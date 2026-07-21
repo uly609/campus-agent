@@ -17,6 +17,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M4 | Complete | `pytest backend/tests/unit/test_agent_graph.py` passed; `pytest backend/tests/integration/test_chat_flow.py` passed | Pending |
 | M5 | Complete | `pytest backend/tests/unit/test_grounding.py` passed; `pytest backend/tests/unit/test_prompt_injection.py` passed | Pending |
 | M6 | Complete | `pytest backend/tests/unit/test_llm_router.py` passed; `pytest backend/tests/integration/test_llm_cache.py` passed | Pending |
+| M7 | Complete | `pytest backend/tests/unit/test_image_attributes.py` passed; `pytest backend/tests/unit/test_ocr_privacy.py` passed; `pytest backend/tests/integration/test_multimodal_search.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -56,6 +57,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 - Added role-based chat, embedding, and VLM routing through local-primary, local-backup, and cloud-fallback tiers.
 - Added Redis SETEX exact-match cache keys using role, model, prompt version, and input hash, with in-memory fallback when Redis is unavailable.
 - Fake providers are explicit and used for tests/degraded local mode.
+
+## 2026-07-21 M7 Notes
+
+- Added fake Qwen2.5-VL-compatible image attribute extraction, image-enhanced query expansion, lost-and-found matching path, and synthetic-only student-card OCR.
+- OCR privacy redacts names/student IDs and rejects non-demo card images.
 
 ## Degraded Mode Policy
 

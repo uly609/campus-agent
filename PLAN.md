@@ -135,13 +135,13 @@ pytest backend/tests/integration/test_llm_cache.py
 
 ## M7 - VLM, Image Search, And OCR
 
-- [ ] Image attribute extraction.
-- [ ] Image-enhanced query.
-- [ ] Lost-and-found matching.
-- [ ] Synthetic student-card OCR demo.
-- [ ] Privacy protection.
-- [ ] Explicit fake VLM adapter without keys.
-- [ ] Image upload/search API.
+- [x] Image attribute extraction.
+- [x] Image-enhanced query.
+- [x] Lost-and-found matching.
+- [x] Synthetic student-card OCR demo.
+- [x] Privacy protection.
+- [x] Explicit fake VLM adapter without keys.
+- [x] Image upload/search API.
 
 Validation:
 
