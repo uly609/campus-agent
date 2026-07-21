@@ -66,12 +66,12 @@ pytest backend/tests/integration/test_retrieval.py
 
 ## M3 - GraphRAG
 
-- [ ] Document -> Chunk -> Entity graph.
-- [ ] Post, Topic, Location, Event graph relationships.
-- [ ] Rule-based and LLM-based entity extraction paths.
-- [ ] One-hop and two-hop expansion.
-- [ ] Graph candidates fused with BM25/vector.
-- [ ] Graph visualization API.
+- [x] Document -> Chunk -> Entity graph.
+- [x] Post, Topic, Location, Event graph relationships.
+- [x] Rule-based and LLM-based entity extraction paths.
+- [x] One-hop and two-hop expansion.
+- [x] Graph candidates fused with BM25/vector.
+- [x] Graph visualization API.
 
 Validation:
 

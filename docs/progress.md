@@ -13,6 +13,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M0 | Complete | `make lint` passed; `make typecheck` passed | Pending |
 | M1 | Complete with external registry caveat | `make migrate` passed via SQLite fallback; `make seed` passed; `pytest backend/tests/unit/test_domain.py` passed; `make db-up` blocked by Docker Hub EOF pulling uncached Postgres/Neo4j | Pending |
 | M2 | Complete | `pytest backend/tests/unit/test_chunking.py` passed; `pytest backend/tests/unit/test_rrf.py` passed; `pytest backend/tests/integration/test_retrieval.py` passed | Pending |
+| M3 | Complete | `pytest backend/tests/integration/test_graph_rag.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -31,6 +32,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 - Implemented document parsing/chunking, BM25, deterministic bge-m3-compatible 1024-dimensional embeddings, Neo4j vector adapter, RRF, evidence schema, and retrieval explanations.
 - Neo4j adapter attempts a real driver connection and reports explicit degraded in-memory vector mode when Neo4j is unavailable.
 - Added `/app` to API `PYTHONPATH` so tests can import operational scripts.
+
+## 2026-07-21 M3 Notes
+
+- GraphRAG builds source/entity relationships for documents and posts, supports one-hop and two-hop expansion, contributes candidates to RRF, and exposes visualization data.
+- LLM-style entity extraction is represented by the provider-compatible extraction path; without credentials the rule path is used explicitly.
 
 ## Degraded Mode Policy
 
