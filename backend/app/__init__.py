@@ -1,0 +1,2 @@
+"""CampusFlow application package."""
+

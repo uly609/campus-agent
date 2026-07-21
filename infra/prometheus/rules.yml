@@ -1,0 +1,32 @@
+groups:
+  - name: campusflow-alerts
+    rules:
+      - alert: CampusFlowHighErrorRate
+        expr: rate(campusflow_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: API error rate is elevated.
+      - alert: CampusFlowProviderFailures
+        expr: increase(campusflow_llm_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Model provider failures are repeating.
+      - alert: CampusFlowP95Latency
+        expr: histogram_quantile(0.95, rate(campusflow_request_latency_seconds_bucket[5m])) > 3
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: API p95 latency is above target.
+      - alert: CampusFlowLowCitationCoverage
+        expr: campusflow_citation_coverage < 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Citation coverage fell below threshold.
+

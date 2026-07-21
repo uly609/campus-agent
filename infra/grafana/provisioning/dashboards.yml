@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: CampusFlow
+    orgId: 1
+    folder: CampusFlow
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
+

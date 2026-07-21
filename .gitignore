@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+dist/
+coverage/
+data/generated/*.db
+data/generated/*.sqlite
+data/generated/runtime_*.json
+evals/reports/*.tmp
+*.pyc
+

@@ -1,0 +1,26 @@
+{
+  "title": "CampusFlow AI",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Requests",
+      "targets": [{"expr": "rate(campusflow_requests_total[5m])"}],
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "LLM Provider Calls",
+      "targets": [{"expr": "rate(campusflow_llm_calls_total[5m])"}],
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "Citation Coverage",
+      "targets": [{"expr": "campusflow_citation_coverage"}],
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8}
+    }
+  ]
+}
+
