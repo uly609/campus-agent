@@ -221,11 +221,11 @@ make eval
 
 ## M12 - Prometheus, Grafana, And Alerts
 
-- [ ] 12 metrics.
-- [ ] Grafana dashboard.
-- [ ] Alertmanager rules.
-- [ ] OpenTelemetry-style trace ids.
-- [ ] Trace API and frontend page.
+- [x] 12 metrics.
+- [x] Grafana dashboard.
+- [x] Alertmanager rules.
+- [x] OpenTelemetry-style trace ids.
+- [x] Trace API and frontend page.
 
 Validation:
 

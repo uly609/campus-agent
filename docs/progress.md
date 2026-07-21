@@ -22,6 +22,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M9 | Complete | `pytest backend/tests/unit/test_memory_conflict.py` passed; `pytest backend/tests/integration/test_memory_stream.py` passed | Pending |
 | M10 | Complete | `cd frontend && npm run lint && npm run typecheck && npm run test` passed | Pending |
 | M11 | Complete | `make eval` passed; persisted 80 intent, 18 retrieval, and 14 QA cases plus JSON/Markdown reports | Pending |
+| M12 | Complete with external registry caveat | `curl -f http://localhost:8000/metrics` passed against API service; Prometheus/Grafana/Alertmanager configs present; full service health still awaits external image pulls | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -86,6 +87,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added eval runner that generates human-readable datasets if absent and computes metrics from actual predictions.
 - Latest run wrote `evals/reports/latest.json` and `evals/reports/latest.md`; scores are computed, not hardcoded.
+
+## 2026-07-21 M12 Notes
+
+- Added 12 Prometheus metrics, Grafana dashboard config, Alertmanager rules, metrics middleware, and trace API.
+- Validated `/metrics` on the running API service.
 
 ## Degraded Mode Policy
 

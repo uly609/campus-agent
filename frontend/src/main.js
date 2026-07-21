@@ -75,7 +75,7 @@ async function runEval() {
 }
 
 async function loadTrace() {
-  const data = await api("/api/v1/evals/latest").catch(() => ({ metrics: {} }));
+  const data = await api("/api/v1/traces").catch(() => ({ traces: [] }));
   document.querySelector("#trace-list").innerHTML = `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
 }
 
@@ -90,4 +90,3 @@ document.querySelector("#load-memory").addEventListener("click", loadMemory);
 document.querySelector("#run-eval").addEventListener("click", runEval);
 document.querySelector("#load-trace").addEventListener("click", loadTrace);
 loadPosts().catch((error) => { document.querySelector("#post-list").innerHTML = `<div class="panel empty">${escapeHtml(error.message)}</div>`; });
-
