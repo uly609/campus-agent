@@ -16,6 +16,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M3 | Complete | `pytest backend/tests/integration/test_graph_rag.py` passed | Pending |
 | M4 | Complete | `pytest backend/tests/unit/test_agent_graph.py` passed; `pytest backend/tests/integration/test_chat_flow.py` passed | Pending |
 | M5 | Complete | `pytest backend/tests/unit/test_grounding.py` passed; `pytest backend/tests/unit/test_prompt_injection.py` passed | Pending |
+| M6 | Complete | `pytest backend/tests/unit/test_llm_router.py` passed; `pytest backend/tests/integration/test_llm_cache.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -49,6 +50,12 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added relevance judging, claim/evidence/citation enforcement, evidence-insufficient refusal, input/retrieval/output guardrails, PII filtering, and tool allowlisting.
 - Prompt injection examples in English and Chinese are detected and retrieved content is marked as untrusted data.
+
+## 2026-07-21 M6 Notes
+
+- Added role-based chat, embedding, and VLM routing through local-primary, local-backup, and cloud-fallback tiers.
+- Added Redis SETEX exact-match cache keys using role, model, prompt version, and input hash, with in-memory fallback when Redis is unavailable.
+- Fake providers are explicit and used for tests/degraded local mode.
 
 ## Degraded Mode Policy
 

@@ -118,13 +118,13 @@ pytest backend/tests/unit/test_prompt_injection.py
 
 ## M6 - Model Routing, Fallback, And Cache
 
-- [ ] Chat, embedding, and VLM roles.
-- [ ] Local primary, local backup, cloud fallback.
-- [ ] Fallback only on recoverable infrastructure errors.
-- [ ] Redis SETEX exact cache.
-- [ ] Provider trace.
-- [ ] Fake providers.
-- [ ] Timeout and retry.
+- [x] Chat, embedding, and VLM roles.
+- [x] Local primary, local backup, cloud fallback.
+- [x] Fallback only on recoverable infrastructure errors.
+- [x] Redis SETEX exact cache.
+- [x] Provider trace.
+- [x] Fake providers.
+- [x] Timeout and retry.
 
 Validation:
 
