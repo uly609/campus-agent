@@ -18,6 +18,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M5 | Complete | `pytest backend/tests/unit/test_grounding.py` passed; `pytest backend/tests/unit/test_prompt_injection.py` passed | Pending |
 | M6 | Complete | `pytest backend/tests/unit/test_llm_router.py` passed; `pytest backend/tests/integration/test_llm_cache.py` passed | Pending |
 | M7 | Complete | `pytest backend/tests/unit/test_image_attributes.py` passed; `pytest backend/tests/unit/test_ocr_privacy.py` passed; `pytest backend/tests/integration/test_multimodal_search.py` passed | Pending |
+| M8 | Complete | `pytest backend/tests/integration/test_post_draft_hitl.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -62,6 +63,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added fake Qwen2.5-VL-compatible image attribute extraction, image-enhanced query expansion, lost-and-found matching path, and synthetic-only student-card OCR.
 - OCR privacy redacts names/student IDs and rejects non-demo card images.
+
+## 2026-07-21 M8 Notes
+
+- Added HITL draft sessions with VLM-derived fields, safety checks, version diffs, confirmation gate, and strict five-edit-round limit.
+- Draft publishing requires explicit confirmation and a separate publish flag.
 
 ## Degraded Mode Policy
 

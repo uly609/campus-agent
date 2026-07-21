@@ -153,13 +153,13 @@ pytest backend/tests/integration/test_multimodal_search.py
 
 ## M8 - AI Post Draft Subgraph And HITL
 
-- [ ] VLM analysis.
-- [ ] Draft generation.
-- [ ] Content safety check.
-- [ ] Interrupt-style user confirmation.
-- [ ] Five edit rounds.
-- [ ] Version diff.
-- [ ] Publish only after confirmation.
+- [x] VLM analysis.
+- [x] Draft generation.
+- [x] Content safety check.
+- [x] Interrupt-style user confirmation.
+- [x] Five edit rounds.
+- [x] Version diff.
+- [x] Publish only after confirmation.
 
 Validation:
 
