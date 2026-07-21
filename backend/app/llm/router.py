@@ -47,7 +47,7 @@ class ProviderRouter:
         payload: Any,
     ) -> ProviderResult:
         for provider in providers:
-            cache_key = self.cache.key(role, provider.model, payload)
+            cache_key = self.cache.key(role, provider.name, provider.model, payload)
             cached = self.cache.get(cache_key)
             if cached is not None:
                 CACHE_HITS.labels(role=role).inc()
@@ -86,4 +86,3 @@ class ProviderRouter:
                 )
                 continue
         raise ProviderRecoverableError(f"all providers failed for {role}")
-

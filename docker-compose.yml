@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: mirror.gcr.io/library/postgres:16-alpine
     environment:
       POSTGRES_USER: campusflow
       POSTGRES_PASSWORD: campusflow
@@ -14,7 +14,7 @@ services:
       retries: 20
 
   redis:
-    image: redis:7-alpine
+    image: redis:7
     ports:
       - "6379:6379"
     command: ["redis-server", "--save", "", "--appendonly", "no"]
@@ -25,7 +25,7 @@ services:
       retries: 20
 
   neo4j:
-    image: neo4j:5-community
+    image: mirror.gcr.io/library/neo4j:5-community
     environment:
       NEO4J_AUTH: neo4j/campusflow-password
       NEO4J_PLUGINS: '["apoc"]'
@@ -41,9 +41,7 @@ services:
       retries: 30
 
   api:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: newproject-api:latest
     env_file:
       - .env.example
     environment:
@@ -80,16 +78,15 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null"]
+      test: ["CMD", "nginx", "-t"]
       interval: 10s
       timeout: 5s
       retries: 20
 
   prometheus:
-    image: prom/prometheus:v2.53.2
-    volumes:
-      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./infra/prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+    build:
+      context: .
+      dockerfile: infra/prometheus/Dockerfile
     ports:
       - "9090:9090"
     depends_on:
@@ -102,13 +99,12 @@ services:
       retries: 20
 
   grafana:
-    image: grafana/grafana:11.1.4
+    build:
+      context: .
+      dockerfile: infra/grafana/Dockerfile
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: campusflow
-    volumes:
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
       - "3000:3000"
     depends_on:
@@ -121,13 +117,13 @@ services:
       retries: 20
 
   alertmanager:
-    image: prom/alertmanager:v0.27.0
-    volumes:
-      - ./infra/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    build:
+      context: .
+      dockerfile: infra/alertmanager/Dockerfile
     ports:
       - "9093:9093"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9093/-/healthy >/dev/null"]
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/9093'"]
       interval: 10s
       timeout: 5s
       retries: 20

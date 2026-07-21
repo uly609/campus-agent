@@ -22,8 +22,8 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M9 | Complete | `pytest backend/tests/unit/test_memory_conflict.py` passed; `pytest backend/tests/integration/test_memory_stream.py` passed | Pending |
 | M10 | Complete | `cd frontend && npm run lint && npm run typecheck && npm run test` passed | Pending |
 | M11 | Complete | `make eval` passed; persisted 80 intent, 18 retrieval, and 14 QA cases plus JSON/Markdown reports | Pending |
-| M12 | Complete with external registry caveat | `curl -f http://localhost:8000/metrics` passed against API service; Prometheus/Grafana/Alertmanager configs present; full service health still awaits external image pulls | Pending |
-| M13 | Locally complete; full Compose blocked | `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed; `docker compose up --build -d` blocked by Docker Hub EOF for uncached Neo4j/Postgres/Alertmanager images | Pending |
+| M12 | Complete | `curl -f http://localhost:8000/metrics` passed; Prometheus, Grafana, and Alertmanager build from local configs and are healthy in Compose | Pending |
+| M13 | Complete | `docker compose up --build -d` passed; all 8 services healthy; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -99,8 +99,10 @@ The workspace was empty at start. The starter pack instructions were read from `
 - Added README, architecture, agent flow, retrieval, memory, security, eval, API, and demo-script docs.
 - Added E2E demo flow and smoke script.
 - Final cleanup scan found no temporary markers, empty implementations, tautological tests, stub wording, or unexplained temporary code.
-- Final local validation passed: `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke`.
-- Full `docker compose up --build -d` is not yet satisfied because Docker Hub repeatedly returns EOF/auth errors for uncached `neo4j:5-community`, `postgres:16-alpine`, and `prom/alertmanager:v0.27.0`.
+- Resolved Docker registry flakiness by using cached mirror images for Postgres and Neo4j, cached Redis, locally built frontend/Prometheus/Grafana images, and a locally built Alertmanager image from the official release archive.
+- Fixed real-Redis validation issues by serializing memory stream fields as Redis-safe scalars and by scoping exact-match LLM cache keys to the provider tier.
+- Final Compose validation passed on 2026-07-21: `docker compose up --build -d` succeeded and `docker compose ps --format json` reported healthy `api`, `web`, `postgres`, `redis`, `neo4j`, `prometheus`, `grafana`, and `alertmanager`.
+- Final command validation passed after the healthy Compose run: `make seed`, `make lint`, `make typecheck`, `make test` (23 passed), `make eval` (`eval-7dfc3e46b9`, 80 intent / 18 retrieval / 14 QA cases), `make e2e` (backend E2E plus frontend tests), and `make smoke`.
 
 ## Degraded Mode Policy
 

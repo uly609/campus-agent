@@ -4,7 +4,7 @@ Every milestone requires validation, failure fixes, status updates here, `docs/p
 
 ## Overall Stop Conditions
 
-- [ ] Docker Compose all required services healthy.
+- [x] Docker Compose all required services healthy.
 - [x] `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` pass.
 - [x] Agent, RAG, GraphRAG, VLM/OCR adapter, HITL, memory, fallback, and observability have runnable code and tests.
 - [x] Vue 3 demo can complete core flows.
@@ -235,7 +235,7 @@ curl -f http://localhost:8000/metrics
 
 ## M13 - E2E, Docker, Docs, And Final Review
 
-- [ ] Docker health checks.
+- [x] Docker health checks.
 - [x] E2E flows.
 - [x] README.
 - [x] Architecture docs.

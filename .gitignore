@@ -11,5 +11,5 @@ data/generated/*.db
 data/generated/*.sqlite
 data/generated/runtime_*.json
 evals/reports/*.tmp
+infra/alertmanager/bin/
 *.pyc
-

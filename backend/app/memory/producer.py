@@ -10,6 +10,10 @@ from app.services.repository import now_iso
 STREAM_NAME = "campusflow:memory_events"
 
 
+def redis_stream_fields(event: MemoryEvent) -> dict[str, str]:
+    return {key: str(value) for key, value in event.model_dump(mode="json").items() if value is not None}
+
+
 def publish_memory_event(user_id: str, session_id: str, text: str, source: str) -> str:
     if not get_settings().memory_enabled:
         return "memory-disabled"
@@ -22,5 +26,4 @@ def publish_memory_event(user_id: str, session_id: str, text: str, source: str) 
         created_at=now_iso(),
     )
     client = get_redis_client()
-    return str(client.xadd(STREAM_NAME, event.model_dump(mode="json"), maxlen=1000, approximate=True))
-
+    return str(client.xadd(STREAM_NAME, redis_stream_fields(event), maxlen=1000, approximate=True))

@@ -12,10 +12,10 @@ class ExactMatchCache:
     def __init__(self) -> None:
         self.client = get_redis_client()
 
-    def key(self, role: str, model: str, payload: Any) -> str:
+    def key(self, role: str, provider: str, model: str, payload: Any) -> str:
         serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
         digest = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-        return f"campusflow:llm:{role}:{model}:{get_settings().prompt_version}:{digest}"
+        return f"campusflow:llm:{role}:{provider}:{model}:{get_settings().prompt_version}:{digest}"
 
     def get(self, key: str) -> Any | None:
         value = self.client.get(key)
@@ -26,4 +26,3 @@ class ExactMatchCache:
     def set(self, key: str, value: Any, seconds: int = 900) -> None:
         serialized = json.dumps(value, ensure_ascii=False)
         self.client.setex(key, seconds, serialized)
-

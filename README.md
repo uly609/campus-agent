@@ -10,6 +10,14 @@ Student-card OCR is synthetic-demo only and rejects non-demo images.
 
 ## One-Command Demo
 
+Alertmanager is built from the official release archive so Compose does not depend on a live `prom/alertmanager` image pull. The archive is ignored by git; on a fresh checkout, download it once:
+
+```bash
+ARCH="$(docker version --format '{{.Server.Arch}}')"
+mkdir -p infra/alertmanager/bin
+curl -L "https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertmanager-0.27.0.linux-${ARCH}.tar.gz" -o "infra/alertmanager/bin/alertmanager-0.27.0.linux-${ARCH}.tar.gz"
+```
+
 ```bash
 docker compose up --build -d
 make seed
@@ -61,4 +69,3 @@ make smoke
 ## Data
 
 `make seed` creates 300 Chinese campus posts and 30 official campus documents under `data/generated`. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
-
