@@ -39,10 +39,12 @@ _fallback = InMemoryRedis()
 def get_redis_client() -> Any:
     try:
         import redis
+    except ImportError:
+        return _fallback
 
+    try:
         client = redis.Redis.from_url(get_settings().redis_url, decode_responses=True, socket_timeout=1)
         client.ping()
         return client
-    except (ImportError, OSError, TimeoutError, ValueError):
+    except (OSError, TimeoutError, ValueError, redis.exceptions.RedisError):
         return _fallback
-

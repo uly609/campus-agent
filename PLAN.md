@@ -81,15 +81,15 @@ pytest backend/tests/integration/test_graph_rag.py
 
 ## M4 - LangGraph Main Agent
 
-- [ ] AgentState.
-- [ ] 13 nodes.
-- [ ] Six-stage main flow.
-- [ ] Conditional edges.
-- [ ] Replan.
-- [ ] Tool Registry.
-- [ ] Checkpoint.
-- [ ] SSE events.
-- [ ] Fake LLM tests.
+- [x] AgentState.
+- [x] 13 nodes.
+- [x] Six-stage main flow.
+- [x] Conditional edges.
+- [x] Replan.
+- [x] Tool Registry.
+- [x] Checkpoint.
+- [x] SSE events.
+- [x] Fake LLM tests.
 
 Validation:
 

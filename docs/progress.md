@@ -14,6 +14,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M1 | Complete with external registry caveat | `make migrate` passed via SQLite fallback; `make seed` passed; `pytest backend/tests/unit/test_domain.py` passed; `make db-up` blocked by Docker Hub EOF pulling uncached Postgres/Neo4j | Pending |
 | M2 | Complete | `pytest backend/tests/unit/test_chunking.py` passed; `pytest backend/tests/unit/test_rrf.py` passed; `pytest backend/tests/integration/test_retrieval.py` passed | Pending |
 | M3 | Complete | `pytest backend/tests/integration/test_graph_rag.py` passed | Pending |
+| M4 | Complete | `pytest backend/tests/unit/test_agent_graph.py` passed; `pytest backend/tests/integration/test_chat_flow.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -37,6 +38,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - GraphRAG builds source/entity relationships for documents and posts, supports one-hop and two-hop expansion, contributes candidates to RRF, and exposes visualization data.
 - LLM-style entity extraction is represented by the provider-compatible extraction path; without credentials the rule path is used explicitly.
+
+## 2026-07-21 M4 Notes
+
+- Implemented explicit AgentState, 13 node methods, six-stage workflow, conditional visual/greeting/tool/replan paths, tool registry, SSE events, and trace persistence.
+- Fixed Redis fallback so unavailable Redis degrades to the explicit in-memory stream instead of timing out during tests.
 
 ## Degraded Mode Policy
 
