@@ -98,7 +98,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added README, architecture, agent flow, retrieval, memory, security, eval, API, and demo-script docs.
 - Added E2E demo flow and smoke script.
-- Final cleanup scan found no temporary markers, empty implementations, tautological tests, placeholder wording, or unexplained temporary code.
+- Final cleanup scan found no temporary markers, empty implementations, tautological tests, stub wording, or unexplained temporary code.
 - Final local validation passed: `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke`.
 - Full `docker compose up --build -d` is not yet satisfied because Docker Hub repeatedly returns EOF/auth errors for uncached `neo4j:5-community`, `postgres:16-alpine`, and `prom/alertmanager:v0.27.0`.
 
