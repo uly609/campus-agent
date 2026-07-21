@@ -5,10 +5,10 @@ Every milestone requires validation, failure fixes, status updates here, `docs/p
 ## Overall Stop Conditions
 
 - [ ] Docker Compose all required services healthy.
-- [ ] `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` pass.
-- [ ] Agent, RAG, GraphRAG, VLM/OCR adapter, HITL, memory, fallback, and observability have runnable code and tests.
-- [ ] Vue 3 demo can complete core flows.
-- [ ] README and demo script are actionable for a new user.
+- [x] `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` pass.
+- [x] Agent, RAG, GraphRAG, VLM/OCR adapter, HITL, memory, fallback, and observability have runnable code and tests.
+- [x] Vue 3 demo can complete core flows.
+- [x] README and demo script are actionable for a new user.
 
 ## M0 - Repository And Engineering Standards
 
@@ -236,18 +236,18 @@ curl -f http://localhost:8000/metrics
 ## M13 - E2E, Docker, Docs, And Final Review
 
 - [ ] Docker health checks.
-- [ ] E2E flows.
-- [ ] README.
-- [ ] Architecture docs.
-- [ ] Agent flow docs.
-- [ ] Retrieval docs.
-- [ ] Memory docs.
-- [ ] Security docs.
-- [ ] Eval docs.
-- [ ] API docs.
-- [ ] Demo script.
-- [ ] Clean temporary code.
-- [ ] Final safety and dependency scan.
+- [x] E2E flows.
+- [x] README.
+- [x] Architecture docs.
+- [x] Agent flow docs.
+- [x] Retrieval docs.
+- [x] Memory docs.
+- [x] Security docs.
+- [x] Eval docs.
+- [x] API docs.
+- [x] Demo script.
+- [x] Clean temporary code.
+- [x] Final safety and dependency scan.
 
 Validation:
 

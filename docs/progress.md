@@ -23,6 +23,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M10 | Complete | `cd frontend && npm run lint && npm run typecheck && npm run test` passed | Pending |
 | M11 | Complete | `make eval` passed; persisted 80 intent, 18 retrieval, and 14 QA cases plus JSON/Markdown reports | Pending |
 | M12 | Complete with external registry caveat | `curl -f http://localhost:8000/metrics` passed against API service; Prometheus/Grafana/Alertmanager configs present; full service health still awaits external image pulls | Pending |
+| M13 | Locally complete; full Compose blocked | `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed; `docker compose up --build -d` blocked by Docker Hub EOF for uncached Neo4j/Postgres/Alertmanager images | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -92,6 +93,14 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added 12 Prometheus metrics, Grafana dashboard config, Alertmanager rules, metrics middleware, and trace API.
 - Validated `/metrics` on the running API service.
+
+## 2026-07-21 M13 Notes
+
+- Added README, architecture, agent flow, retrieval, memory, security, eval, API, and demo-script docs.
+- Added E2E demo flow and smoke script.
+- Final cleanup scan found no `TODO`, `pass`, `assert True`, placeholder wording, or unexplained temporary code.
+- Final local validation passed: `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke`.
+- Full `docker compose up --build -d` is not yet satisfied because Docker Hub repeatedly returns EOF/auth errors for uncached `neo4j:5-community`, `postgres:16-alpine`, and `prom/alertmanager:v0.27.0`.
 
 ## Degraded Mode Policy
 

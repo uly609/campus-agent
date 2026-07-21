@@ -7,7 +7,7 @@ from app.core.config import get_settings
 
 
 class Base(DeclarativeBase):
-    pass
+    __abstract__ = True
 
 
 def make_engine():
@@ -24,4 +24,3 @@ def create_all_tables() -> None:
     from app.domain import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
-

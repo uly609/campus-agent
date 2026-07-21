@@ -17,7 +17,7 @@ test:
 	$(COMPOSE) run --rm --no-deps $(API_SERVICE) pytest backend/tests/unit backend/tests/integration
 
 e2e:
-	$(COMPOSE) run --rm $(API_SERVICE) pytest backend/tests/e2e
+	$(COMPOSE) run --rm --no-deps $(API_SERVICE) pytest backend/tests/e2e
 	cd frontend && npm run test
 
 eval:
