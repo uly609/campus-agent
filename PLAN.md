@@ -169,14 +169,14 @@ pytest backend/tests/integration/test_post_draft_hitl.py
 
 ## M9 - Long-Term Memory
 
-- [ ] Redis Streams producer.
-- [ ] Consumer group.
-- [ ] Memory extractor.
-- [ ] Hash and embedding deduplication.
-- [ ] Conflict detection.
-- [ ] Supersedes.
-- [ ] Event expiry.
-- [ ] User view/delete/disable.
+- [x] Redis Streams producer.
+- [x] Consumer group.
+- [x] Memory extractor.
+- [x] Hash and embedding deduplication.
+- [x] Conflict detection.
+- [x] Supersedes.
+- [x] Event expiry.
+- [x] User view/delete/disable.
 
 Validation:
 

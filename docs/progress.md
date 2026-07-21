@@ -19,6 +19,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M6 | Complete | `pytest backend/tests/unit/test_llm_router.py` passed; `pytest backend/tests/integration/test_llm_cache.py` passed | Pending |
 | M7 | Complete | `pytest backend/tests/unit/test_image_attributes.py` passed; `pytest backend/tests/unit/test_ocr_privacy.py` passed; `pytest backend/tests/integration/test_multimodal_search.py` passed | Pending |
 | M8 | Complete | `pytest backend/tests/integration/test_post_draft_hitl.py` passed | Pending |
+| M9 | Complete | `pytest backend/tests/unit/test_memory_conflict.py` passed; `pytest backend/tests/integration/test_memory_stream.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -68,6 +69,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added HITL draft sessions with VLM-derived fields, safety checks, version diffs, confirmation gate, and strict five-edit-round limit.
 - Draft publishing requires explicit confirmation and a separate publish flag.
+
+## 2026-07-21 M9 Notes
+
+- Added Redis Stream memory producer/consumer, extraction, PII rejection, hash and embedding deduplication, conflict detection, supersedes, and user delete controls.
+- When Redis is unavailable, memory uses the explicit in-memory stream adapter for local validation.
 
 ## Degraded Mode Policy
 
