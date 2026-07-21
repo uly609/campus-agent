@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusFlow AI</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <h1>CampusFlow AI</h1>
+        <button data-view="feed">帖子流</button>
+        <button data-view="chat">AI 助手</button>
+        <button data-view="search">智能搜索</button>
+        <button data-view="draft">发帖助手</button>
+        <button data-view="memory">记忆管理</button>
+        <button data-view="eval">Eval</button>
+        <button data-view="trace">Trace</button>
+      </aside>
+      <main>
+        <section id="feed" class="view active">
+          <header><h2>匿名帖子流</h2><button id="refresh-posts">刷新</button></header>
+          <div id="post-list" class="grid"></div>
+        </section>
+        <section id="chat" class="view">
+          <header><h2>AI 助手</h2><span class="pill">引用 + 节点轨迹</span></header>
+          <div id="chat-output" class="panel empty">输入校园问题后会显示答案、引用和执行节点。</div>
+          <div class="composer"><input id="chat-input" value="图书馆今天几点关门？" /><button id="send-chat">发送</button></div>
+        </section>
+        <section id="search" class="view">
+          <header><h2>智能搜索</h2><span class="pill">BM25 / Vector / Graph / RRF</span></header>
+          <div class="composer"><input id="search-input" value="南门 捡到 校园卡" /><button id="run-search">搜索</button></div>
+          <div id="search-results" class="grid"></div>
+        </section>
+        <section id="draft" class="view">
+          <header><h2>发帖助手</h2><span class="pill">最多 5 轮修改</span></header>
+          <div class="composer"><input id="draft-intent" value="帮我根据图片起草失物招领" /><button id="create-draft">生成草稿</button></div>
+          <div id="draft-box" class="panel empty">草稿需确认后才能发布。</div>
+          <div class="composer"><input id="draft-feedback" value="正文加一句在图书馆门口发现" /><button id="edit-draft">修改</button><button id="confirm-draft">确认</button></div>
+        </section>
+        <section id="memory" class="view">
+          <header><h2>记忆管理</h2><button id="load-memory">加载</button></header>
+          <div id="memory-list" class="grid"></div>
+        </section>
+        <section id="eval" class="view">
+          <header><h2>Eval Dashboard</h2><button id="run-eval">运行评测</button></header>
+          <div id="eval-report" class="panel empty">这里展示真实计算的指标。</div>
+        </section>
+        <section id="trace" class="view">
+          <header><h2>Execution Trace</h2><button id="load-trace">加载轨迹</button></header>
+          <div id="trace-list" class="panel empty">聊天后可查看节点耗时、工具调用和 Replan。</div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+

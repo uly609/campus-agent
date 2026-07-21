@@ -187,14 +187,14 @@ pytest backend/tests/integration/test_memory_stream.py
 
 ## M10 - Vue 3 Demo UI
 
-- [ ] Post feed.
-- [ ] AI assistant.
-- [ ] Smart search.
-- [ ] Post drafting assistant.
-- [ ] Memory management.
-- [ ] Eval dashboard.
-- [ ] Trace page.
-- [ ] Responsive loading, error, and empty states.
+- [x] Post feed.
+- [x] AI assistant.
+- [x] Smart search.
+- [x] Post drafting assistant.
+- [x] Memory management.
+- [x] Eval dashboard.
+- [x] Trace page.
+- [x] Responsive loading, error, and empty states.
 
 Validation:
 
