@@ -47,14 +47,14 @@ pytest backend/tests/unit/test_domain.py
 
 ## M2 - Document Ingestion And Hybrid Retrieval
 
-- [ ] Document parsing.
-- [ ] Chunking.
-- [ ] BM25.
-- [ ] Embedding provider.
-- [ ] Neo4j vector index.
-- [ ] RRF.
-- [ ] Evidence schema.
-- [ ] Retrieval explanations.
+- [x] Document parsing.
+- [x] Chunking.
+- [x] BM25.
+- [x] Embedding provider.
+- [x] Neo4j vector index.
+- [x] RRF.
+- [x] Evidence schema.
+- [x] Retrieval explanations.
 
 Validation:
 
