@@ -15,6 +15,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M2 | Complete | `pytest backend/tests/unit/test_chunking.py` passed; `pytest backend/tests/unit/test_rrf.py` passed; `pytest backend/tests/integration/test_retrieval.py` passed | Pending |
 | M3 | Complete | `pytest backend/tests/integration/test_graph_rag.py` passed | Pending |
 | M4 | Complete | `pytest backend/tests/unit/test_agent_graph.py` passed; `pytest backend/tests/integration/test_chat_flow.py` passed | Pending |
+| M5 | Complete | `pytest backend/tests/unit/test_grounding.py` passed; `pytest backend/tests/unit/test_prompt_injection.py` passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -43,6 +44,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Implemented explicit AgentState, 13 node methods, six-stage workflow, conditional visual/greeting/tool/replan paths, tool registry, SSE events, and trace persistence.
 - Fixed Redis fallback so unavailable Redis degrades to the explicit in-memory stream instead of timing out during tests.
+
+## 2026-07-21 M5 Notes
+
+- Added relevance judging, claim/evidence/citation enforcement, evidence-insufficient refusal, input/retrieval/output guardrails, PII filtering, and tool allowlisting.
+- Prompt injection examples in English and Chinese are detected and retrieved content is marked as untrusted data.
 
 ## Degraded Mode Policy
 

@@ -100,14 +100,14 @@ pytest backend/tests/integration/test_chat_flow.py
 
 ## M5 - Grounded Synthesis And Safety
 
-- [ ] Relevance Judge.
-- [ ] Claim-evidence binding.
-- [ ] Citations.
-- [ ] Evidence-insufficient refusal.
-- [ ] Three-layer prompt injection defense.
-- [ ] PII filtering.
-- [ ] Tool allowlist.
-- [ ] Safety audit logs.
+- [x] Relevance Judge.
+- [x] Claim-evidence binding.
+- [x] Citations.
+- [x] Evidence-insufficient refusal.
+- [x] Three-layer prompt injection defense.
+- [x] PII filtering.
+- [x] Tool allowlist.
+- [x] Safety audit logs.
 
 Validation:
 
