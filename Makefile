@@ -30,7 +30,7 @@ db-up:
 	$(COMPOSE) up -d postgres redis neo4j
 
 migrate:
-	$(COMPOSE) run --rm --no-deps $(API_SERVICE) python scripts/migrate.py
+	$(COMPOSE) run --rm --no-deps -e DATABASE_URL=sqlite:///data/generated/campusflow.db $(API_SERVICE) python scripts/migrate.py
 
 smoke:
 	$(COMPOSE) run --rm --no-deps $(API_SERVICE) python scripts/smoke.py

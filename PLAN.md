@@ -29,12 +29,12 @@ make typecheck
 
 ## M1 - Data Model, Database, And Seed Data
 
-- [ ] PostgreSQL / SQLAlchemy / Alembic definitions.
-- [ ] Post, PostImage, UserSession, Memory, EvalRun, and Trace tables.
-- [ ] At least 300 Chinese campus posts.
-- [ ] At least 30 campus documents.
-- [ ] API CRUD.
-- [ ] Demo token auth.
+- [x] PostgreSQL / SQLAlchemy / Alembic definitions.
+- [x] Post, PostImage, UserSession, Memory, EvalRun, and Trace tables.
+- [x] At least 300 Chinese campus posts.
+- [x] At least 30 campus documents.
+- [x] API CRUD.
+- [x] Demo token auth.
 
 Validation:
 
