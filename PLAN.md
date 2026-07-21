@@ -204,14 +204,14 @@ cd frontend && npm run lint && npm run typecheck && npm run test
 
 ## M11 - Eval
 
-- [ ] 80 intent cases.
-- [ ] 18 retrieval cases.
-- [ ] 14 QA cases.
-- [ ] Graders.
-- [ ] JSON and Markdown reports.
-- [ ] Prompt/model versions.
-- [ ] Paired comparison.
-- [ ] No hardcoded scores.
+- [x] 80 intent cases.
+- [x] 18 retrieval cases.
+- [x] 14 QA cases.
+- [x] Graders.
+- [x] JSON and Markdown reports.
+- [x] Prompt/model versions.
+- [x] Paired comparison.
+- [x] No hardcoded scores.
 
 Validation:
 

@@ -21,6 +21,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M8 | Complete | `pytest backend/tests/integration/test_post_draft_hitl.py` passed | Pending |
 | M9 | Complete | `pytest backend/tests/unit/test_memory_conflict.py` passed; `pytest backend/tests/integration/test_memory_stream.py` passed | Pending |
 | M10 | Complete | `cd frontend && npm run lint && npm run typecheck && npm run test` passed | Pending |
+| M11 | Complete | `make eval` passed; persisted 80 intent, 18 retrieval, and 14 QA cases plus JSON/Markdown reports | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -80,6 +81,11 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 - Added a responsive demo UI with post feed, AI assistant with citations/traces, smart search, HITL draft assistant, memory management, eval dashboard, and trace page.
 - Frontend validation is dependency-light and checks the required user-facing flows.
+
+## 2026-07-21 M11 Notes
+
+- Added eval runner that generates human-readable datasets if absent and computes metrics from actual predictions.
+- Latest run wrote `evals/reports/latest.json` and `evals/reports/latest.md`; scores are computed, not hardcoded.
 
 ## Degraded Mode Policy
 

@@ -1,0 +1,18 @@
+{"id": "ret-00", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
+{"id": "ret-01", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
+{"id": "ret-02", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
+{"id": "ret-03", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
+{"id": "ret-04", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
+{"id": "ret-05", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}
+{"id": "ret-06", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
+{"id": "ret-07", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
+{"id": "ret-08", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
+{"id": "ret-09", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
+{"id": "ret-10", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
+{"id": "ret-11", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}
+{"id": "ret-12", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
+{"id": "ret-13", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
+{"id": "ret-14", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
+{"id": "ret-15", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
+{"id": "ret-16", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
+{"id": "ret-17", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}

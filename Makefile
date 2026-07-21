@@ -21,7 +21,7 @@ e2e:
 	cd frontend && npm run test
 
 eval:
-	$(COMPOSE) run --rm --no-deps $(API_SERVICE) python evals/run_eval.py --write-report
+	$(COMPOSE) run --rm --no-deps -v "$$(pwd)/evals:/app/evals" $(API_SERVICE) python -c "import runpy, sys; sys.argv=['evals/run_eval.py','--write-report']; runpy.run_path('evals/run_eval.py', run_name='__main__')"
 
 seed:
 	$(COMPOSE) run --rm --no-deps $(API_SERVICE) python scripts/seed.py
