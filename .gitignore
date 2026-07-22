@@ -4,8 +4,10 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-node_modules/
+node_modules
 dist/
+!frontend/dist/
+!frontend/dist/**
 coverage/
 data/generated/*.db
 data/generated/*.sqlite

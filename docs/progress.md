@@ -26,6 +26,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M13 | Complete | `docker compose up --build -d` passed; all 8 services healthy; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
 | M14 | Complete | Compiled LangGraph, real HTTP providers, Neo4j Vector Index/GraphRAG, grounded-model validation, improved Chinese retrieval/evals; all final validations passed | Pending |
 | M15 | Complete | Real Bailian Chat/Embedding/VLM calls passed; batched embeddings and provider-isolated offline validation passed | Pending |
+| M16 | Complete | Vue 3 UI rebuild, real image upload, readable model output, responsive browser QA, and full regression validation passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -126,3 +127,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Added embedding batch support across the provider/router boundary and reused the retrieval service so the first real-model chat indexes the corpus efficiently.
 - Isolated unit, integration, E2E, and eval commands from local provider credentials to keep validations deterministic and avoid unintended cloud charges. Runtime smoke continues to exercise the configured real providers.
 - Final validation passed: 29 tests, lint, typecheck, `eval-acaa8777bf` (80 intent / 18 retrieval / 14 QA), E2E, frontend tests, and real-provider smoke. All eight Compose services are healthy.
+
+## 2026-07-22 M16 Notes
+
+- Replaced the static DOM-string renderer with a real Vue 3 Composition API application built by Vite, Lucide controls, and a reproducible multi-stage frontend Dockerfile.
+- Removed raw JSON and provider debug fields from user-facing pages. Eval metrics, retrieval reasons, intents, image attributes, and model mode are presented with concise Chinese labels.
+- Added real image selection, client-side resize/preview, same-origin Nginx API proxying, VLM attribute display, and complete HITL edit/confirm states.
+- Normalized VLM values and scalar/list variations at the backend boundary so English provider output and string `location_hints` cannot break Chinese draft rendering.
+- Browser QA passed for posts, real chat with citations, eight-result retrieval, synthetic image/VLM drafting, memory, latest eval report, and 50 trace records. Desktop and 390x844 mobile layouts had no horizontal overflow or console errors.
+- Final validation passed with 31 unit/integration tests, E2E, frontend production build/tests, real-provider smoke, and all eight Compose services healthy. The verified Vite bundle is included for registry-independent Web image builds.

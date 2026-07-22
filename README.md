@@ -1,6 +1,6 @@
 # CampusFlow AI
 
-CampusFlow AI is a Python-first campus community agent demo with FastAPI, a Vue 3-style demo UI, Hybrid RAG, GraphRAG, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
+CampusFlow AI is a Python-first campus community agent demo with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
 
 The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines Chinese-aware BM25, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, relevance reranking, and RRF.
 

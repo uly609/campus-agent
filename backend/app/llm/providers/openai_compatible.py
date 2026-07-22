@@ -115,7 +115,8 @@ class OpenAICompatibleVLMProvider(OpenAICompatibleProvider):
                                 "type": "text",
                                 "text": (
                                     f"{prompt} Return only a JSON object with category, color, brand, "
-                                    "material, visible_text, location_hints, confidence, and safety_flags."
+                                    "material, visible_text, location_hints, confidence, and safety_flags. "
+                                    "All descriptive values and location hints must use concise Simplified Chinese."
                                 ),
                             },
                         ],
