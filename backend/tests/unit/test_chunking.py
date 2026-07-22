@@ -11,3 +11,9 @@ def test_chunking_keeps_metadata_and_overlap() -> None:
     assert chunks[0].metadata["path"] == "doc.md"
     assert len(tokenize(chunks[1].text)) <= 100
 
+
+def test_chinese_tokenization_produces_searchable_bigrams_and_trigrams() -> None:
+    tokens = tokenize("图书馆开放时间")
+    assert "图书馆" in tokens
+    assert "开放" in tokens
+    assert "时间" in tokens

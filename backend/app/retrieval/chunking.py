@@ -17,7 +17,15 @@ class Chunk:
 
 
 def tokenize(text: str) -> list[str]:
-    return re.findall(r"[\w\u4e00-\u9fff]+", text.lower())
+    tokens: list[str] = []
+    for segment in re.findall(r"[a-z0-9_\u4e00-\u9fff]+", text.lower()):
+        if not re.fullmatch(r"[\u4e00-\u9fff]+", segment):
+            tokens.append(segment)
+            continue
+        tokens.append(segment)
+        for width in (2, 3):
+            tokens.extend(segment[index : index + width] for index in range(len(segment) - width + 1))
+    return tokens
 
 
 def chunk_text(
@@ -30,7 +38,7 @@ def chunk_text(
     target_tokens: int = 500,
     overlap: int = 80,
 ) -> list[Chunk]:
-    words = tokenize(text)
+    words = re.findall(r"[\w\u4e00-\u9fff]+", text.lower())
     if not words:
         return []
     if len(words) <= target_tokens:
@@ -81,4 +89,3 @@ def chunks_from_documents(documents: Iterable[dict[str, str]]) -> list[Chunk]:
             )
         )
     return chunks
-

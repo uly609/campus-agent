@@ -41,9 +41,15 @@ services:
       retries: 30
 
   api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     image: newproject-api:latest
     env_file:
-      - .env.example
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+psycopg://campusflow:campusflow@postgres:5432/campusflow
       REDIS_URL: redis://redis:6379/0
@@ -123,7 +129,7 @@ services:
     ports:
       - "9093:9093"
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/9093'"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9093/-/healthy >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 20

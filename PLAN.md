@@ -261,3 +261,16 @@ make eval
 make e2e
 make smoke
 ```
+
+## M14 - Agent Fidelity And Evaluation Hardening
+
+- [x] Replace manual orchestration with compiled LangGraph `StateGraph` execution.
+- [x] Add real OpenAI-compatible Chat, Embedding, and VLM providers with bounded fallback.
+- [x] Route embeddings through provider/cache infrastructure.
+- [x] Query the Neo4j Vector Index and persisted GraphRAG relationships.
+- [x] Validate real-model claims against supplied evidence ids.
+- [x] Add Chinese query expansion, tokenization, and relevance reranking.
+- [x] Replace duplicated intent templates and correct retrieval/QA relevance labels.
+- [x] Compute Judge F1, citation groundedness, retrieval precision/recall, cache hits, and latency from executions.
+- [x] Make Docker builds independent of ignored local binaries and reduce build context.
+- [x] Run all stop-condition commands with eight healthy services.

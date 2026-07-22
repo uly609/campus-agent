@@ -21,6 +21,23 @@ class Settings(BaseSettings):
     local_primary_chat_url: Optional[str] = None
     local_backup_chat_url: Optional[str] = None
     cloud_fallback_chat_url: Optional[str] = None
+    local_primary_api_key: Optional[str] = None
+    local_backup_api_key: Optional[str] = None
+    local_primary_chat_model: str = "qwen2.5:7b"
+    local_backup_chat_model: str = "qwen2.5:3b"
+    cloud_fallback_chat_model: str = "qwen-plus"
+    local_primary_embedding_url: Optional[str] = None
+    local_backup_embedding_url: Optional[str] = None
+    cloud_fallback_embedding_url: Optional[str] = None
+    local_primary_embedding_model: str = "bge-m3"
+    local_backup_embedding_model: str = "bge-m3"
+    cloud_fallback_embedding_model: str = "text-embedding-v3"
+    local_primary_vlm_url: Optional[str] = None
+    local_backup_vlm_url: Optional[str] = None
+    cloud_fallback_vlm_url: Optional[str] = None
+    local_primary_vlm_model: str = "qwen2.5-vl:7b"
+    local_backup_vlm_model: str = "qwen2.5-vl:3b"
+    cloud_fallback_vlm_model: str = "qwen-vl-plus"
     vlm_api_key: Optional[str] = None
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
@@ -32,4 +49,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

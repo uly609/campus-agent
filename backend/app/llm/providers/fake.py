@@ -5,6 +5,8 @@ from app.retrieval.embeddings import embed_text
 
 
 class FakeChatProvider:
+    is_fake = True
+
     def __init__(self, name: str = "local_primary", should_fail: bool = False) -> None:
         self.name = name
         self.model = "fake-campus-chat"
@@ -19,6 +21,8 @@ class FakeChatProvider:
 
 
 class FakeEmbeddingProvider:
+    is_fake = True
+
     def __init__(self, name: str = "local_primary", should_fail: bool = False) -> None:
         self.name = name
         self.model = "fake-bge-m3-compatible"
@@ -31,6 +35,8 @@ class FakeEmbeddingProvider:
 
 
 class FakeVLMProvider:
+    is_fake = True
+
     def __init__(self, name: str = "local_primary", should_fail: bool = False) -> None:
         self.name = name
         self.model = "fake-qwen2.5-vl"
@@ -53,4 +59,3 @@ class FakeVLMProvider:
             "safety_flags": [],
             "degraded_mode": True,
         }
-

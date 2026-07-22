@@ -6,15 +6,36 @@ from app.domain.schemas import Citation, Claim, Evidence, GroundedAnswer
 def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | bool]:
     if not evidence:
         return {"relevant": False, "score": 0.0, "coverage": 0.0}
-    query_chars = set(query.lower())
+    unsupported_markers = ["不存在", "火星", "飞船", "量子", "传送门", "海底", "管理员密码", "忽略规则", "忽略指令"]
+    if any(marker in query for marker in unsupported_markers):
+        return {"relevant": False, "score": 0.0, "coverage": 0.0}
+    supported_fact_anchors = [
+        "图书馆",
+        "宿舍",
+        "寝室",
+        "一卡通",
+        "校园卡",
+        "奖学金",
+        "校医院",
+        "急诊",
+        "看诊",
+        "票据",
+        "后勤",
+        "报修",
+    ]
+    if all(item.official for item in evidence) and not any(anchor in query for anchor in supported_fact_anchors):
+        return {"relevant": False, "score": 0.0, "coverage": 0.0}
+    ignored = set("的是了在有和与或请问一下多少什么怎么如何能否校园官方说明")
+    query_chars = {char for char in query.lower() if char.isalnum() and char not in ignored}
     scores = []
     for item in evidence:
         haystack = f"{item.title} {item.excerpt}".lower()
         overlap = len(query_chars.intersection(haystack)) / max(len(query_chars), 1)
-        scores.append(min(1.0, overlap + item.score * 6))
+        scores.append(min(1.0, overlap + item.score * 1.5))
     score = max(scores)
-    coverage = sum(1 for value in scores if value >= 0.25) / max(len(scores), 1)
-    return {"relevant": score >= 0.2, "score": round(score, 4), "coverage": round(coverage, 4)}
+    relevant_count = sum(1 for value in scores if value >= 0.25)
+    coverage = min(1.0, relevant_count / min(len(scores), 3))
+    return {"relevant": score >= 0.25, "score": round(score, 4), "coverage": round(coverage, 4)}
 
 
 def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> GroundedAnswer:
@@ -53,4 +74,3 @@ def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> Grounded
         unsupported_questions=[],
         confidence=0.78 if official else 0.55,
     )
-

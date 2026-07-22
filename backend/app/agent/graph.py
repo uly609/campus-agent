@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import time
 import uuid
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable, Literal
+
+from langgraph.graph import END, START, StateGraph
 
 from app.agent.policies import judge_relevance, synthesize_grounded_answer
+from app.agent.planning import plan_intent
+from app.agent.grounded_llm import synthesize_with_provider
 from app.agent.state import AgentState, REQUIRED_NODES, SIX_STAGES
 from app.agent.tools.campus_tools import build_registry
 from app.domain.enums import Intent
 from app.domain.schemas import Citation, Evidence
 from app.memory.producer import publish_memory_event
+from app.llm.router import ProviderRouter
 from app.multimodal.image_attributes import enhance_query_with_image
 from app.security.pii import redact_pii
 from app.security.prompt_injection import detect_prompt_injection, isolate_untrusted_content
@@ -17,11 +22,13 @@ from app.services.repository import JsonRepository
 
 
 NodeCallable = Callable[[AgentState], Any]
+GraphRoute = Literal["visual_understanding_node", "intent_planner_node", "tool_executor_node", "grounded_synthesis_node", "replan_node"]
 
 
 class CampusFlowGraph:
     def __init__(self, repo: JsonRepository | None = None) -> None:
         self.repo = repo or JsonRepository()
+        self.provider_router = ProviderRouter()
         self.registry = build_registry()
         self.nodes = {
             "input_guard_node": self.input_guard_node,
@@ -38,10 +45,55 @@ class CampusFlowGraph:
             "publish_memory_event_node": self.publish_memory_event_node,
             "persist_trace_node": self.persist_trace_node,
         }
+        self.compiled = self._compile()
+
+    def _compile(self) -> Any:
+        workflow = StateGraph(AgentState)
+        for name in REQUIRED_NODES:
+            workflow.add_node(name, self._node_runner(name))
+
+        workflow.add_edge(START, "input_guard_node")
+        workflow.add_edge("input_guard_node", "load_memory_node")
+        workflow.add_edge("load_memory_node", "coreference_resolver_node")
+        workflow.add_conditional_edges("coreference_resolver_node", self._route_visual)
+        workflow.add_edge("visual_understanding_node", "intent_planner_node")
+        workflow.add_conditional_edges("intent_planner_node", self._route_intent)
+        workflow.add_edge("tool_executor_node", "retrieval_gate_node")
+        workflow.add_edge("retrieval_gate_node", "relevance_judge_node")
+        workflow.add_conditional_edges("relevance_judge_node", self._route_relevance)
+        workflow.add_edge("replan_node", "tool_executor_node")
+        workflow.add_edge("grounded_synthesis_node", "output_guard_node")
+        workflow.add_edge("output_guard_node", "publish_memory_event_node")
+        workflow.add_edge("publish_memory_event_node", "persist_trace_node")
+        workflow.add_edge("persist_trace_node", END)
+        return workflow.compile()
+
+    def _node_runner(self, name: str) -> Callable[[AgentState], Awaitable[AgentState]]:
+        async def run_node(state: AgentState) -> AgentState:
+            await self._run_node(name, state)
+            return state
+
+        return run_node
+
+    @staticmethod
+    def _route_visual(state: AgentState) -> GraphRoute:
+        return "visual_understanding_node" if state.get("image_urls") else "intent_planner_node"
+
+    @staticmethod
+    def _route_intent(state: AgentState) -> GraphRoute:
+        return "grounded_synthesis_node" if state.get("intent") == Intent.GREETING.value else "tool_executor_node"
+
+    @staticmethod
+    def _route_relevance(state: AgentState) -> GraphRoute:
+        if state.get("evidence_coverage", 0.0) >= 0.25:
+            return "grounded_synthesis_node"
+        if state.get("replan_count", 0) >= state.get("max_replans", 2):
+            return "grounded_synthesis_node"
+        return "replan_node"
 
     def graph_spec(self) -> dict[str, object]:
         return {
-            "framework": "LangGraph-compatible explicit state graph",
+            "framework": "LangGraph StateGraph",
             "stages": SIX_STAGES,
             "nodes": REQUIRED_NODES,
             "edges": [
@@ -81,27 +133,10 @@ class CampusFlowGraph:
             "guardrail_flags": [],
             "errors": [],
             "trace": [],
-            "degraded_mode": ["fake_chat_provider", "fake_embedding_provider", "fake_vlm_provider"],
+            "degraded_mode": self.provider_router.degraded_modes,
         }
-        await self._run_node("input_guard_node", state)
-        await self._run_node("load_memory_node", state)
-        await self._run_node("coreference_resolver_node", state)
-        if state.get("image_urls"):
-            await self._run_node("visual_understanding_node", state)
-        await self._run_node("intent_planner_node", state)
-        if state.get("intent") != Intent.GREETING.value:
-            while True:
-                await self._run_node("tool_executor_node", state)
-                await self._run_node("retrieval_gate_node", state)
-                await self._run_node("relevance_judge_node", state)
-                if state.get("evidence_coverage", 0.0) >= 0.25 or state.get("replan_count", 0) >= state.get("max_replans", 2):
-                    break
-                await self._run_node("replan_node", state)
-        await self._run_node("grounded_synthesis_node", state)
-        await self._run_node("output_guard_node", state)
-        await self._run_node("publish_memory_event_node", state)
-        await self._run_node("persist_trace_node", state)
-        return state
+        result = await self.compiled.ainvoke(state)
+        return AgentState(**result)
 
     async def _run_node(self, name: str, state: AgentState) -> None:
         start = time.perf_counter()
@@ -141,26 +176,9 @@ class CampusFlowGraph:
 
     async def intent_planner_node(self, state: AgentState) -> None:
         query = state["resolved_query"]
-        if any(word in query for word in ["你好", "嗨", "hello"]):
-            intent = Intent.GREETING
-            plan: list[dict[str, object]] = []
-        elif any(word in query for word in ["起草", "发帖", "草稿"]):
-            intent = Intent.POST_DRAFT
-            plan = [{"tool": "create_post_draft", "args": {"intent": query}}]
-        elif any(word in query for word in ["失物", "捡到", "丢了", "找"]):
-            intent = Intent.LOST_FOUND
-            plan = [{"tool": "search_lost_and_found", "args": {"query": query}}, {"tool": "search_posts", "args": {"query": query}}]
-        elif any(word in query for word in ["记住", "记忆", "偏好"]):
-            intent = Intent.MEMORY
-            plan = [{"tool": "load_user_memories", "args": {"user_id": state["user_id"]}}]
-        elif any(word in query for word in ["帖子", "搜索", "二手", "拼车"]):
-            intent = Intent.POST_SEARCH
-            plan = [{"tool": "search_posts", "args": {"query": query}}]
-        else:
-            intent = Intent.CAMPUS_QA
-            plan = [{"tool": "search_campus_docs", "args": {"query": query}}, {"tool": "get_campus_service_info", "args": {"query": query}}]
+        intent, plan, confidence = plan_intent(query, state["user_id"])
         state["intent"] = intent.value
-        state["intent_confidence"] = 0.84
+        state["intent_confidence"] = confidence
         state["plan"] = plan
         state["current_step"] = 0
 
@@ -202,11 +220,21 @@ class CampusFlowGraph:
 
     async def grounded_synthesis_node(self, state: AgentState) -> None:
         if state.get("intent") == Intent.GREETING.value:
-            state["final_answer"] = "你好，我是 CampusFlow AI，可以帮你查校园信息、找帖子、识别失物图片和起草匿名帖。"
+            result = await self.provider_router.chat("寒暄：向用户介绍 CampusFlow AI。")
+            state["final_answer"] = str(result.content)
             state["citations"] = []
+            if result.degraded and "fake_chat_provider" not in state["degraded_mode"]:
+                state["degraded_mode"].append("fake_chat_provider")
             return
         evidence = [Evidence.model_validate(item) for item in state.get("retrieved_evidence", [])]
-        answer = synthesize_grounded_answer(state["resolved_query"], evidence)
+        if state.get("evidence_coverage", 0.0) < 0.25 or state.get("relevance_score", 0.0) < 0.25:
+            evidence = []
+        fallback = synthesize_grounded_answer(state["resolved_query"], evidence)
+        answer, used_fallback = await synthesize_with_provider(
+            state["resolved_query"], evidence, self.provider_router, fallback
+        )
+        if used_fallback:
+            state["trace"].append({"event": "grounded_synthesis_fallback", "reason": "fake_or_invalid_provider_output"})
         state["final_answer"] = answer.answer
         state["citations"] = [citation.model_dump() for citation in answer.citations]
 
@@ -243,4 +271,3 @@ def build_graph() -> CampusFlowGraph:
 
 async def run_agent(raw_query: str, session_id: str, user_id: str, image_urls: list[str] | None = None) -> AgentState:
     return await build_graph().run(raw_query, session_id, user_id, image_urls)
-

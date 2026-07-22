@@ -24,6 +24,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M11 | Complete | `make eval` passed; persisted 80 intent, 18 retrieval, and 14 QA cases plus JSON/Markdown reports | Pending |
 | M12 | Complete | `curl -f http://localhost:8000/metrics` passed; Prometheus, Grafana, and Alertmanager build from local configs and are healthy in Compose | Pending |
 | M13 | Complete | `docker compose up --build -d` passed; all 8 services healthy; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
+| M14 | Complete | Compiled LangGraph, real HTTP providers, Neo4j Vector Index/GraphRAG, grounded-model validation, improved Chinese retrieval/evals; all final validations passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -107,3 +108,13 @@ The workspace was empty at start. The starter pack instructions were read from `
 ## Degraded Mode Policy
 
 External model credentials are optional for local demo and test runs. When absent, chat, embedding, and VLM providers use explicit fake adapters and include degraded-mode traces. PostgreSQL, Redis, and Neo4j are represented as real Docker Compose services for the full demo.
+
+## 2026-07-22 M14 Notes
+
+- Replaced the manual node loop with a compiled LangGraph `StateGraph` while preserving all 13 nodes, conditional branches, and the strict two-replan cap.
+- Added tested OpenAI-compatible Chat, Embedding, and VLM adapters for local-primary, local-backup, and cloud-fallback tiers. Real model claims must cite supplied evidence ids and pass support validation.
+- Added real Neo4j Vector Index queries and persisted `Source-[:MENTIONS]->Entity` Cypher expansion, retaining explicit in-memory degradation.
+- Fixed Chinese tokenization, added domain query expansion and post-fusion reranking, diversified seed posts, and expanded official documents from 30 to 40.
+- Replaced numbered intent copies with 80 distinct utterances, corrected relevance labels, added per-case reports, and removed hardcoded tool/cache/latency metrics.
+- Final `eval-4d42b39c8f` computed: intent accuracy 1.0, Hit@8 1.0, Precision@5 1.0, Precision@8 0.9375, Recall@8 1.0, citation groundedness 1.0, refusal accuracy 1.0, and Judge F1 1.0.
+- `docker compose up --build -d` passed with all eight services healthy. `make seed lint typecheck test eval e2e smoke` passed; 29 unit/integration tests and the E2E suite passed.

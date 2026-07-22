@@ -12,10 +12,10 @@ ALLOWED_TOOLS = {
     "create_post_draft",
     "load_user_memories",
     "save_memory_feedback",
+    "get_eval_report",
 }
 
 
 def assert_tool_allowed(tool_name: str) -> None:
     if tool_name not in ALLOWED_TOOLS:
         raise ValueError(f"TOOL_NOT_ALLOWED:{tool_name}")
-

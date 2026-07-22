@@ -1,80 +1,80 @@
-{"id": "intent-00", "input": "你好呀 #0", "expected_intent": "greeting"}
-{"id": "intent-01", "input": "图书馆几点关门 #1", "expected_intent": "campus_qa"}
-{"id": "intent-02", "input": "搜索二手教材帖子 #2", "expected_intent": "post_search"}
-{"id": "intent-03", "input": "我在南门丢了蓝色水杯 #3", "expected_intent": "lost_found"}
-{"id": "intent-04", "input": "帮我起草一个失物招领帖子 #4", "expected_intent": "post_draft"}
-{"id": "intent-05", "input": "记住我喜欢安静自习室 #5", "expected_intent": "memory"}
-{"id": "intent-06", "input": "运行一下评测结果 #6", "expected_intent": "eval"}
-{"id": "intent-07", "input": "校医院工作时间是什么 #7", "expected_intent": "campus_qa"}
-{"id": "intent-08", "input": "你好呀 #8", "expected_intent": "greeting"}
-{"id": "intent-09", "input": "图书馆几点关门 #9", "expected_intent": "campus_qa"}
-{"id": "intent-10", "input": "搜索二手教材帖子 #10", "expected_intent": "post_search"}
-{"id": "intent-11", "input": "我在南门丢了蓝色水杯 #11", "expected_intent": "lost_found"}
-{"id": "intent-12", "input": "帮我起草一个失物招领帖子 #12", "expected_intent": "post_draft"}
-{"id": "intent-13", "input": "记住我喜欢安静自习室 #13", "expected_intent": "memory"}
-{"id": "intent-14", "input": "运行一下评测结果 #14", "expected_intent": "eval"}
-{"id": "intent-15", "input": "校医院工作时间是什么 #15", "expected_intent": "campus_qa"}
-{"id": "intent-16", "input": "你好呀 #16", "expected_intent": "greeting"}
-{"id": "intent-17", "input": "图书馆几点关门 #17", "expected_intent": "campus_qa"}
-{"id": "intent-18", "input": "搜索二手教材帖子 #18", "expected_intent": "post_search"}
-{"id": "intent-19", "input": "我在南门丢了蓝色水杯 #19", "expected_intent": "lost_found"}
-{"id": "intent-20", "input": "帮我起草一个失物招领帖子 #20", "expected_intent": "post_draft"}
-{"id": "intent-21", "input": "记住我喜欢安静自习室 #21", "expected_intent": "memory"}
-{"id": "intent-22", "input": "运行一下评测结果 #22", "expected_intent": "eval"}
-{"id": "intent-23", "input": "校医院工作时间是什么 #23", "expected_intent": "campus_qa"}
-{"id": "intent-24", "input": "你好呀 #24", "expected_intent": "greeting"}
-{"id": "intent-25", "input": "图书馆几点关门 #25", "expected_intent": "campus_qa"}
-{"id": "intent-26", "input": "搜索二手教材帖子 #26", "expected_intent": "post_search"}
-{"id": "intent-27", "input": "我在南门丢了蓝色水杯 #27", "expected_intent": "lost_found"}
-{"id": "intent-28", "input": "帮我起草一个失物招领帖子 #28", "expected_intent": "post_draft"}
-{"id": "intent-29", "input": "记住我喜欢安静自习室 #29", "expected_intent": "memory"}
-{"id": "intent-30", "input": "运行一下评测结果 #30", "expected_intent": "eval"}
-{"id": "intent-31", "input": "校医院工作时间是什么 #31", "expected_intent": "campus_qa"}
-{"id": "intent-32", "input": "你好呀 #32", "expected_intent": "greeting"}
-{"id": "intent-33", "input": "图书馆几点关门 #33", "expected_intent": "campus_qa"}
-{"id": "intent-34", "input": "搜索二手教材帖子 #34", "expected_intent": "post_search"}
-{"id": "intent-35", "input": "我在南门丢了蓝色水杯 #35", "expected_intent": "lost_found"}
-{"id": "intent-36", "input": "帮我起草一个失物招领帖子 #36", "expected_intent": "post_draft"}
-{"id": "intent-37", "input": "记住我喜欢安静自习室 #37", "expected_intent": "memory"}
-{"id": "intent-38", "input": "运行一下评测结果 #38", "expected_intent": "eval"}
-{"id": "intent-39", "input": "校医院工作时间是什么 #39", "expected_intent": "campus_qa"}
-{"id": "intent-40", "input": "你好呀 #40", "expected_intent": "greeting"}
-{"id": "intent-41", "input": "图书馆几点关门 #41", "expected_intent": "campus_qa"}
-{"id": "intent-42", "input": "搜索二手教材帖子 #42", "expected_intent": "post_search"}
-{"id": "intent-43", "input": "我在南门丢了蓝色水杯 #43", "expected_intent": "lost_found"}
-{"id": "intent-44", "input": "帮我起草一个失物招领帖子 #44", "expected_intent": "post_draft"}
-{"id": "intent-45", "input": "记住我喜欢安静自习室 #45", "expected_intent": "memory"}
-{"id": "intent-46", "input": "运行一下评测结果 #46", "expected_intent": "eval"}
-{"id": "intent-47", "input": "校医院工作时间是什么 #47", "expected_intent": "campus_qa"}
-{"id": "intent-48", "input": "你好呀 #48", "expected_intent": "greeting"}
-{"id": "intent-49", "input": "图书馆几点关门 #49", "expected_intent": "campus_qa"}
-{"id": "intent-50", "input": "搜索二手教材帖子 #50", "expected_intent": "post_search"}
-{"id": "intent-51", "input": "我在南门丢了蓝色水杯 #51", "expected_intent": "lost_found"}
-{"id": "intent-52", "input": "帮我起草一个失物招领帖子 #52", "expected_intent": "post_draft"}
-{"id": "intent-53", "input": "记住我喜欢安静自习室 #53", "expected_intent": "memory"}
-{"id": "intent-54", "input": "运行一下评测结果 #54", "expected_intent": "eval"}
-{"id": "intent-55", "input": "校医院工作时间是什么 #55", "expected_intent": "campus_qa"}
-{"id": "intent-56", "input": "你好呀 #56", "expected_intent": "greeting"}
-{"id": "intent-57", "input": "图书馆几点关门 #57", "expected_intent": "campus_qa"}
-{"id": "intent-58", "input": "搜索二手教材帖子 #58", "expected_intent": "post_search"}
-{"id": "intent-59", "input": "我在南门丢了蓝色水杯 #59", "expected_intent": "lost_found"}
-{"id": "intent-60", "input": "帮我起草一个失物招领帖子 #60", "expected_intent": "post_draft"}
-{"id": "intent-61", "input": "记住我喜欢安静自习室 #61", "expected_intent": "memory"}
-{"id": "intent-62", "input": "运行一下评测结果 #62", "expected_intent": "eval"}
-{"id": "intent-63", "input": "校医院工作时间是什么 #63", "expected_intent": "campus_qa"}
-{"id": "intent-64", "input": "你好呀 #64", "expected_intent": "greeting"}
-{"id": "intent-65", "input": "图书馆几点关门 #65", "expected_intent": "campus_qa"}
-{"id": "intent-66", "input": "搜索二手教材帖子 #66", "expected_intent": "post_search"}
-{"id": "intent-67", "input": "我在南门丢了蓝色水杯 #67", "expected_intent": "lost_found"}
-{"id": "intent-68", "input": "帮我起草一个失物招领帖子 #68", "expected_intent": "post_draft"}
-{"id": "intent-69", "input": "记住我喜欢安静自习室 #69", "expected_intent": "memory"}
-{"id": "intent-70", "input": "运行一下评测结果 #70", "expected_intent": "eval"}
-{"id": "intent-71", "input": "校医院工作时间是什么 #71", "expected_intent": "campus_qa"}
-{"id": "intent-72", "input": "你好呀 #72", "expected_intent": "greeting"}
-{"id": "intent-73", "input": "图书馆几点关门 #73", "expected_intent": "campus_qa"}
-{"id": "intent-74", "input": "搜索二手教材帖子 #74", "expected_intent": "post_search"}
-{"id": "intent-75", "input": "我在南门丢了蓝色水杯 #75", "expected_intent": "lost_found"}
-{"id": "intent-76", "input": "帮我起草一个失物招领帖子 #76", "expected_intent": "post_draft"}
-{"id": "intent-77", "input": "记住我喜欢安静自习室 #77", "expected_intent": "memory"}
-{"id": "intent-78", "input": "运行一下评测结果 #78", "expected_intent": "eval"}
-{"id": "intent-79", "input": "校医院工作时间是什么 #79", "expected_intent": "campus_qa"}
+{"id":"intent-00","input":"你好，CampusFlow","expected_intent":"greeting"}
+{"id":"intent-01","input":"您好，可以帮我吗","expected_intent":"greeting"}
+{"id":"intent-02","input":"嗨，早上好","expected_intent":"greeting"}
+{"id":"intent-03","input":"hello campus assistant","expected_intent":"greeting"}
+{"id":"intent-04","input":"hi there","expected_intent":"greeting"}
+{"id":"intent-05","input":"你好呀","expected_intent":"greeting"}
+{"id":"intent-06","input":"您好同学助手","expected_intent":"greeting"}
+{"id":"intent-07","input":"嗨，我来问个问题","expected_intent":"greeting"}
+{"id":"intent-08","input":"hello，你在吗","expected_intent":"greeting"}
+{"id":"intent-09","input":"你好，第一次使用","expected_intent":"greeting"}
+{"id":"intent-10","input":"图书馆几点关门","expected_intent":"campus_qa"}
+{"id":"intent-11","input":"考试周闭馆时间是什么","expected_intent":"campus_qa"}
+{"id":"intent-12","input":"宿舍漏水应该联系谁","expected_intent":"campus_qa"}
+{"id":"intent-13","input":"后勤维修电话是多少","expected_intent":"campus_qa"}
+{"id":"intent-14","input":"一卡通怎样办理挂失","expected_intent":"campus_qa"}
+{"id":"intent-15","input":"校园卡补办地点在哪","expected_intent":"campus_qa"}
+{"id":"intent-16","input":"奖学金申请要什么材料","expected_intent":"campus_qa"}
+{"id":"intent-17","input":"奖学金材料交给谁","expected_intent":"campus_qa"}
+{"id":"intent-18","input":"校医院工作时间是什么","expected_intent":"campus_qa"}
+{"id":"intent-19","input":"夜间急诊应该去哪里","expected_intent":"campus_qa"}
+{"id":"intent-20","input":"图书馆周末开放吗","expected_intent":"campus_qa"}
+{"id":"intent-21","input":"闭馆前多久停止入馆","expected_intent":"campus_qa"}
+{"id":"intent-22","input":"寝室报修多久响应","expected_intent":"campus_qa"}
+{"id":"intent-23","input":"补卡是在学生服务中心吗","expected_intent":"campus_qa"}
+{"id":"intent-24","input":"志愿服务记录是否影响奖学金","expected_intent":"campus_qa"}
+{"id":"intent-25","input":"校医院下班后还能看病吗","expected_intent":"campus_qa"}
+{"id":"intent-26","input":"报修小程序在哪里提交","expected_intent":"campus_qa"}
+{"id":"intent-27","input":"合作医院就诊票据要保留吗","expected_intent":"campus_qa"}
+{"id":"intent-28","input":"辅导员负责收奖学金材料吗","expected_intent":"campus_qa"}
+{"id":"intent-29","input":"校园卡中心可以挂失吗","expected_intent":"campus_qa"}
+{"id":"intent-30","input":"搜索二手教材帖子","expected_intent":"post_search"}
+{"id":"intent-31","input":"帮我找拼车帖子","expected_intent":"post_search"}
+{"id":"intent-32","input":"社区里有什么学习信息","expected_intent":"post_search"}
+{"id":"intent-33","input":"查一下校园活动","expected_intent":"post_search"}
+{"id":"intent-34","input":"搜索北门相关内容","expected_intent":"post_search"}
+{"id":"intent-35","input":"有没有出售计算器的帖子","expected_intent":"post_search"}
+{"id":"intent-36","input":"想看同学发布的二手信息","expected_intent":"post_search"}
+{"id":"intent-37","input":"社区里有人约自习吗","expected_intent":"post_search"}
+{"id":"intent-38","input":"搜索体育馆附近的信息","expected_intent":"post_search"}
+{"id":"intent-39","input":"找一找拼车去车站的帖子","expected_intent":"post_search"}
+{"id":"intent-40","input":"查看最新校园帖子","expected_intent":"post_search"}
+{"id":"intent-41","input":"二手区有没有教材","expected_intent":"post_search"}
+{"id":"intent-42","input":"我在南门丢了蓝色水杯","expected_intent":"lost_found"}
+{"id":"intent-43","input":"有人捡到校园卡吗","expected_intent":"lost_found"}
+{"id":"intent-44","input":"查询最近的失物招领","expected_intent":"lost_found"}
+{"id":"intent-45","input":"耳机遗失在图书馆","expected_intent":"lost_found"}
+{"id":"intent-46","input":"怎样找回我的计算器","expected_intent":"lost_found"}
+{"id":"intent-47","input":"北门捡到一串钥匙","expected_intent":"lost_found"}
+{"id":"intent-48","input":"我的帆布包丢了","expected_intent":"lost_found"}
+{"id":"intent-49","input":"失物区有黑色雨伞吗","expected_intent":"lost_found"}
+{"id":"intent-50","input":"招领一张校园卡","expected_intent":"lost_found"}
+{"id":"intent-51","input":"白色耳机还能找回吗","expected_intent":"lost_found"}
+{"id":"intent-52","input":"一食堂有人捡到教材","expected_intent":"lost_found"}
+{"id":"intent-53","input":"我遗失了宿舍钥匙","expected_intent":"lost_found"}
+{"id":"intent-54","input":"帮我起草一个失物招领帖子","expected_intent":"post_draft"}
+{"id":"intent-55","input":"写一篇寻找水杯的内容","expected_intent":"post_draft"}
+{"id":"intent-56","input":"给我生成发帖草稿","expected_intent":"post_draft"}
+{"id":"intent-57","input":"帮我写一个二手教材帖子","expected_intent":"post_draft"}
+{"id":"intent-58","input":"起草校园卡招领信息","expected_intent":"post_draft"}
+{"id":"intent-59","input":"我要发帖找耳机","expected_intent":"post_draft"}
+{"id":"intent-60","input":"草稿标题改成寻找失主","expected_intent":"post_draft"}
+{"id":"intent-61","input":"帮我写一篇拼车信息","expected_intent":"post_draft"}
+{"id":"intent-62","input":"起草一则校园通知","expected_intent":"post_draft"}
+{"id":"intent-63","input":"生成一个待确认的发帖草稿","expected_intent":"post_draft"}
+{"id":"intent-64","input":"记住我喜欢安静的自习室","expected_intent":"memory"}
+{"id":"intent-65","input":"请保存我的学习偏好","expected_intent":"memory"}
+{"id":"intent-66","input":"查看你对我的记忆","expected_intent":"memory"}
+{"id":"intent-67","input":"忘掉我之前说的地点","expected_intent":"memory"}
+{"id":"intent-68","input":"删除记忆中的联系方式","expected_intent":"memory"}
+{"id":"intent-69","input":"记住我通常晚上去图书馆","expected_intent":"memory"}
+{"id":"intent-70","input":"我的偏好有哪些","expected_intent":"memory"}
+{"id":"intent-71","input":"更新记忆，我现在喜欢北区","expected_intent":"memory"}
+{"id":"intent-72","input":"请记住这件事","expected_intent":"memory"}
+{"id":"intent-73","input":"关闭长期记忆可以吗","expected_intent":"memory"}
+{"id":"intent-74","input":"运行一下评测","expected_intent":"eval"}
+{"id":"intent-75","input":"查看最新评估报告","expected_intent":"eval"}
+{"id":"intent-76","input":"执行 eval","expected_intent":"eval"}
+{"id":"intent-77","input":"打开指标报告","expected_intent":"eval"}
+{"id":"intent-78","input":"重新跑一遍评测集","expected_intent":"eval"}
+{"id":"intent-79","input":"最新评测结果怎么样","expected_intent":"eval"}

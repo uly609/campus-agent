@@ -2,21 +2,35 @@
 
 CampusFlow AI is a Python-first campus community agent demo with FastAPI, a Vue 3-style demo UI, Hybrid RAG, GraphRAG, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
 
+The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines Chinese-aware BM25, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, relevance reranking, and RRF.
+
 ## Degraded Mode
 
 The Docker demo starts PostgreSQL, Redis, Neo4j, Prometheus, Grafana, and Alertmanager as real services. Model credentials are optional. If chat, embedding, or VLM credentials are absent, CampusFlow uses explicit fake providers and returns degraded-mode trace labels such as `fake_chat_provider`, `fake_embedding_provider`, and `fake_vlm_provider`.
 
 Student-card OCR is synthetic-demo only and rejects non-demo images.
 
-## One-Command Demo
+## Real Model Providers
 
-Alertmanager is built from the official release archive so Compose does not depend on a live `prom/alertmanager` image pull. The archive is ignored by git; on a fresh checkout, download it once:
+Each role supports `local_primary`, `local_backup`, and `cloud_fallback` through an OpenAI-compatible HTTP contract. Set the role-specific base URL and model in `.env`; local API keys may be empty when the server permits it.
 
 ```bash
-ARCH="$(docker version --format '{{.Server.Arch}}')"
-mkdir -p infra/alertmanager/bin
-curl -L "https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertmanager-0.27.0.linux-${ARCH}.tar.gz" -o "infra/alertmanager/bin/alertmanager-0.27.0.linux-${ARCH}.tar.gz"
+cp .env.example .env
+# Example local OpenAI-compatible server
+LOCAL_PRIMARY_CHAT_URL=http://host.docker.internal:11434
+LOCAL_PRIMARY_CHAT_MODEL=qwen2.5:7b
+LOCAL_PRIMARY_EMBEDDING_URL=http://host.docker.internal:11434
+LOCAL_PRIMARY_EMBEDDING_MODEL=bge-m3
+LOCAL_PRIMARY_VLM_URL=http://host.docker.internal:11434
+LOCAL_PRIMARY_VLM_MODEL=qwen2.5-vl:7b
 ```
+
+For DashScope-compatible cloud fallback, set the relevant `CLOUD_FALLBACK_*_URL` to `https://dashscope.aliyuncs.com/compatible-mode/v1`, select the model, and provide `OPENAI_API_KEY` or `VLM_API_KEY`. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+
+## One-Command Demo
+
+Alertmanager uses the pinned official `quay.io/prometheus/alertmanager:v0.27.0`
+image with the repository configuration baked into a thin local layer. No untracked binary archive is required.
 
 ```bash
 docker compose up --build -d

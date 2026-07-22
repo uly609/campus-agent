@@ -1,18 +1,18 @@
-{"id": "ret-00", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
-{"id": "ret-01", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
-{"id": "ret-02", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
-{"id": "ret-03", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
-{"id": "ret-04", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
-{"id": "ret-05", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}
-{"id": "ret-06", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
-{"id": "ret-07", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
-{"id": "ret-08", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
-{"id": "ret-09", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
-{"id": "ret-10", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
-{"id": "ret-11", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}
-{"id": "ret-12", "query": "图书馆开放时间", "expected_source_ids": ["doc-library-hours-00"]}
-{"id": "ret-13", "query": "一卡通挂失补办", "expected_source_ids": ["doc-card-loss-02"]}
-{"id": "ret-14", "query": "宿舍维修漏水", "expected_source_ids": ["doc-dorm-repair-01"]}
-{"id": "ret-15", "query": "奖学金申请材料", "expected_source_ids": ["doc-scholarship-03"]}
-{"id": "ret-16", "query": "校医院开诊", "expected_source_ids": ["doc-clinic-04"]}
-{"id": "ret-17", "query": "南门 捡到 校园卡", "expected_source_ids": ["post-seed-011"]}
+{"id":"ret-00","query":"图书馆开放时间","expected_source_prefixes":["doc-library-hours-"]}
+{"id":"ret-01","query":"图书馆晚上几点闭馆","expected_source_prefixes":["doc-library-hours-"]}
+{"id":"ret-02","query":"考试周图书馆延长到几点","expected_source_prefixes":["doc-library-hours-"]}
+{"id":"ret-03","query":"宿舍漏水怎么报修","expected_source_prefixes":["doc-dorm-repair-"]}
+{"id":"ret-04","query":"后勤维修联系电话","expected_source_prefixes":["doc-dorm-repair-"]}
+{"id":"ret-05","query":"寝室维修多久响应","expected_source_prefixes":["doc-dorm-repair-"]}
+{"id":"ret-06","query":"一卡通丢失挂失","expected_source_prefixes":["doc-card-loss-"]}
+{"id":"ret-07","query":"校园卡在哪里补办","expected_source_prefixes":["doc-card-loss-"]}
+{"id":"ret-08","query":"学生服务中心补卡","expected_source_prefixes":["doc-card-loss-"]}
+{"id":"ret-09","query":"奖学金申请材料","expected_source_prefixes":["doc-scholarship-"]}
+{"id":"ret-10","query":"奖学金需要成绩排名吗","expected_source_prefixes":["doc-scholarship-"]}
+{"id":"ret-11","query":"奖学金材料交给谁","expected_source_prefixes":["doc-scholarship-"]}
+{"id":"ret-12","query":"校医院工作时间","expected_source_prefixes":["doc-clinic-"]}
+{"id":"ret-13","query":"校医院夜间急诊","expected_source_prefixes":["doc-clinic-"]}
+{"id":"ret-14","query":"看诊后票据要保留吗","expected_source_prefixes":["doc-clinic-"]}
+{"id":"ret-15","query":"南门捡到蓝色水杯","expected_source_ids":["post-seed-001","post-seed-065","post-seed-129","post-seed-193","post-seed-257"]}
+{"id":"ret-16","query":"北门捡到计算器","expected_source_ids":["post-seed-009","post-seed-073","post-seed-137","post-seed-201","post-seed-265"]}
+{"id":"ret-17","query":"一食堂捡到教材","expected_source_ids":["post-seed-017","post-seed-081","post-seed-145","post-seed-209","post-seed-273"]}

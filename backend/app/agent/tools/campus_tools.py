@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from app.domain.enums import PostCategory
 from app.domain.schemas import PostCreate, ToolResult
 from app.multimodal.image_attributes import extract_image_attributes
@@ -187,6 +190,41 @@ class CampusTools:
             provenance=[],
         )
 
+    async def get_eval_report(self, payload: dict[str, object]) -> ToolResult:
+        report_path = Path("evals/reports/latest.json")
+        if not report_path.exists():
+            return ToolResult(
+                tool_name="get_eval_report",
+                success=False,
+                data=None,
+                error_code="EVAL_REPORT_NOT_FOUND",
+                error_message="Run the evaluation suite before requesting its report.",
+                latency_ms=0,
+                provenance=[],
+            )
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        summary = json.dumps(report.get("metrics", {}), ensure_ascii=False, sort_keys=True)
+        return ToolResult(
+            tool_name="get_eval_report",
+            success=True,
+            data=[
+                {
+                    "evidence_id": f"eval-{report.get('run_id', 'latest')}",
+                    "source_id": str(report.get("run_id", "latest")),
+                    "source_type": "official",
+                    "title": "CampusFlow evaluation report",
+                    "excerpt": summary,
+                    "score": 1.0,
+                    "official": True,
+                    "metadata": {"report_path": str(report_path)},
+                }
+            ],
+            error_code=None,
+            error_message=None,
+            latency_ms=0,
+            provenance=[{"path": str(report_path), "kind": "evaluation_report"}],
+        )
+
 
 def build_registry(tools: CampusTools | None = None):
     from app.agent.tools.registry import ToolRegistry
@@ -204,4 +242,5 @@ def build_registry(tools: CampusTools | None = None):
     registry.register("create_post_draft", active.create_post_draft)
     registry.register("load_user_memories", active.load_user_memories)
     registry.register("save_memory_feedback", active.save_memory_feedback)
+    registry.register("get_eval_report", active.get_eval_report)
     return registry

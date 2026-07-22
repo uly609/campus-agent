@@ -6,28 +6,72 @@ from typing import Any, Awaitable, Callable
 from app.llm.base import ProviderRecoverableError, ProviderResult
 from app.llm.cache import ExactMatchCache
 from app.llm.providers.fake import FakeChatProvider, FakeEmbeddingProvider, FakeVLMProvider
+from app.llm.providers.openai_compatible import (
+    OpenAICompatibleChatProvider,
+    OpenAICompatibleEmbeddingProvider,
+    OpenAICompatibleVLMProvider,
+)
+from app.core.config import get_settings
 from app.observability.metrics import CACHE_HITS, LLM_CALLS, LLM_FAILURES, LLM_LATENCY
 
 
 class ProviderRouter:
     def __init__(self) -> None:
+        settings = get_settings()
         self.cache = ExactMatchCache()
-        self.chat_providers = [
-            FakeChatProvider("local_primary"),
-            FakeChatProvider("local_backup"),
-            FakeChatProvider("cloud_fallback"),
-        ]
-        self.embedding_providers = [
-            FakeEmbeddingProvider("local_primary"),
-            FakeEmbeddingProvider("local_backup"),
-            FakeEmbeddingProvider("cloud_fallback"),
-        ]
-        self.vlm_providers = [
-            FakeVLMProvider("local_primary"),
-            FakeVLMProvider("local_backup"),
-            FakeVLMProvider("cloud_fallback"),
-        ]
+        common = {"timeout_seconds": settings.provider_timeout_seconds, "max_retries": settings.provider_max_retries}
+        self.chat_providers = self._configured(
+            OpenAICompatibleChatProvider,
+            [
+                ("local_primary", settings.local_primary_chat_model, settings.local_primary_chat_url, settings.local_primary_api_key),
+                ("local_backup", settings.local_backup_chat_model, settings.local_backup_chat_url, settings.local_backup_api_key),
+                ("cloud_fallback", settings.cloud_fallback_chat_model, settings.cloud_fallback_chat_url, settings.openai_api_key),
+            ],
+            FakeChatProvider("fake_fallback"),
+            common,
+        )
+        self.embedding_providers = self._configured(
+            OpenAICompatibleEmbeddingProvider,
+            [
+                ("local_primary", settings.local_primary_embedding_model, settings.local_primary_embedding_url, settings.local_primary_api_key),
+                ("local_backup", settings.local_backup_embedding_model, settings.local_backup_embedding_url, settings.local_backup_api_key),
+                ("cloud_fallback", settings.cloud_fallback_embedding_model, settings.cloud_fallback_embedding_url, settings.openai_api_key),
+            ],
+            FakeEmbeddingProvider("fake_fallback"),
+            common,
+        )
+        self.vlm_providers = self._configured(
+            OpenAICompatibleVLMProvider,
+            [
+                ("local_primary", settings.local_primary_vlm_model, settings.local_primary_vlm_url, settings.local_primary_api_key),
+                ("local_backup", settings.local_backup_vlm_model, settings.local_backup_vlm_url, settings.local_backup_api_key),
+                ("cloud_fallback", settings.cloud_fallback_vlm_model, settings.cloud_fallback_vlm_url, settings.vlm_api_key or settings.openai_api_key),
+            ],
+            FakeVLMProvider("fake_fallback"),
+            common,
+        )
         self.trace: list[dict[str, Any]] = []
+
+    @staticmethod
+    def _configured(provider_type: type[Any], specs: list[tuple[str, str, str | None, str | None]], fake: Any, common: dict[str, Any]) -> list[Any]:
+        providers = [
+            provider_type(name=name, model=model, base_url=url, api_key=key, **common)
+            for name, model, url, key in specs
+            if url
+        ]
+        providers.append(fake)
+        return providers
+
+    @property
+    def degraded_modes(self) -> list[str]:
+        modes = []
+        if all(getattr(provider, "is_fake", False) for provider in self.chat_providers):
+            modes.append("fake_chat_provider")
+        if all(getattr(provider, "is_fake", False) for provider in self.embedding_providers):
+            modes.append("fake_embedding_provider")
+        if all(getattr(provider, "is_fake", False) for provider in self.vlm_providers):
+            modes.append("fake_vlm_provider")
+        return modes
 
     async def chat(self, prompt: str) -> ProviderResult:
         return await self._route("chat", self.chat_providers, lambda provider: provider.complete(prompt), prompt)
@@ -59,7 +103,7 @@ class ProviderRouter:
                 LLM_CALLS.labels(role=role, provider=provider.name, status="ok").inc()
                 LLM_LATENCY.labels(role=role, provider=provider.name).observe(latency_ms / 1000)
                 self.cache.set(cache_key, content)
-                degraded = provider.name != "local_primary" or provider.name.startswith("local")
+                degraded = bool(getattr(provider, "is_fake", False))
                 self.trace.append(
                     {
                         "role": role,
