@@ -33,6 +33,11 @@ class FakeEmbeddingProvider:
             raise ProviderRecoverableError("simulated embedding outage")
         return embed_text(text)
 
+    async def embed_many(self, texts: list[str]) -> list[list[float]]:
+        if self.should_fail:
+            raise ProviderRecoverableError("simulated embedding outage")
+        return [embed_text(text) for text in texts]
+
 
 class FakeVLMProvider:
     is_fake = True

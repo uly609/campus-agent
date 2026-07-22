@@ -79,6 +79,14 @@ class ProviderRouter:
     async def embed(self, text: str) -> ProviderResult:
         return await self._route("embedding", self.embedding_providers, lambda provider: provider.embed(text), text)
 
+    async def embed_many(self, texts: list[str]) -> ProviderResult:
+        return await self._route(
+            "embedding",
+            self.embedding_providers,
+            lambda provider: provider.embed_many(texts),
+            texts,
+        )
+
     async def analyze_image(self, image_url: str, prompt: str) -> ProviderResult:
         payload = {"image_url": image_url, "prompt": prompt}
         return await self._route("vlm", self.vlm_providers, lambda provider: provider.analyze(image_url, prompt), payload)

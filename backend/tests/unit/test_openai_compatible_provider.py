@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import httpx
 import pytest
 
@@ -27,14 +29,20 @@ async def test_openai_compatible_chat_and_embedding_contracts() -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
         assert request.headers["authorization"] == "Bearer test-key"
         if request.url.path.endswith("/embeddings"):
-            return httpx.Response(200, json={"data": [{"embedding": [0.1, 0.2, 0.3]}]})
+            payload = json.loads(request.content)
+            inputs = payload["input"] if isinstance(payload["input"], list) else [payload["input"]]
+            return httpx.Response(
+                200,
+                json={"data": [{"index": index, "embedding": [0.1, 0.2, float(index)]} for index, _ in enumerate(inputs)]},
+            )
         return httpx.Response(200, json={"choices": [{"message": {"content": "grounded"}}]})
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         chat = OpenAICompatibleChatProvider(**provider_args(client))
         embedding = OpenAICompatibleEmbeddingProvider(**provider_args(client))
         assert await chat.complete("question") == "grounded"
-        assert await embedding.embed("query") == [0.1, 0.2, 0.3]
+        assert await embedding.embed("query") == [0.1, 0.2, 0.0]
+        assert await embedding.embed_many(["first", "second"]) == [[0.1, 0.2, 0.0], [0.1, 0.2, 1.0]]
 
 
 @pytest.mark.asyncio

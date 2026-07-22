@@ -12,15 +12,21 @@ from app.retrieval.service import RetrievalService
 from app.services.repository import JsonRepository
 
 
+_shared_retrieval: RetrievalService | None = None
+
+
 class CampusTools:
     def __init__(self, repo: JsonRepository | None = None) -> None:
         self.repo = repo or JsonRepository()
         self._retrieval: RetrievalService | None = None
 
     async def retrieval(self) -> RetrievalService:
+        global _shared_retrieval
         if self._retrieval is None:
-            self._retrieval = RetrievalService(build_corpus(self.repo.load_posts(), self.repo.load_documents()))
-            await self._retrieval.rebuild()
+            if _shared_retrieval is None:
+                _shared_retrieval = RetrievalService(build_corpus(self.repo.load_posts(), self.repo.load_documents()))
+                await _shared_retrieval.rebuild()
+            self._retrieval = _shared_retrieval
         return self._retrieval
 
     async def search_campus_docs(self, payload: dict[str, object]) -> ToolResult:

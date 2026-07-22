@@ -17,7 +17,7 @@ class ProviderResult:
     role: str
     provider: str
     model: str
-    content: str | list[float] | dict[str, object]
+    content: str | list[float] | list[list[float]] | dict[str, object]
     degraded: bool
     latency_ms: int
 
@@ -44,4 +44,3 @@ class VLMProvider(Protocol):
 
     async def analyze(self, image_url: str, prompt: str) -> dict[str, object]:
         ...
-

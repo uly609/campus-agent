@@ -274,3 +274,11 @@ make smoke
 - [x] Compute Judge F1, citation groundedness, retrieval precision/recall, cache hits, and latency from executions.
 - [x] Make Docker builds independent of ignored local binaries and reduce build context.
 - [x] Run all stop-condition commands with eight healthy services.
+
+## M15 - Real Provider Runtime Validation
+
+- [x] Configure Bailian Chat, Embedding, and VLM cloud-fallback roles without committing credentials.
+- [x] Validate each role with a real OpenAI-compatible API call.
+- [x] Batch corpus embeddings and reuse the retrieval index for practical real-provider startup latency.
+- [x] Force fake adapters for deterministic tests and evals while retaining real-provider smoke coverage.
+- [x] Run lint, typecheck, tests, eval, E2E, frontend tests, and real-provider smoke with healthy Compose services.

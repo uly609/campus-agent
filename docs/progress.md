@@ -25,6 +25,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M12 | Complete | `curl -f http://localhost:8000/metrics` passed; Prometheus, Grafana, and Alertmanager build from local configs and are healthy in Compose | Pending |
 | M13 | Complete | `docker compose up --build -d` passed; all 8 services healthy; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
 | M14 | Complete | Compiled LangGraph, real HTTP providers, Neo4j Vector Index/GraphRAG, grounded-model validation, improved Chinese retrieval/evals; all final validations passed | Pending |
+| M15 | Complete | Real Bailian Chat/Embedding/VLM calls passed; batched embeddings and provider-isolated offline validation passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -118,3 +119,10 @@ External model credentials are optional for local demo and test runs. When absen
 - Replaced numbered intent copies with 80 distinct utterances, corrected relevance labels, added per-case reports, and removed hardcoded tool/cache/latency metrics.
 - Final `eval-4d42b39c8f` computed: intent accuracy 1.0, Hit@8 1.0, Precision@5 1.0, Precision@8 0.9375, Recall@8 1.0, citation groundedness 1.0, refusal accuracy 1.0, and Judge F1 1.0.
 - `docker compose up --build -d` passed with all eight services healthy. `make seed lint typecheck test eval e2e smoke` passed; 29 unit/integration tests and the E2E suite passed.
+
+## 2026-07-22 M15 Notes
+
+- Configured the ignored local `.env` for Bailian OpenAI-compatible cloud fallback: `qwen-plus`, `text-embedding-v3`, and `qwen-vl-plus`. Minimal real Chat, Embedding, and static-image VLM calls all completed without degraded mode.
+- Added embedding batch support across the provider/router boundary and reused the retrieval service so the first real-model chat indexes the corpus efficiently.
+- Isolated unit, integration, E2E, and eval commands from local provider credentials to keep validations deterministic and avoid unintended cloud charges. Runtime smoke continues to exercise the configured real providers.
+- Final validation passed: 29 tests, lint, typecheck, `eval-acaa8777bf` (80 intent / 18 retrieval / 14 QA), E2E, frontend tests, and real-provider smoke. All eight Compose services are healthy.

@@ -80,14 +80,24 @@ class OpenAICompatibleChatProvider(OpenAICompatibleProvider):
 
 class OpenAICompatibleEmbeddingProvider(OpenAICompatibleProvider):
     async def embed(self, text: str) -> list[float]:
-        body = await self._post("embeddings", {"model": self.model, "input": text})
-        embedding = body["data"][0]["embedding"]
-        if not isinstance(embedding, list) or not embedding:
-            raise ProviderRecoverableError(f"{self.name} returned an invalid embedding")
+        return (await self.embed_many([text]))[0]
+
+    async def embed_many(self, texts: list[str]) -> list[list[float]]:
+        body = await self._post("embeddings", {"model": self.model, "input": texts})
+        data = body.get("data")
+        if not isinstance(data, list) or len(data) != len(texts):
+            raise ProviderRecoverableError(f"{self.name} returned an invalid embedding batch")
+        ordered = sorted(data, key=lambda item: int(item.get("index", 0)))
+        embeddings: list[list[float]] = []
         try:
-            return [float(value) for value in embedding]
-        except (TypeError, ValueError) as exc:
+            for item in ordered:
+                vector = item["embedding"]
+                if not isinstance(vector, list) or not vector:
+                    raise ValueError("empty embedding")
+                embeddings.append([float(value) for value in vector])
+        except (KeyError, TypeError, ValueError) as exc:
             raise ProviderRecoverableError(f"{self.name} returned non-numeric embedding values") from exc
+        return embeddings
 
 
 class OpenAICompatibleVLMProvider(OpenAICompatibleProvider):
