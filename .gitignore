@@ -1,11 +1,14 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 .env
 .venv/
 __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-node_modules/
+node_modules
 dist/
+!frontend/dist/
+!frontend/dist/**
 coverage/
 data/generated/*.db
 data/generated/*.sqlite

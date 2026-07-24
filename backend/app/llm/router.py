@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 from __future__ import annotations
 
 import time
@@ -13,16 +14,19 @@ from app.llm.providers.openai_compatible import (
 )
 from app.core.config import get_settings
 from app.observability.metrics import CACHE_HITS, LLM_CALLS, LLM_FAILURES, LLM_LATENCY
+from app.services.provider_registry import ProviderRegistry
 
 
 class ProviderRouter:
     def __init__(self) -> None:
         settings = get_settings()
+        registry = ProviderRegistry()
         self.cache = ExactMatchCache()
         common = {"timeout_seconds": settings.provider_timeout_seconds, "max_retries": settings.provider_max_retries}
         self.chat_providers = self._configured(
             OpenAICompatibleChatProvider,
             [
+                *registry.runtime_specs("chat"),
                 ("local_primary", settings.local_primary_chat_model, settings.local_primary_chat_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_chat_model, settings.local_backup_chat_url, settings.local_backup_api_key),
                 ("cloud_fallback", settings.cloud_fallback_chat_model, settings.cloud_fallback_chat_url, settings.openai_api_key),
@@ -33,6 +37,7 @@ class ProviderRouter:
         self.embedding_providers = self._configured(
             OpenAICompatibleEmbeddingProvider,
             [
+                *registry.runtime_specs("embedding"),
                 ("local_primary", settings.local_primary_embedding_model, settings.local_primary_embedding_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_embedding_model, settings.local_backup_embedding_url, settings.local_backup_api_key),
                 ("cloud_fallback", settings.cloud_fallback_embedding_model, settings.cloud_fallback_embedding_url, settings.openai_api_key),
@@ -43,6 +48,7 @@ class ProviderRouter:
         self.vlm_providers = self._configured(
             OpenAICompatibleVLMProvider,
             [
+                *registry.runtime_specs("vlm"),
                 ("local_primary", settings.local_primary_vlm_model, settings.local_primary_vlm_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_vlm_model, settings.local_backup_vlm_url, settings.local_backup_api_key),
                 ("cloud_fallback", settings.cloud_fallback_vlm_model, settings.cloud_fallback_vlm_url, settings.vlm_api_key or settings.openai_api_key),

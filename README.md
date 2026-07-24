@@ -1,6 +1,7 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 # CampusFlow AI
 
-CampusFlow AI is a Python-first campus community agent demo with FastAPI, a Vue 3-style demo UI, Hybrid RAG, GraphRAG, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
+CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
 
 The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines Chinese-aware BM25, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, relevance reranking, and RRF.
 
@@ -26,6 +27,8 @@ LOCAL_PRIMARY_VLM_MODEL=qwen2.5-vl:7b
 ```
 
 For DashScope-compatible cloud fallback, set the relevant `CLOUD_FALLBACK_*_URL` to `https://dashscope.aliyuncs.com/compatible-mode/v1`, select the model, and provide `OPENAI_API_KEY` or `VLM_API_KEY`. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+
+Providers can also be added from the **模型** page. Runtime keys are encrypted at rest using `CAMPUSFLOW_PROVIDER_ENCRYPTION_SECRET`, never returned to the browser, and checked through the non-generating `/models` compatibility endpoint.
 
 ## One-Command Demo
 
@@ -66,7 +69,9 @@ make smoke
 4. Generate a post draft with synthetic image `synthetic-card-library-blue.png`, edit it up to five rounds, then confirm.
 5. Ask the assistant `记住我喜欢图书馆靠窗座位`, open Memory Management, and delete the memory.
 6. Run Eval Dashboard and inspect the computed metrics.
-7. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
+7. Add a TXT or Markdown notice in Knowledge Base and wait for its task to become searchable.
+8. Add or check a Chat, Embedding, or VLM route in Model Routing.
+9. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
 
 ## Main API
 
@@ -77,9 +82,15 @@ make smoke
 - `POST /api/v1/posts/draft/{draft_id}/feedback`
 - `GET /api/v1/memories`
 - `DELETE /api/v1/memories/{memory_id}`
+- `GET|POST /api/v1/knowledge/documents`
+- `GET /api/v1/knowledge/jobs`
+- `POST /api/v1/knowledge/jobs/{job_id}/retry`
+- `GET|POST /api/v1/providers`
+- `POST /api/v1/providers/{provider_id}/check`
+- `GET|POST /api/v1/sessions`
 - `POST /api/v1/evals/run`
 - `GET /metrics`
 
 ## Data
 
-`make seed` creates 300 Chinese campus posts and 30 official campus documents under `data/generated`. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
+`make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.

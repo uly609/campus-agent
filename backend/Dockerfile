@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+FROM mirror.gcr.io/library/python:3.12-slim
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1

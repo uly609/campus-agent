@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 .git
 .github
 .env
@@ -8,7 +9,6 @@
 **/.mypy_cache
 **/.ruff_cache
 frontend/node_modules
-frontend/dist
 data/generated
 evals/reports
 infra/alertmanager/bin

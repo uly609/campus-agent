@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 [project]
 name = "campusflow-ai"
 version = "0.1.0"
@@ -18,7 +19,8 @@ dependencies = [
   "opentelemetry-api>=1.25,<1.28",
   "langgraph>=0.2,<0.3",
   "python-multipart>=0.0.9,<0.0.10",
-  "httpx>=0.27,<0.28"
+  "httpx>=0.27,<0.28",
+  "cryptography>=43,<45"
 ]
 
 [project.optional-dependencies]

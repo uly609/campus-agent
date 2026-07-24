@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 from __future__ import annotations
 
 from functools import lru_cache
@@ -41,6 +42,12 @@ class Settings(BaseSettings):
     vlm_api_key: Optional[str] = None
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
+    provider_encryption_secret: str = Field(
+        default="campusflow-local-demo-encryption-secret",
+        alias="CAMPUSFLOW_PROVIDER_ENCRYPTION_SECRET",
+    )
+    api_rate_limit_per_minute: int = Field(default=120, alias="CAMPUSFLOW_API_RATE_LIMIT")
+    chat_rate_limit_per_minute: int = Field(default=20, alias="CAMPUSFLOW_CHAT_RATE_LIMIT")
     memory_enabled: bool = True
     data_dir: str = "data/generated"
     prompt_version: str = "campusflow-agent-v1"

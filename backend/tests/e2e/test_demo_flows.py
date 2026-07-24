@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
@@ -22,3 +23,34 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     metrics = client.get("/metrics")
     assert metrics.status_code == 200
 
+
+def test_platform_management_flows() -> None:
+    client = TestClient(app)
+    session = client.post(
+        "/api/v1/sessions", json={"user_id": "platform-user", "title": "校园咨询"}
+    )
+    assert session.status_code == 200
+    session_id = session.json()["session_id"]
+    assert client.get("/api/v1/sessions?user_id=platform-user").json()[0]["session_id"] == session_id
+
+    provider = client.post(
+        "/api/v1/providers",
+        json={
+            "name": "不可达测试模型",
+            "role": "chat",
+            "tier": "cloud_fallback",
+            "base_url": "http://127.0.0.1:9/v1",
+            "model": "test-model",
+            "api_key": "test-secret-key",
+        },
+    )
+    assert provider.status_code == 201
+    assert provider.json()["api_key_present"] is True
+    assert "api_key" not in provider.json()
+    provider_id = provider.json()["provider_id"]
+    checked = client.post(f"/api/v1/providers/{provider_id}/check")
+    assert checked.json()["last_check_status"] == "failed"
+    assert client.delete(f"/api/v1/providers/{provider_id}").status_code == 200
+    assert client.delete(
+        f"/api/v1/sessions/{session_id}?user_id=platform-user"
+    ).status_code == 200

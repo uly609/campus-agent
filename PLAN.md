@@ -1,3 +1,4 @@
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 # PLAN.md - CampusFlow AI Implementation Plan
 
 Every milestone requires validation, failure fixes, status updates here, `docs/progress.md`, and an atomic commit.
@@ -282,3 +283,22 @@ make smoke
 - [x] Batch corpus embeddings and reuse the retrieval index for practical real-provider startup latency.
 - [x] Force fake adapters for deterministic tests and evals while retaining real-provider smoke coverage.
 - [x] Run lint, typecheck, tests, eval, E2E, frontend tests, and real-provider smoke with healthy Compose services.
+
+## M16 - Vue UI Runtime Hardening
+
+- [x] Replace static HTML string rendering with a real Vue 3 + Vite application.
+- [x] Remove raw JSON and provider debug fields from user-facing views.
+- [x] Add real image upload, preview, VLM drafting, editing, and confirmation.
+- [x] Normalize multilingual and scalar/list VLM attributes at the API boundary.
+- [x] Render readable chat citations, retrieval explanations, eval metrics, memories, and traces.
+- [x] Verify core flows in a real browser at desktop and mobile viewports with no console errors.
+- [x] Run full validation with all eight Compose services healthy.
+
+## M17 - Product Platform Hardening
+
+- [x] Add managed knowledge documents with lifecycle status and content-hash deduplication.
+- [x] Add Redis Streams ingestion jobs with progress, bounded retry, and failure visibility.
+- [x] Add runtime provider profiles with encrypted credentials and connectivity checks.
+- [x] Add Redis-backed API rate limiting and user-visible session management.
+- [x] Add Vue knowledge-base, provider, task, and session management surfaces.
+- [x] Validate platform flows, update architecture docs, and run all stop-condition commands.
