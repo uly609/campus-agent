@@ -301,3 +301,10 @@ make smoke
 - [x] Add Redis-backed API rate limiting and user-visible session management.
 - [x] Add Vue knowledge-base, provider, task, and session management surfaces.
 - [x] Validate platform flows, update architecture docs, and run all stop-condition commands.
+
+## M18 - Campus Demo Data Curation
+
+- [x] Add a curated, first-screen campus-week feed covering dining, dorms, sports, lost and found, ride sharing, study, clubs, and second-hand exchange.
+- [x] Expand official knowledge to course selection, exams, campus card, dining, sports venues, delivery, counseling, network, shuttle, internship, clubs, and graduation.
+- [x] Preserve 300 posts, 40 official documents, and strong authoritative retrieval coverage for campus-service answers.
+- [x] Add seed-data coverage tests and run the full validation suite.

@@ -28,6 +28,13 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M15 | Complete | Real Bailian Chat/Embedding/VLM calls passed; batched embeddings and provider-isolated offline validation passed | Pending |
 | M16 | Complete | Vue 3 UI rebuild, real image upload, readable model output, responsive browser QA, and full regression validation passed | Pending |
 | M17 | Complete | Knowledge ingestion, encrypted provider profiles, rate limiting, sessions, Vue admin surfaces, browser QA, and all stop-condition commands passed | Pending |
+| M18 | Complete | Curated multi-scenario demo feed and 40-document school knowledge base; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
+
+## 2026-07-24 M18 Notes
+
+- Replaced the generic first-screen seed feed with 12 realistic, clearly differentiated campus scenarios: dining, dorm repair, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and daily campus questions.
+- Expanded official knowledge coverage beyond the library to 16 campus service topics while retaining repeated authoritative evidence for card replacement, library hours, repairs, and other high-confidence service answers.
+- Added an automated seed-data test so the UI demo remains varied and the retrieval corpus keeps its required 300-post / 40-document size.
 
 ## 2026-07-21 M0 Notes
 

@@ -92,4 +92,4 @@ make smoke
 
 ## Data
 
-`make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
+`make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
