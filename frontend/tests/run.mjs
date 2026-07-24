@@ -8,4 +8,5 @@ for (const text of ["AI 助手", "智能搜索", "发帖助手", "长期记忆",
 }
 if (!app.includes('type="file"') || !app.includes("resizeImage")) throw new Error("missing real image upload flow");
 if (app.includes("JSON.stringify(attrs")) throw new Error("raw image attributes must not be rendered");
+if (!app.includes("openSourceDetail") || !app.includes('role="dialog"')) throw new Error("search results need source details");
 console.log("frontend tests passed");

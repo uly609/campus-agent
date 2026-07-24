@@ -30,6 +30,14 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M17 | Complete | Knowledge ingestion, encrypted provider profiles, rate limiting, sessions, Vue admin surfaces, browser QA, and all stop-condition commands passed | Pending |
 | M18 | Complete | Curated multi-scenario demo feed and 40-document school knowledge base; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
 | M19 | Complete | Query-facet reranking and minimal sufficient evidence; 40 tests, real Bailian location QA, eval, E2E, and smoke passed | Pending |
+| M20 | Complete | Clickable intelligent-search results, typed source-detail API, responsive detail dialog, browser QA, and full regression validation passed | Pending |
+
+## 2026-07-24 M20 Notes
+
+- Replaced display-only intelligent-search rows with accessible result buttons backed by `GET /api/v1/sources/{source_id}`.
+- Added complete official-document and campus-post detail views with source metadata, retrieval explanation, tags, and optional real source links.
+- Browser QA confirmed that a `课表` result opens the expected source, closes correctly, produces no console errors, and has no horizontal overflow at 390x844.
+- Final validation passed with all eight Compose services healthy: lint, typecheck, 40 unit/integration tests, eval `eval-cf54d1120d` (80 intent / 18 retrieval / 14 QA), 2 E2E tests, frontend tests, and smoke.
 
 ## 2026-07-24 M19 Notes
 

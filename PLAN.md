@@ -317,3 +317,12 @@ make smoke
 - [x] Require grounded model claims to answer the requested facet.
 - [x] Use minimal sufficient evidence and deduplicate excerpts, claims, and citations.
 - [x] Add regression tests for `食堂在哪` and run the full validation suite.
+
+## M20 - Search Source Detail Experience
+
+- [x] Add a typed source-detail API for official knowledge and campus posts.
+- [x] Make every intelligent-search result keyboard-accessible and clickable.
+- [x] Show full source content, provenance, metadata, tags, and retrieval explanation.
+- [x] Hide synthetic demo URLs instead of presenting them as external links.
+- [x] Add responsive detail-dialog behavior and Escape/close controls.
+- [x] Validate desktop and mobile interactions in a real browser.

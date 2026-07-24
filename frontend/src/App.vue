@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import {
   Activity,
   Bot,
@@ -45,6 +45,8 @@ const chatInput = ref("图书馆今天几点关门？");
 const chatResult = ref(null);
 const searchInput = ref("南门捡到蓝色校园卡");
 const searchResults = ref([]);
+const selectedResult = ref(null);
+const sourceDetail = ref(null);
 const draftIntent = ref("帮我根据图片起草失物招领");
 const draftFeedback = ref("正文加一句在图书馆门口发现");
 const draft = ref(null);
@@ -72,6 +74,10 @@ const providerForm = ref({
 
 const pageTitle = computed(() => views.find((item) => item.id === activeView.value)?.label || "CampusFlow AI");
 const draftProgress = computed(() => draft.value ? `${draft.value.edit_round} / ${draft.value.max_edit_rounds}` : "0 / 5");
+const sourcePublicUrl = computed(() => {
+  const url = String(sourceDetail.value?.url || "");
+  return /^https?:\/\//.test(url) && !url.includes("campus.example.edu") ? url : "";
+});
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -164,7 +170,25 @@ async function runSearch() {
       body: JSON.stringify({ query: searchInput.value.trim(), top_k: 8 }),
     });
     searchResults.value = data.results;
+    closeSourceDetail();
   });
+}
+
+async function openSourceDetail(item) {
+  selectedResult.value = item;
+  sourceDetail.value = null;
+  await run(`source-${item.source_id}`, async () => {
+    sourceDetail.value = await api(`/api/v1/sources/${encodeURIComponent(item.source_id)}`);
+  });
+}
+
+function closeSourceDetail() {
+  selectedResult.value = null;
+  sourceDetail.value = null;
+}
+
+function handleGlobalKeydown(event) {
+  if (event.key === "Escape" && selectedResult.value) closeSourceDetail();
 }
 
 async function resizeImage(file) {
@@ -411,8 +435,10 @@ function modelVersionLabel(value) {
 }
 
 onMounted(async () => {
+  window.addEventListener("keydown", handleGlobalKeydown);
   await Promise.all([loadPosts(), loadSessions()]);
 });
+onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown));
 </script>
 
 <template>
@@ -479,7 +505,13 @@ onMounted(async () => {
       <section v-else-if="activeView === 'search'" class="view">
         <form class="searchbar" @submit.prevent="runSearch"><Search :size="20" /><input v-model="searchInput" aria-label="搜索校园内容" /><button class="primary" :disabled="busy === 'search'">搜索</button></form>
         <div v-if="busy === 'search'" class="loading-state"><LoaderCircle class="spin" :size="24" /><span>正在融合检索结果…</span></div>
-        <div v-else-if="searchResults.length" class="result-list"><article v-for="item in searchResults" :key="item.evidence_id" class="result-row"><div class="result-icon"><FileImage :size="20" /></div><div><div class="result-title"><h3>{{ item.title }}</h3><span>{{ item.official ? '官方' : '帖子' }}</span></div><p>{{ item.excerpt }}</p><small>{{ retrievalLabel(item) }}</small></div><ChevronRight :size="19" /></article></div>
+        <div v-else-if="searchResults.length" class="result-list">
+          <button v-for="item in searchResults" :key="item.evidence_id" type="button" class="result-row" :aria-label="`查看${item.title}详情`" @click="openSourceDetail(item)">
+            <span class="result-icon"><FileImage :size="20" /></span>
+            <span class="result-content"><span class="result-title"><strong>{{ item.title }}</strong><span>{{ item.official ? '官方' : '帖子' }}</span></span><span class="result-excerpt">{{ item.excerpt }}</span><small>{{ retrievalLabel(item) }}</small></span>
+            <ChevronRight :size="19" />
+          </button>
+        </div>
         <div v-else class="empty-state compact"><Search :size="26" /><h2>搜索校园内容</h2></div>
       </section>
 
@@ -580,5 +612,33 @@ onMounted(async () => {
         </div>
       </section>
     </main>
+
+    <div v-if="selectedResult" class="modal-backdrop" @click.self="closeSourceDetail">
+      <section class="source-modal" role="dialog" aria-modal="true" aria-labelledby="source-detail-title">
+        <header>
+          <div><span>{{ selectedResult.official ? '官方知识' : '校园帖子' }}</span><h2 id="source-detail-title">{{ selectedResult.title }}</h2></div>
+          <button type="button" class="icon-button" title="关闭详情" aria-label="关闭详情" @click="closeSourceDetail"><X :size="19" /></button>
+        </header>
+        <div v-if="busy === `source-${selectedResult.source_id}`" class="source-loading"><LoaderCircle class="spin" :size="24" /><span>正在读取完整内容…</span></div>
+        <template v-else-if="sourceDetail">
+          <div class="source-meta">
+            <span>{{ sourceDetail.official ? '官方来源' : '社区来源' }}</span>
+            <span v-if="sourceDetail.location">{{ sourceDetail.location }}</span>
+            <span v-if="sourceDetail.author_alias">{{ sourceDetail.author_alias }}</span>
+            <time v-if="sourceDetail.created_at">{{ sourceDetail.created_at.slice(0, 10) }}</time>
+          </div>
+          <p class="source-body">{{ sourceDetail.body }}</p>
+          <div v-if="sourceDetail.tags?.length" class="source-tags"><span v-for="tag in sourceDetail.tags" :key="tag">{{ tag }}</span></div>
+          <div class="source-retrieval">
+            <strong>检索说明</strong>
+            <p>{{ retrievalLabel(selectedResult) }}</p>
+          </div>
+          <footer>
+            <small>来源编号 {{ sourceDetail.source_id }}</small>
+            <a v-if="sourcePublicUrl" :href="sourcePublicUrl" target="_blank" rel="noopener noreferrer">查看原文</a>
+          </footer>
+        </template>
+      </section>
+    </div>
   </div>
 </template>

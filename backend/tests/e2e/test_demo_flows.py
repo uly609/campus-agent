@@ -13,6 +13,9 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     assert chat["citations"]
     search = client.post("/api/v1/posts/search", json={"query": "南门 校园卡", "top_k": 5}).json()
     assert search["results"]
+    detail = client.get(f"/api/v1/sources/{search['results'][0]['source_id']}")
+    assert detail.status_code == 200
+    assert detail.json()["body"]
     draft = client.post("/api/v1/posts/draft", json={"intent": "起草失物招领", "image_url": "synthetic-card.png"}).json()
     draft_id = draft["draft"]["draft_id"]
     feedback = client.post(f"/api/v1/posts/draft/{draft_id}/feedback", json={"feedback": "标题改成 图书馆校园卡招领"}).json()

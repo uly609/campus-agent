@@ -79,3 +79,16 @@ class UserSession(BaseModel):
     message_count: int = 0
     created_at: str
     updated_at: str
+
+
+class SourceDetail(BaseModel):
+    source_id: str
+    source_type: Literal["official", "post"]
+    title: str
+    body: str
+    official: bool
+    location: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+    author_alias: Optional[str] = None
+    created_at: Optional[str] = None
+    url: Optional[str] = None
