@@ -27,6 +27,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M14 | Complete | Compiled LangGraph, real HTTP providers, Neo4j Vector Index/GraphRAG, grounded-model validation, improved Chinese retrieval/evals; all final validations passed | Pending |
 | M15 | Complete | Real Bailian Chat/Embedding/VLM calls passed; batched embeddings and provider-isolated offline validation passed | Pending |
 | M16 | Complete | Vue 3 UI rebuild, real image upload, readable model output, responsive browser QA, and full regression validation passed | Pending |
+| M17 | Complete | Knowledge ingestion, encrypted provider profiles, rate limiting, sessions, Vue admin surfaces, browser QA, and all stop-condition commands passed | Pending |
 
 ## 2026-07-21 M0 Notes
 
@@ -136,3 +137,11 @@ External model credentials are optional for local demo and test runs. When absen
 - Normalized VLM values and scalar/list variations at the backend boundary so English provider output and string `location_hints` cannot break Chinese draft rendering.
 - Browser QA passed for posts, real chat with citations, eight-result retrieval, synthetic image/VLM drafting, memory, latest eval report, and 50 trace records. Desktop and 390x844 mobile layouts had no horizontal overflow or console errors.
 - Final validation passed with 31 unit/integration tests, E2E, frontend production build/tests, real-provider smoke, and all eight Compose services healthy. The verified Vite bundle is included for registry-independent Web image builds.
+
+## 2026-07-24 M17 Notes
+
+- Added managed knowledge documents with lifecycle status, SHA-256 content deduplication, Redis Streams ingestion events, progress, failure visibility, and a strict three-attempt retry cap.
+- Added runtime Chat, Embedding, and VLM provider profiles ordered by local-primary, local-backup, and cloud-fallback tiers. API keys are Fernet-encrypted at rest and are never returned by public APIs.
+- Added provider connectivity checks, Redis fixed-window API/chat rate limiting, and privacy-minimized session history that stores titles and counts instead of full message bodies.
+- Added Vue knowledge-base, ingestion task, provider routing, and conversation management surfaces. Browser QA confirmed no raw JSON or encrypted credential fields, no console errors, and no horizontal overflow at 1280 desktop and 390x844 mobile viewports.
+- `docker compose up --build -d` passed and all eight services reported healthy. `make seed`, `make lint`, `make typecheck`, `make test` (34 passed), `make eval` (`eval-6afc0d6cb2`, 80 intent / 18 retrieval / 14 QA), `make e2e` (2 backend flows plus frontend tests), and `make smoke` passed.

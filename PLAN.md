@@ -292,3 +292,12 @@ make smoke
 - [x] Render readable chat citations, retrieval explanations, eval metrics, memories, and traces.
 - [x] Verify core flows in a real browser at desktop and mobile viewports with no console errors.
 - [x] Run full validation with all eight Compose services healthy.
+
+## M17 - Product Platform Hardening
+
+- [x] Add managed knowledge documents with lifecycle status and content-hash deduplication.
+- [x] Add Redis Streams ingestion jobs with progress, bounded retry, and failure visibility.
+- [x] Add runtime provider profiles with encrypted credentials and connectivity checks.
+- [x] Add Redis-backed API rate limiting and user-visible session management.
+- [x] Add Vue knowledge-base, provider, task, and session management surfaces.
+- [x] Validate platform flows, update architecture docs, and run all stop-condition commands.
