@@ -20,6 +20,12 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     draft_id = draft["draft"]["draft_id"]
     feedback = client.post(f"/api/v1/posts/draft/{draft_id}/feedback", json={"feedback": "标题改成 图书馆校园卡招领"}).json()
     assert feedback["draft"]["edit_round"] == 1
+    event_draft = client.post(
+        "/api/v1/posts/draft",
+        json={"intent": "发布学院迎新活动，周五晚七点开始", "category": "活动"},
+    )
+    assert event_draft.status_code == 200
+    assert event_draft.json()["draft"]["category"] == "活动"
     memories = client.get("/api/v1/memories?user_id=demo-user").json()
     assert "memories" in memories
     metrics = client.get("/metrics")

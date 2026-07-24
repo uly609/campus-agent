@@ -31,6 +31,16 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M18 | Complete | Curated multi-scenario demo feed and 40-document school knowledge base; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
 | M19 | Complete | Query-facet reranking and minimal sufficient evidence; 40 tests, real Bailian location QA, eval, E2E, and smoke passed | Pending |
 | M20 | Complete | Clickable intelligent-search results, typed source-detail API, responsive detail dialog, browser QA, and full regression validation passed | Pending |
+| M21 | Complete | Eight-scenario post Agent, text-only and VLM-enhanced drafting, shared LangGraph/API service, frontend controls, browser QA, and full validation passed | Pending |
+
+## 2026-07-24 M21 Notes
+
+- Replaced the hardcoded lost-and-found draft generator with automatic classification for lost and found, second-hand exchange, events, carpooling, study partners, campus questions, feedback, and daily-life sharing.
+- Added optional explicit category selection while retaining automatic intent inference. Images are optional and enrich the draft through the VLM attribute path when supplied.
+- Unified the REST endpoint and registered LangGraph `create_post_draft` tool on the same draft service, while preserving content safety, five edit rounds, version diffs, and mandatory user confirmation.
+- Added frontend scenario controls and natural text-only drafting, plus regression coverage for all eight categories and the existing image-assisted lost-and-found flow.
+- Browser QA passed for automatic activity drafting, explicit second-hand drafting, natural feedback application, confirmation, nine scene controls, and 390x844 mobile layout without console errors or horizontal overflow.
+- Final validation passed after a successful full Compose rebuild with all eight services healthy: seed, lint, typecheck, 49 unit/integration tests, eval `eval-4930bca1c8` (80 intent / 18 retrieval / 14 QA), 2 E2E tests, frontend tests, and smoke.
 
 ## 2026-07-24 M20 Notes
 

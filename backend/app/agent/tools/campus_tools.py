@@ -9,6 +9,7 @@ from app.multimodal.image_attributes import extract_image_attributes
 from app.multimodal.ocr import verify_demo_student_card as verify_card
 from app.retrieval.ingestion import build_corpus
 from app.retrieval.service import RetrievalService
+from app.services.post_service import create_draft, draft_to_dict
 from app.services.repository import JsonRepository
 
 
@@ -152,17 +153,10 @@ class CampusTools:
         attrs = payload.get("image_attributes", {})
         if not isinstance(attrs, dict):
             attrs = {}
-        title = str(payload.get("title") or f"{attrs.get('location_hints', ['校园'])[0]}失物招领")
-        body = str(payload.get("body") or f"根据图片线索，物品可能是{attrs.get('color', '')}{attrs.get('category', '物品')}。请同学核对后再发布。")
-        draft = {
-            "draft_id": "draft-demo",
-            "title": title,
-            "body": body,
-            "category": PostCategory.LOST_FOUND.value if "失物" in title or intent else PostCategory.LIFE.value,
-            "tags": ["AI草稿", str(attrs.get("category", "校园"))],
-            "edit_round": int(str(payload.get("edit_round", 0))),
-            "requires_confirmation": True,
-        }
+        requested = payload.get("category")
+        category = PostCategory(str(requested)) if requested else None
+        draft = draft_to_dict(create_draft(intent, attrs, category))
+        draft["requires_confirmation"] = True
         return ToolResult(
             tool_name="create_post_draft",
             success=True,

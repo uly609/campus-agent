@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.domain.enums import PostCategory
 from app.domain.schemas import Post, PostCreate, SearchRequest
 from app.multimodal.image_attributes import enhance_query_with_image, extract_image_attributes
 from app.retrieval.ingestion import build_corpus
@@ -19,6 +20,7 @@ repo = JsonRepository()
 class DraftRequest(BaseModel):
     intent: str
     image_url: str | None = None
+    category: PostCategory | None = None
 
 
 class DraftFeedback(BaseModel):
@@ -60,7 +62,10 @@ async def draft(payload: DraftRequest) -> dict[str, Any]:
     attrs = {}
     if payload.image_url:
         attrs = await extract_image_attributes(payload.image_url)
-    return {"draft": draft_to_dict(create_draft(payload.intent, attrs)), "image_attributes": attrs}
+    return {
+        "draft": draft_to_dict(create_draft(payload.intent, attrs, payload.category)),
+        "image_attributes": attrs,
+    }
 
 
 @router.post("/posts/draft/{draft_id}/feedback")
@@ -74,4 +79,3 @@ def draft_feedback(draft_id: str, payload: DraftFeedback) -> dict[str, Any]:
             raise HTTPException(status_code=409, detail={"code": "DRAFT_NOT_CONFIRMED"})
         result["post"] = post.model_dump()
     return result
-

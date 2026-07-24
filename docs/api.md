@@ -13,7 +13,7 @@ Important endpoints:
 - Rate-limited responses expose `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset`.
 - `POST /api/v1/posts/search` runs image-enhanced Hybrid RAG.
 - `GET /api/v1/sources/{source_id}` returns the full official document or campus post behind a search result.
-- `POST /api/v1/posts/draft` creates a HITL draft.
+- `POST /api/v1/posts/draft` creates a multi-scenario HITL draft from required `intent`, optional `category`, and optional VLM `image_url`.
 - `POST /api/v1/posts/draft/{draft_id}/feedback` edits, confirms, or publishes after confirmation.
 - `GET /api/v1/memories` consumes memory events and lists user memories.
 - `DELETE /api/v1/memories/{memory_id}` deletes user memory.

@@ -58,7 +58,8 @@ async def extract_image_attributes(image_url: str, router: ProviderRouter | None
     active_router = router or ProviderRouter()
     result = await active_router.analyze_image(
         image_url,
-        "提取失物招领属性、地点提示、可见文字和安全标记，所有描述性字段使用简体中文。",
+        "提取校园帖子图片中的主体类别、颜色、品牌、材质、地点提示、可见文字和安全标记，"
+        "用于失物、二手、活动、拼车、学习和生活分享等场景；所有描述性字段使用简体中文。",
     )
     if isinstance(result.content, dict):
         return normalize_image_attributes(dict(result.content))

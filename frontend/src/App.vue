@@ -37,6 +37,18 @@ const views = [
   { id: "platform", label: "模型", icon: ServerCog },
 ];
 
+const draftCategories = [
+  { value: "", label: "自动识别" },
+  { value: "失物招领", label: "失物" },
+  { value: "二手", label: "二手" },
+  { value: "活动", label: "活动" },
+  { value: "拼车", label: "拼车" },
+  { value: "学习", label: "学习" },
+  { value: "校园问答", label: "求助" },
+  { value: "吐槽", label: "建议" },
+  { value: "生活", label: "生活" },
+];
+
 const activeView = ref("feed");
 const busy = ref("");
 const notice = ref(null);
@@ -47,8 +59,9 @@ const searchInput = ref("南门捡到蓝色校园卡");
 const searchResults = ref([]);
 const selectedResult = ref(null);
 const sourceDetail = ref(null);
-const draftIntent = ref("帮我根据图片起草失物招领");
-const draftFeedback = ref("正文加一句在图书馆门口发现");
+const draftIntent = ref("发布周五晚七点的学院迎新活动，地点在大学生活动中心");
+const draftCategory = ref("");
+const draftFeedback = ref("正文补充需要提前报名");
 const draft = ref(null);
 const draftAttributes = ref(null);
 const draftImage = ref("");
@@ -236,14 +249,18 @@ function clearDraftImage() {
 }
 
 async function createDraft() {
-  if (!draftImage.value) {
-    notice.value = { type: "error", text: "请先选择一张物品图片" };
+  if (!draftIntent.value.trim()) {
+    notice.value = { type: "error", text: "请先描述想发布的内容" };
     return;
   }
   await run("draft", async () => {
     const data = await api("/api/v1/posts/draft", {
       method: "POST",
-      body: JSON.stringify({ intent: draftIntent.value.trim(), image_url: draftImage.value }),
+      body: JSON.stringify({
+        intent: draftIntent.value.trim(),
+        image_url: draftImage.value || null,
+        category: draftCategory.value || null,
+      }),
     });
     draft.value = data.draft;
     draftAttributes.value = data.image_attributes;
@@ -517,19 +534,22 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
       <section v-else-if="activeView === 'draft'" class="view draft-layout">
         <div class="draft-workspace">
-          <div class="section-head"><div><h2>图片发帖</h2><p>草稿确认前不会发布</p></div><span class="round-count">修改 {{ draftProgress }}</span></div>
+          <div class="section-head"><div><h2>校园发帖</h2><p>可用文字直接生成，图片用于补充视觉信息</p></div><span class="round-count">修改 {{ draftProgress }}</span></div>
+          <div class="draft-categories" aria-label="发帖场景">
+            <button v-for="item in draftCategories" :key="item.value" type="button" :class="{ active: draftCategory === item.value }" @click="draftCategory = item.value">{{ item.label }}</button>
+          </div>
           <label v-if="!draftImage" class="upload-zone">
             <input type="file" accept="image/jpeg,image/png,image/webp" @change="selectDraftImage" />
-            <span><Upload :size="24" /></span><strong>选择物品图片</strong><small>JPG、PNG 或 WebP</small>
+            <span><Upload :size="24" /></span><strong>添加图片（可选）</strong><small>用于识别物品、场景和地点线索</small>
           </label>
           <div v-else class="image-preview"><img :src="draftImage" :alt="draftImageName" /><div><ImagePlus :size="18" /><span>{{ draftImageName }}</span></div><button class="icon-button danger" title="移除图片" @click="clearDraftImage"><Trash2 :size="18" /></button></div>
-          <label class="field"><span>发帖意图</span><input v-model="draftIntent" maxlength="300" /></label>
-          <button class="primary wide icon-text" :disabled="busy === 'draft' || busy === 'image' || !draftImage" @click="createDraft"><LoaderCircle v-if="busy === 'draft'" class="spin" :size="18" /><Sparkles v-else :size="18" />生成草稿</button>
+          <label class="field"><span>想发布什么</span><input v-model="draftIntent" maxlength="300" /></label>
+          <button class="primary wide icon-text" :disabled="busy === 'draft' || busy === 'image' || !draftIntent.trim()" @click="createDraft"><LoaderCircle v-if="busy === 'draft'" class="spin" :size="18" /><Sparkles v-else :size="18" />生成草稿</button>
         </div>
         <article class="draft-preview">
-          <div v-if="!draft" class="empty-state"><FileImage :size="28" /><h2>草稿预览</h2><p>选择图片后生成内容。</p></div>
+          <div v-if="!draft" class="empty-state"><FileImage :size="28" /><h2>草稿预览</h2><p>描述内容，Agent 会判断场景并生成草稿。</p></div>
           <template v-else>
-            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.confirmed ? '已确认' : '待确认' }}</span><small>AI 识别置信度 {{ Math.round((draftAttributes?.confidence || 0) * 100) }}%</small></div>
+            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.confirmed ? '已确认' : '待确认' }}</span><small>{{ draft.category }}<template v-if="draftAttributes?.confidence"> · 视觉识别 {{ Math.round(draftAttributes.confidence * 100) }}%</template></small></div>
             <h2>{{ draft.title }}</h2><p class="draft-body">{{ draft.body }}</p>
             <div class="attribute-list"><span v-if="draftAttributes?.category">{{ draftAttributes.category }}</span><span v-if="draftAttributes?.color">{{ draftAttributes.color }}</span><span v-if="draftAttributes?.material">{{ draftAttributes.material }}</span><span v-for="hint in draftAttributes?.location_hints || []" :key="hint">{{ hint }}</span></div>
             <div class="edit-area"><input v-model="draftFeedback" :disabled="draft.confirmed" /><button class="secondary" :disabled="draft.confirmed || busy === 'edit' || draft.edit_round >= 5" @click="updateDraft(false)">修改</button><button class="primary icon-text" :disabled="draft.confirmed || busy === 'confirm'" @click="updateDraft(true)"><Check :size="18" />确认草稿</button></div>

@@ -326,3 +326,12 @@ make smoke
 - [x] Hide synthetic demo URLs instead of presenting them as external links.
 - [x] Add responsive detail-dialog behavior and Escape/close controls.
 - [x] Validate desktop and mobile interactions in a real browser.
+
+## M21 - Multi-Scenario Campus Post Agent
+
+- [x] Replace the lost-and-found-only draft template with eight campus post scenarios.
+- [x] Add automatic intent classification and optional explicit category selection.
+- [x] Support text-only drafting with optional VLM image enhancement.
+- [x] Reuse the same draft service from the LangGraph tool registry and REST API.
+- [x] Preserve content safety, five edit rounds, and human confirmation before publishing.
+- [x] Add scenario coverage, E2E coverage, frontend controls, and browser QA.
