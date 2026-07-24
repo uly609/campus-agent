@@ -1,4 +1,3 @@
-git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 # Security
 
 CampusFlow applies three prompt-injection layers:

@@ -1,4 +1,3 @@
-git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 # PLAN.md - CampusFlow AI Implementation Plan
 
 Every milestone requires validation, failure fixes, status updates here, `docs/progress.md`, and an atomic commit.

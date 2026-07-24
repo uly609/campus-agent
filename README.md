@@ -1,4 +1,3 @@
-git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 # CampusFlow AI
 
 CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.

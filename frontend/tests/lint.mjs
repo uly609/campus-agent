@@ -1,4 +1,3 @@
-git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
 import fs from "node:fs";
 
 const files = ["index.html", "src/main.js", "src/App.vue", "src/styles.css", "vite.config.js"];
