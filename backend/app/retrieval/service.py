@@ -9,6 +9,7 @@ from app.retrieval.chunking import tokenize
 from app.retrieval.graph_rag import GraphRAG
 from app.retrieval.graph_rag import extract_entities
 from app.retrieval.neo4j_store import Neo4jVectorStore, VectorRecord
+from app.retrieval.query_facets import query_facet, text_matches_query_facet
 from app.retrieval.rrf import reciprocal_rank_fusion
 
 
@@ -46,19 +47,29 @@ class RetrievalService:
                 [(chunk.source_id, (chunk, score, "graph")) for chunk, score in graph_results],
             ]
         )
-        query_tokens = set(tokenize(expanded_query))
-        reranked = sorted(
-            fused,
-            key=lambda item: (
-                len(query_tokens.intersection(tokenize(f"{item[2][0].title} {item[2][0].text}"))) / max(len(query_tokens), 1)
-                + item[1]
-                + (0.08 if item[2][0].official and expanded_query != query else 0.0)
-            ),
-            reverse=True,
-        )
+        direct_query_tokens = set(tokenize(query))
+        expanded_query_tokens = set(tokenize(expanded_query))
+        facet = query_facet(query)
+
+        def rerank_score(item: tuple[str, float, tuple[Chunk, float, str]]) -> float:
+            chunk = item[2][0]
+            candidate_text = f"{chunk.title} {chunk.text}"
+            candidate_tokens = set(tokenize(candidate_text))
+            direct_overlap = len(direct_query_tokens.intersection(candidate_tokens)) / max(len(direct_query_tokens), 1)
+            expanded_overlap = len(expanded_query_tokens.intersection(candidate_tokens)) / max(
+                len(expanded_query_tokens), 1
+            )
+            facet_adjustment = 0.2 if facet and text_matches_query_facet(query, candidate_text) else 0.0
+            if facet and not text_matches_query_facet(query, candidate_text):
+                facet_adjustment = -0.2
+            official_boost = 0.08 if chunk.official and expanded_query != query else 0.0
+            return item[1] + direct_overlap + expanded_overlap * 0.35 + facet_adjustment + official_boost
+
+        reranked = sorted(fused, key=rerank_score, reverse=True)
         evidence = []
         for index, (source_id, fused_score, payload) in enumerate(reranked[:top_k], start=1):
             chunk = payload[0]
+            final_score = max(0.0, min(1.0, rerank_score((source_id, fused_score, payload))))
             evidence.append(
                 Evidence(
                     evidence_id=f"ev-{index}-{source_id}",
@@ -66,14 +77,19 @@ class RetrievalService:
                     source_type="official" if chunk.official else "post",
                     title=chunk.title,
                     excerpt=chunk.text[:360],
-                    score=round(fused_score, 6),
+                    score=round(final_score, 6),
                     official=chunk.official,
                     metadata={
                         **chunk.metadata,
                         "retrieval": "bm25+vector+graph+rrf",
                         "expanded_query": expanded_query,
                         "neo4j_mode": "real" if not self.vector_store.degraded_reason else "degraded-memory",
-                        "explanation": f"Returned because query terms and graph entities overlap with {chunk.title}.",
+                        "query_facet": facet or "general",
+                        "facet_match": text_matches_query_facet(query, f"{chunk.title} {chunk.text}"),
+                        "explanation": (
+                            f"Returned because query terms, graph entities, and the {facet or 'general'} "
+                            f"question facet overlap with {chunk.title}."
+                        ),
                     },
                 )
             )

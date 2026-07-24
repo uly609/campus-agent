@@ -29,6 +29,15 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M16 | Complete | Vue 3 UI rebuild, real image upload, readable model output, responsive browser QA, and full regression validation passed | Pending |
 | M17 | Complete | Knowledge ingestion, encrypted provider profiles, rate limiting, sessions, Vue admin surfaces, browser QA, and all stop-condition commands passed | Pending |
 | M18 | Complete | Curated multi-scenario demo feed and 40-document school knowledge base; `make seed`, `make lint`, `make typecheck`, `make test`, `make eval`, `make e2e`, and `make smoke` passed | Pending |
+| M19 | Complete | Query-facet reranking and minimal sufficient evidence; 40 tests, real Bailian location QA, eval, E2E, and smoke passed | Pending |
+
+## 2026-07-24 M19 Notes
+
+- Reproduced `食堂在哪` returning dining hours: retrieval found the correct topic, but the corpus lacked location facts and the relevance gate did not distinguish question facets.
+- Added location and time facet detection across reranking, relevance judging, grounded model validation, and deterministic synthesis. Expanded query vocabulary for dining, courses, sports, network, delivery, and shuttle services.
+- Added dining locations, removed numbered duplicate titles, selected minimal sufficient evidence, and deduplicated model context, claims, and citations.
+- Real Bailian runtime now answers `一食堂位于生活区东侧，二食堂位于宿舍区南侧。` with one official citation.
+- Final validation passed: lint, typecheck, 40 unit/integration tests, 2 E2E tests, frontend tests, and smoke. Eval `eval-657b016330` passed 80 intent / 18 retrieval / 14 QA cases with Hit@8, Recall@8, MRR, claim recall, citation coverage, citation groundedness, refusal accuracy, and Judge F1 all at 1.0.
 
 ## 2026-07-24 M18 Notes
 

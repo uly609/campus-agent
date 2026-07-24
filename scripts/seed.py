@@ -16,7 +16,11 @@ DOC_TOPICS = [
     ("doc-card-loss", "一卡通挂失补办", "一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。"),
     ("doc-scholarship", "奖学金申请", "奖学金申请需要成绩排名、志愿服务记录和学院公示，材料由辅导员统一收取。"),
     ("doc-clinic", "校医院服务", "校医院工作日 8:30-17:00 开诊；夜间急诊请前往合作医院并保留票据。"),
-    ("doc-canteen", "学生食堂服务", "一食堂工作日供应早餐 6:50-9:00、午餐 10:50-13:30、晚餐 16:40-19:30；二食堂设有清真窗口。"),
+    (
+        "doc-canteen",
+        "学生食堂服务",
+        "一食堂位于生活区东侧，二食堂位于宿舍区南侧。一食堂工作日供应早餐 6:50-9:00、午餐 10:50-13:30、晚餐 16:40-19:30；二食堂一层设有清真窗口。",
+    ),
     ("doc-course-selection", "选课与退课说明", "本学期选课在教务系统进行，补退选开放至开课后第一周周五 17:00，容量变动以系统显示为准。"),
     ("doc-exam", "期末考试安排", "期末考试安排由教务处统一发布；学生须携带校园卡和身份证明，开考 30 分钟后不得进入考场。"),
     ("doc-sports", "体育馆预约规则", "体育馆羽毛球和篮球场通过校园服务平台预约，每人每天最多预约一次，开始前 15 分钟可取消。"),
@@ -86,7 +90,7 @@ def build_documents() -> list[dict[str, str]]:
             {
                 "source_id": f"{source_id}-{index:02d}",
                 "source_type": "official",
-                "title": title if index < len(DOC_TOPICS) else f"{title}补充说明 {index + 1}",
+                "title": title if index < len(DOC_TOPICS) else f"{title}（补充说明）",
                 "body": f"{body} 本条适用于 2026 春夏学期。",
                 "official": "true",
                 "path": f"data/campus_docs/{source_id}-{index:02d}.md",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.domain.schemas import Citation, Claim, Evidence, GroundedAnswer
+from app.retrieval.query_facets import query_facet, text_matches_query_facet
 
 
 def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | bool]:
@@ -22,6 +23,17 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
         "票据",
         "后勤",
         "报修",
+        "食堂",
+        "选课",
+        "考试",
+        "体育馆",
+        "校园网",
+        "快递",
+        "驿站",
+        "校车",
+        "通勤车",
+        "心理咨询",
+        "社团",
     ]
     if all(item.official for item in evidence) and not any(anchor in query for anchor in supported_fact_anchors):
         return {"relevant": False, "score": 0.0, "coverage": 0.0}
@@ -30,6 +42,9 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
     scores = []
     for item in evidence:
         haystack = f"{item.title} {item.excerpt}".lower()
+        if query_facet(query) and not text_matches_query_facet(query, haystack):
+            scores.append(0.0)
+            continue
         overlap = len(query_chars.intersection(haystack)) / max(len(query_chars), 1)
         scores.append(min(1.0, overlap + item.score * 1.5))
     score = max(scores)
@@ -41,6 +56,11 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
 def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> GroundedAnswer:
     official = [item for item in evidence if item.official]
     support = official or evidence
+    if query_facet(query):
+        support = [item for item in support if text_matches_query_facet(query, f"{item.title} {item.excerpt}")]
+    if support:
+        best_score = max(item.score for item in support)
+        support = [item for item in support if item.score >= best_score * 0.8]
     if not support:
         return GroundedAnswer(
             answer="证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
@@ -52,7 +72,15 @@ def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> Grounded
     claims: list[Claim] = []
     citations: list[Citation] = []
     sentences = []
-    for index, item in enumerate(support[:3], start=1):
+    unique_support: list[Evidence] = []
+    seen_excerpts: set[str] = set()
+    for item in support:
+        normalized = " ".join(item.excerpt.split())
+        if normalized in seen_excerpts:
+            continue
+        seen_excerpts.add(normalized)
+        unique_support.append(item)
+    for index, item in enumerate(unique_support[:1], start=1):
         claim_id = f"claim-{index}"
         source_note = "官方信息" if item.official else "社区信息，可能过时"
         claim_text = f"{source_note}：{item.excerpt[:120]}"

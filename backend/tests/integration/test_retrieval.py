@@ -26,3 +26,15 @@ async def test_query_expansion_prioritizes_official_card_service_documents() -> 
     service = RetrievalService(build_corpus(repo.load_posts(), repo.load_documents()))
     results = await service.search("校园卡在哪里补办", top_k=5)
     assert all(result.source_id.startswith("doc-card-loss-") for result in results)
+
+
+@pytest.mark.asyncio
+async def test_location_question_prioritizes_location_evidence() -> None:
+    seed_main()
+    repo = JsonRepository()
+    service = RetrievalService(build_corpus(repo.load_posts(), repo.load_documents()))
+    results = await service.search("食堂在哪", top_k=5)
+    assert results[0].source_id.startswith("doc-canteen-")
+    assert results[0].official
+    assert all(result.metadata["facet_match"] for result in results)
+    assert "生活区东侧" in results[0].excerpt

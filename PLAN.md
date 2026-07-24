@@ -308,3 +308,12 @@ make smoke
 - [x] Expand official knowledge to course selection, exams, campus card, dining, sports venues, delivery, counseling, network, shuttle, internship, clubs, and graduation.
 - [x] Preserve 300 posts, 40 official documents, and strong authoritative retrieval coverage for campus-service answers.
 - [x] Add seed-data coverage tests and run the full validation suite.
+
+## M19 - Query-Facet RAG Precision
+
+- [x] Reproduce the location-question failure from runtime traces and real-provider calls.
+- [x] Expand campus queries for dining, courses, sports, network, delivery, and shuttle services.
+- [x] Add location/time query-facet matching to post-fusion reranking and the Relevance Judge.
+- [x] Require grounded model claims to answer the requested facet.
+- [x] Use minimal sufficient evidence and deduplicate excerpts, claims, and citations.
+- [x] Add regression tests for `食堂在哪` and run the full validation suite.
