@@ -28,6 +28,7 @@ def parse_grounded_model_output(content: str, evidence: list[Evidence], query: s
     citations: list[Citation] = []
     sentences: list[str] = []
     seen_claims: set[str] = set()
+    source_indexes: dict[str, int] = {}
     for candidate in parsed.claims:
         normalized_claim = " ".join(candidate.text.split()).rstrip("。")
         if normalized_claim in seen_claims:
@@ -42,19 +43,20 @@ def parse_grounded_model_output(content: str, evidence: list[Evidence], query: s
             raise ValueError("model claim is not lexically supported by its evidence")
         if query_facet(query) and not text_matches_query_facet(query, candidate.text):
             raise ValueError("model claim does not answer the requested query facet")
-        index = len(claims) + 1
-        claim_id = f"claim-{index}"
+        claim_number = len(claims) + 1
+        source_index = source_indexes.setdefault(source.source_id, len(source_indexes) + 1)
+        claim_id = f"claim-{claim_number}"
         claims.append(Claim(claim_id=claim_id, text=candidate.text, evidence_ids=[source.evidence_id]))
         citations.append(
             Citation(
-                citation_id=f"cite-{index}",
+                citation_id=f"cite-{claim_number}",
                 claim_id=claim_id,
                 evidence_id=source.evidence_id,
                 source_id=source.source_id,
                 title=source.title,
             )
         )
-        sentences.append(f"{candidate.text} [{index}]")
+        sentences.append(f"{candidate.text} [{source_index}]")
     return GroundedAnswer(answer="\n".join(sentences), claims=claims, citations=citations, confidence=0.8)
 
 

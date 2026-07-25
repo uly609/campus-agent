@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.domain.platform_schemas import UserSession
+from app.services.conversation_context import clear_conversation_context
 from app.services.repository import JsonRepository, now_iso
 
 router = APIRouter(prefix="/api/v1/sessions")
@@ -40,4 +41,5 @@ def create_session(payload: SessionCreate) -> UserSession:
 def delete_session(session_id: str, user_id: str = "demo-user") -> dict[str, object]:
     if not repo.delete_session(user_id, session_id):
         raise HTTPException(status_code=404, detail={"code": "SESSION_NOT_FOUND"})
+    clear_conversation_context(user_id, session_id)
     return {"deleted": True, "session_id": session_id}

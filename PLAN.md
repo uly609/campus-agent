@@ -335,3 +335,15 @@ make smoke
 - [x] Reuse the same draft service from the LangGraph tool registry and REST API.
 - [x] Preserve content safety, five edit rounds, and human confirmation before publishing.
 - [x] Add scenario coverage, E2E coverage, frontend controls, and browser QA.
+
+## M22 - Functional Conversation Acceptance
+
+- [x] Preserve short-term session context and resolve natural follow-ups such as `那周末呢？`.
+- [x] Render a continuous user/assistant transcript and deduplicate displayed sources.
+- [x] Route memory, post drafting, and prompt-injection requests to explicit non-RAG responses.
+- [x] Persist and reuse Neo4j corpus embeddings across API restarts.
+- [x] Separate fake-provider tests from runtime Redis and Neo4j data.
+- [x] Add timetable knowledge and distinguish lookup questions from physical-location questions.
+- [x] Improve chat-style activity drafting and retain eight standalone post scenarios.
+- [x] Validate real Bailian conversations, memory, drafting, search detail, refusal, and security behavior in the browser.
+- [x] Run the complete validation suite with all eight Compose services healthy.

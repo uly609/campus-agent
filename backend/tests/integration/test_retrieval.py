@@ -38,3 +38,14 @@ async def test_location_question_prioritizes_location_evidence() -> None:
     assert results[0].official
     assert all(result.metadata["facet_match"] for result in results)
     assert "生活区东侧" in results[0].excerpt
+
+
+@pytest.mark.asyncio
+async def test_timetable_query_prioritizes_timetable_document() -> None:
+    seed_main()
+    repo = JsonRepository()
+    service = RetrievalService(build_corpus(repo.load_posts(), repo.load_documents()))
+    results = await service.search("课表在哪里看", top_k=5)
+    assert results
+    assert results[0].source_id.startswith("doc-timetable-")
+    assert "我的课表" in results[0].excerpt

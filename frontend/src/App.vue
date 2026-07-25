@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import {
   Activity,
   Bot,
@@ -55,6 +55,8 @@ const notice = ref(null);
 const posts = ref([]);
 const chatInput = ref("图书馆今天几点关门？");
 const chatResult = ref(null);
+const chatMessages = ref([]);
+const chatSurface = ref(null);
 const searchInput = ref("南门捡到蓝色校园卡");
 const searchResults = ref([]);
 const selectedResult = ref(null);
@@ -139,17 +141,41 @@ async function loadPosts() {
 
 async function sendChat() {
   if (!chatInput.value.trim()) return;
+  const message = chatInput.value.trim();
+  chatMessages.value.push({ role: "user", text: message });
+  chatInput.value = "";
+  await scrollChatToBottom();
   await run("chat", async () => {
     chatResult.value = await api("/api/v1/chat", {
       method: "POST",
-      body: JSON.stringify({ session_id: activeSessionId.value, user_id: "demo-user", message: chatInput.value.trim() }),
+      body: JSON.stringify({ session_id: activeSessionId.value, user_id: "demo-user", message }),
+    });
+    chatMessages.value.push({
+      role: "assistant",
+      text: chatResult.value.answer.answer,
+      citations: chatResult.value.citations,
+      degraded_mode: chatResult.value.degraded_mode,
     });
     await loadSessions();
+    await scrollChatToBottom();
   });
+}
+
+async function scrollChatToBottom() {
+  await nextTick();
+  if (chatSurface.value) {
+    chatSurface.value.scrollTop = chatSurface.value.scrollHeight;
+  }
 }
 
 async function loadSessions() {
   sessions.value = await api("/api/v1/sessions?user_id=demo-user");
+}
+
+function selectSession(sessionId) {
+  activeSessionId.value = sessionId;
+  chatResult.value = null;
+  chatMessages.value = [];
 }
 
 async function newSession() {
@@ -160,6 +186,7 @@ async function newSession() {
     });
     activeSessionId.value = session.session_id;
     chatResult.value = null;
+    chatMessages.value = [];
     await loadSessions();
   });
 }
@@ -170,6 +197,7 @@ async function deleteSession(sessionId) {
     if (activeSessionId.value === sessionId) {
       activeSessionId.value = "ui-session";
       chatResult.value = null;
+      chatMessages.value = [];
     }
     await loadSessions();
   }, "会话已删除");
@@ -432,6 +460,15 @@ function intentLabel(value) {
   })[value] || "Agent 执行";
 }
 
+function uniqueCitations(citations = []) {
+  const seen = new Set();
+  return citations.filter((citation) => {
+    if (seen.has(citation.source_id)) return false;
+    seen.add(citation.source_id);
+    return true;
+  });
+}
+
 function statusLabel(value) {
   return ({
     queued: "排队中",
@@ -501,20 +538,22 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       <section v-else-if="activeView === 'chat'" class="view chat-view">
         <div class="session-strip">
           <button class="secondary icon-text" :disabled="busy === 'session-new'" @click="newSession"><MessageSquareText :size="17" />新对话</button>
-          <button v-for="session in sessions.slice(0, 4)" :key="session.session_id" :class="['session-item', { active: activeSessionId === session.session_id }]" @click="activeSessionId = session.session_id; chatResult = null">
+          <button v-for="session in sessions.slice(0, 4)" :key="session.session_id" :class="['session-item', { active: activeSessionId === session.session_id }]" @click="selectSession(session.session_id)">
             <span>{{ session.title }}</span>
             <Trash2 :size="14" @click.stop="deleteSession(session.session_id)" />
           </button>
         </div>
-        <div class="chat-surface">
-          <div v-if="!chatResult && busy !== 'chat'" class="empty-state"><span><Bot :size="26" /></span><h2>问我一个校园问题</h2><p>回答会标注信息来源。</p></div>
-          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>正在检索校园知识…</span></div>
-          <div v-if="chatResult" class="answer">
-            <div class="answer-label"><Sparkles :size="18" /> CampusFlow 回答</div>
-            <p>{{ chatResult.answer.answer }}</p>
-            <div v-if="chatResult.citations.length" class="sources"><h3>信息来源</h3><div v-for="(citation, index) in chatResult.citations" :key="citation.citation_id" class="source"><span>{{ index + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small></div></div></div>
-            <div v-if="chatResult.degraded_mode.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
+        <div ref="chatSurface" class="chat-surface">
+          <div v-if="!chatMessages.length && busy !== 'chat'" class="empty-state"><span><Bot :size="26" /></span><h2>问我一个校园问题</h2><p>可以继续追问，回答会标注信息来源。</p></div>
+          <div v-if="chatMessages.length" class="chat-thread">
+            <article v-for="(message, index) in chatMessages" :key="`${index}-${message.role}`" :class="['chat-message', message.role]">
+              <div v-if="message.role === 'assistant'" class="answer-label"><Sparkles :size="17" /> CampusFlow</div>
+              <p>{{ message.text }}</p>
+              <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><div v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small></div></div></div>
+              <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
+            </article>
           </div>
+          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>正在检索校园知识…</span></div>
         </div>
         <form class="composer" @submit.prevent="sendChat"><input v-model="chatInput" aria-label="校园问题" maxlength="2000" /><button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button></form>
       </section>

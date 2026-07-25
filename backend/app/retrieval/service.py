@@ -23,9 +23,16 @@ class RetrievalService:
         self._indexed = False
 
     async def rebuild(self) -> None:
+        if self.vector_store.reuse_persisted_chunks(
+            self.chunks,
+            self.embedding_provider.model_name,
+        ):
+            self._indexed = True
+            return
         embeddings = await self.embedding_provider.embed([chunk.text for chunk in self.chunks])
         self.vector_store.upsert_chunks(
-            [VectorRecord(chunk=chunk, embedding=embedding) for chunk, embedding in zip(self.chunks, embeddings)]
+            [VectorRecord(chunk=chunk, embedding=embedding) for chunk, embedding in zip(self.chunks, embeddings)],
+            self.embedding_provider.model_name,
         )
         self.vector_store.upsert_graph()
         self._indexed = True

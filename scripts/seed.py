@@ -31,6 +31,12 @@ DOC_TOPICS = [
     ("doc-internship", "实习证明办理", "实习证明需提交单位名称、实习起止时间和学院审核材料，学生服务中心在三个工作日内处理。"),
     ("doc-club", "社团活动申请", "校园活动需至少提前 5 个工作日提交场地和安全申请，涉及校外人员须同步登记。"),
     ("doc-graduation", "毕业手续清单", "毕业生离校前需完成图书归还、宿舍验收、财务结算和档案去向确认，具体时间以学院通知为准。"),
+    (
+        "doc-timetable",
+        "课表与上课时间查询",
+        "个人课表可在教务系统首页的“我的课表”查看，也可在校园服务小程序进入教务服务查询。"
+        "课程调整、教室变更和停调课信息以教务系统最新通知为准。",
+    ),
 ]
 
 # High-confidence service answers need several independently retrievable notices.
@@ -59,7 +65,6 @@ RETRIEVAL_SUPPORT_TOPICS = [
     DOC_TOPICS[5],
     DOC_TOPICS[7],
     DOC_TOPICS[13],
-    DOC_TOPICS[2],
 ]
 
 LOCATIONS = ["图书馆", "南门", "北门", "一食堂", "二食堂", "体育馆", "教学楼A", "学生服务中心"]

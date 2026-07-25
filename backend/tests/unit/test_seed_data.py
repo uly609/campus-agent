@@ -18,4 +18,10 @@ def test_seed_data_covers_multiple_campus_demo_scenarios() -> None:
         "生活",
     }
     titles = {document["title"] for document in documents}
-    assert {"学生食堂服务", "选课与退课说明", "体育馆预约规则", "校园网与宿舍网络"} <= titles
+    assert {
+        "学生食堂服务",
+        "选课与退课说明",
+        "体育馆预约规则",
+        "校园网与宿舍网络",
+        "课表与上课时间查询",
+    } <= titles

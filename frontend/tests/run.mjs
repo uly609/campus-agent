@@ -11,4 +11,8 @@ if (app.includes("JSON.stringify(attrs")) throw new Error("raw image attributes 
 if (!app.includes("openSourceDetail") || !app.includes('role="dialog"')) throw new Error("search results need source details");
 if (!app.includes("draftCategories") || !app.includes("自动识别")) throw new Error("post assistant needs multiple campus scenarios");
 if (app.includes("|| !draftImage")) throw new Error("post drafting must support text without an image");
+if (!app.includes("chatMessages") || !app.includes("可以继续追问")) {
+  throw new Error("chat must preserve and present a continuous conversation");
+}
+if (!app.includes("uniqueCitations")) throw new Error("chat citations must be de-duplicated for display");
 console.log("frontend tests passed");

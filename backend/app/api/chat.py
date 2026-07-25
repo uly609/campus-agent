@@ -27,7 +27,11 @@ async def chat(request: ChatRequest) -> ChatResponse:
         UserSession(
             session_id=request.session_id,
             user_id=request.user_id,
-            title=existing.title if existing else request.message[:32],
+            title=(
+                request.message[:32]
+                if existing is None or (existing.title == "新对话" and existing.message_count == 0)
+                else existing.title
+            ),
             message_count=(existing.message_count if existing else 0) + 1,
             created_at=existing.created_at if existing else timestamp,
             updated_at=timestamp,

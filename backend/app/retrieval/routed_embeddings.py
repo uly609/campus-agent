@@ -10,6 +10,10 @@ class RoutedEmbeddingProvider:
     def __init__(self, router: ProviderRouter | None = None) -> None:
         self.router = router or ProviderRouter()
 
+    @property
+    def model_name(self) -> str:
+        return str(self.router.embedding_providers[0].model)
+
     async def embed(self, texts: list[str]) -> list[list[float]]:
         embeddings: list[list[float]] = []
         for start in range(0, len(texts), self.batch_size):

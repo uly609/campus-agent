@@ -36,7 +36,32 @@ class Neo4jVectorStore:
             self.degraded_reason = f"neo4j_unavailable:{exc.__class__.__name__}"
             self._driver = None
 
-    def upsert_chunks(self, records: list[VectorRecord]) -> None:
+    def reuse_persisted_chunks(self, chunks: list[Chunk], embedding_model: str) -> bool:
+        if not self._driver or not chunks:
+            return False
+        chunk_ids = [chunk.chunk_id for chunk in chunks]
+        try:
+            with self._driver.session() as session:
+                row = session.run(
+                    """
+                    MATCH (c:Chunk)
+                    WHERE c.chunk_id IN $chunk_ids
+                      AND c.embedding_model = $embedding_model
+                      AND c.embedding IS NOT NULL
+                    RETURN count(c) AS matched
+                    """,
+                    chunk_ids=chunk_ids,
+                    embedding_model=embedding_model,
+                ).single()
+            if row is None or int(row["matched"]) != len(chunks):
+                return False
+            self.records = [VectorRecord(chunk=chunk, embedding=[]) for chunk in chunks]
+            return True
+        except Exception as exc:
+            self.degraded_reason = f"neo4j_index_reuse_failed:{exc.__class__.__name__}"
+            return False
+
+    def upsert_chunks(self, records: list[VectorRecord], embedding_model: str) -> None:
         self.records = records
         if not self._driver:
             return
@@ -69,6 +94,7 @@ class Neo4jVectorStore:
                         c.official = $official,
                         c.source_type = $source_type,
                         c.metadata_json = $metadata_json,
+                        c.embedding_model = $embedding_model,
                         c.embedding = $embedding
                     """,
                     chunk_id=record.chunk.chunk_id,
@@ -78,6 +104,7 @@ class Neo4jVectorStore:
                     official=record.chunk.official,
                     source_type=record.chunk.source_type,
                     metadata_json=json.dumps(record.chunk.metadata, ensure_ascii=False),
+                    embedding_model=embedding_model,
                     embedding=record.embedding,
                 )
 
@@ -130,7 +157,11 @@ class Neo4jVectorStore:
                         return results
             except Exception as exc:
                 self.degraded_reason = f"neo4j_vector_query_failed:{exc.__class__.__name__}"
-        scored = [(record.chunk, cosine(query_embedding, record.embedding)) for record in self.records]
+        scored = [
+            (record.chunk, cosine(query_embedding, record.embedding))
+            for record in self.records
+            if record.embedding
+        ]
         return [(chunk, score) for chunk, score in sorted(scored, key=lambda item: item[1], reverse=True)[:top_k]]
 
     def graph_search(self, query_entities: list[str], top_k: int = 20) -> list[tuple[Chunk, float]]:

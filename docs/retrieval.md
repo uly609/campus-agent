@@ -8,10 +8,12 @@ Hybrid RAG uses three retrieval lanes:
 
 When Neo4j is reachable, ingestion creates the `chunk_embedding` Vector Index and retrieval calls `db.index.vector.queryNodes`; GraphRAG expansion runs through Cypher. If Neo4j is unavailable, the service reports the reason and uses explicit in-memory vector/graph adapters.
 
+Each Neo4j chunk stores the embedding-model signature. On API restart, the retrieval service reuses the persisted vectors when every corpus chunk matches the active model; corpus embedding runs again only when the corpus or model changes.
+
 Results are fused by reciprocal-rank fusion:
 
 `score(d) = sum(1 / (k + rank_i(d)))`
 
-Domain query expansion and lexical relevance reranking run after fusion. Query-facet detection distinguishes location and time questions, boosts evidence that answers the requested facet, and rejects same-topic evidence that answers a different facet. Grounded synthesis uses minimal sufficient evidence and removes duplicate excerpts and claims before returning citations.
+Domain query expansion and lexical relevance reranking run after fusion. Query-facet detection distinguishes physical location, time, and non-physical lookup wording such as `在哪里看`, boosts evidence that answers the requested facet, and rejects same-topic evidence that answers a different facet. Grounded synthesis uses minimal sufficient evidence and removes duplicate excerpts and claims before returning citations.
 
 Final evidence records include source id, source type, title, excerpt, score, official flag, backend mode, expanded query, facet match, and retrieval explanation.

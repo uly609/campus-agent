@@ -57,9 +57,29 @@ def _image_context(attrs: dict[str, Any]) -> tuple[str, str, str]:
 
 def _intent_summary(intent: str) -> str:
     summary = intent.strip().strip("，。！？ ")
-    for prefix in ("帮我", "请帮我", "起草", "写一条", "发一条", "发布", "一条"):
+    for prefix in (
+        "请帮我写一篇",
+        "帮我写一篇",
+        "请帮我写一条",
+        "帮我写一条",
+        "请帮我",
+        "帮我",
+        "起草一篇",
+        "起草一条",
+        "起草",
+        "写一篇",
+        "写一条",
+        "发一条",
+        "发布",
+        "一条",
+    ):
         if summary.startswith(prefix):
             summary = summary.removeprefix(prefix).strip(" ：:")
+            break
+    for suffix in ("的帖子", "帖子", "的草稿", "草稿"):
+        if summary.endswith(suffix):
+            summary = summary.removesuffix(suffix).strip(" ：:")
+            break
     return summary.split("，", 1)[0].split("。", 1)[0][:32]
 
 
@@ -96,7 +116,10 @@ def _draft_content(
         tags = ["学习", "搭子", place]
     elif category == PostCategory.EVENT:
         title = summary or (f"{location}校园活动" if location else "校园活动")
-        body = f"{request}。请在参与前确认时间、地点、报名方式和主办方通知。"
+        body = (
+            f"{summary}即将开始，欢迎感兴趣的同学参加！"
+            "具体时间、地点和报名方式请以主办方通知为准，期待和大家现场见面。"
+        )
         tags = ["活动", "报名", place]
     elif category == PostCategory.QA:
         title = f"校园求助：{summary.removeprefix('求助').strip(' ：:')}"

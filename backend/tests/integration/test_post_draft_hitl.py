@@ -37,6 +37,14 @@ def test_draft_accepts_explicit_category_and_optional_image() -> None:
     assert draft.location is None
 
 
+def test_chat_style_event_request_extracts_topic_instead_of_copying_command() -> None:
+    draft = create_draft("帮我写一篇周五学院迎新活动的帖子")
+    assert draft.category == PostCategory.EVENT.value
+    assert draft.title == "周五学院迎新活动"
+    assert "帮我写" not in draft.body
+    assert "欢迎感兴趣的同学参加" in draft.body
+
+
 def test_hitl_draft_enforces_five_edit_rounds_and_confirmation() -> None:
     draft = create_draft("失物招领", {"category": "校园卡", "color": "蓝色", "location_hints": ["图书馆"]})
     for index in range(MAX_EDIT_ROUNDS):

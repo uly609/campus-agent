@@ -116,7 +116,14 @@ class CampusFlowGraph:
             "max_replans": 2,
         }
 
-    async def run(self, raw_query: str, session_id: str, user_id: str, image_urls: list[str] | None = None) -> AgentState:
+    async def run(
+        self,
+        raw_query: str,
+        session_id: str,
+        user_id: str,
+        image_urls: list[str] | None = None,
+        conversation_summary: str = "",
+    ) -> AgentState:
         state: AgentState = {
             "request_id": f"req-{uuid.uuid4().hex[:12]}",
             "session_id": session_id,
@@ -124,6 +131,7 @@ class CampusFlowGraph:
             "raw_query": raw_query,
             "image_urls": image_urls or [],
             "image_context": [],
+            "conversation_summary": conversation_summary,
             "memory_context": [],
             "tool_results": [],
             "retrieved_evidence": [],
@@ -159,9 +167,42 @@ class CampusFlowGraph:
     async def coreference_resolver_node(self, state: AgentState) -> None:
         query = state["raw_query"]
         summary = state.get("conversation_summary", "")
-        if "它" in query and summary:
-            query = query.replace("它", summary[:40])
+        if summary and self._is_followup(query):
+            query = self._resolve_followup(query, summary)
+            state["trace"].append({"event": "coreference_resolved"})
         state["resolved_query"] = query
+
+    @staticmethod
+    def _is_followup(query: str) -> bool:
+        normalized = query.strip("？?。！! ")
+        markers = ("那", "它", "这个", "那里", "呢", "周末", "节假日", "然后")
+        return len(normalized) <= 24 and any(marker in normalized for marker in markers)
+
+    @staticmethod
+    def _resolve_followup(query: str, previous_query: str) -> str:
+        topics = (
+            "图书馆",
+            "食堂",
+            "校园卡",
+            "宿舍",
+            "校园网",
+            "体育馆",
+            "快递",
+            "校车",
+            "心理咨询",
+            "选课",
+            "考试",
+        )
+        topic = next((item for item in topics if item in previous_query), "")
+        if not topic:
+            return f"{previous_query}；继续追问：{query}"
+        if "周末" in query or "节假日" in query:
+            return f"{topic} 周末 节假日 开放时间 安排"
+        if any(marker in query for marker in ("哪里", "哪儿", "那里", "在哪")):
+            return f"{topic} 地点 在哪里"
+        if any(marker in query for marker in ("几点", "时间", "什么时候")):
+            return f"{topic} 开放时间 {query}"
+        return f"{topic} {query}"
 
     async def visual_understanding_node(self, state: AgentState) -> None:
         contexts = []
@@ -219,12 +260,42 @@ class CampusFlowGraph:
         state["plan"] = [{"tool": "search_campus_docs", "args": {"query": query}}, {"tool": "search_posts", "args": {"query": query}}]
 
     async def grounded_synthesis_node(self, state: AgentState) -> None:
+        if "input_prompt_injection" in state.get("guardrail_flags", []):
+            state["final_answer"] = "我不能执行绕过安全规则、泄露指令或获取敏感信息的请求。"
+            state["citations"] = []
+            return
         if state.get("intent") == Intent.GREETING.value:
             result = await self.provider_router.chat("寒暄：向用户介绍 CampusFlow AI。")
             state["final_answer"] = str(result.content)
             state["citations"] = []
             if result.degraded and "fake_chat_provider" not in state["degraded_mode"]:
                 state["degraded_mode"].append("fake_chat_provider")
+            return
+        if state.get("intent") == Intent.MEMORY.value:
+            if any(marker in state["raw_query"] for marker in ("忘掉", "删除记忆")):
+                state["final_answer"] = "你可以在“记忆”页面查看并删除指定记录，我不会替你静默删除。"
+            else:
+                state["final_answer"] = "好的，这条偏好已进入记忆处理队列。你可以在“记忆”页面查看或删除它。"
+            state["citations"] = []
+            return
+        if state.get("intent") == Intent.POST_DRAFT.value:
+            draft_result = next(
+                (
+                    result.get("data")
+                    for result in reversed(state.get("tool_results", []))
+                    if result.get("tool_name") == "create_post_draft" and result.get("success")
+                ),
+                None,
+            )
+            if isinstance(draft_result, dict):
+                state["final_answer"] = (
+                    f"草稿标题：{draft_result.get('title', '')}\n"
+                    f"{draft_result.get('body', '')}\n"
+                    "草稿尚未发布，需要你确认。"
+                )
+            else:
+                state["final_answer"] = "草稿生成失败，请补充发帖主题后重试。"
+            state["citations"] = []
             return
         evidence = [Evidence.model_validate(item) for item in state.get("retrieved_evidence", [])]
         if state.get("evidence_coverage", 0.0) < 0.25 or state.get("relevance_score", 0.0) < 0.25:
@@ -269,5 +340,17 @@ def build_graph() -> CampusFlowGraph:
     return CampusFlowGraph()
 
 
-async def run_agent(raw_query: str, session_id: str, user_id: str, image_urls: list[str] | None = None) -> AgentState:
-    return await build_graph().run(raw_query, session_id, user_id, image_urls)
+async def run_agent(
+    raw_query: str,
+    session_id: str,
+    user_id: str,
+    image_urls: list[str] | None = None,
+    conversation_summary: str = "",
+) -> AgentState:
+    return await build_graph().run(
+        raw_query,
+        session_id,
+        user_id,
+        image_urls,
+        conversation_summary,
+    )

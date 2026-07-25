@@ -115,7 +115,8 @@ class ProviderRouter:
                 latency_ms = int((time.perf_counter() - start) * 1000)
                 LLM_CALLS.labels(role=role, provider=provider.name, status="ok").inc()
                 LLM_LATENCY.labels(role=role, provider=provider.name).observe(latency_ms / 1000)
-                self.cache.set(cache_key, content)
+                cache_seconds = 7 * 24 * 60 * 60 if role == "embedding" else 15 * 60
+                self.cache.set(cache_key, content, seconds=cache_seconds)
                 degraded = bool(getattr(provider, "is_fake", False))
                 self.trace.append(
                     {

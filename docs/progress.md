@@ -32,6 +32,16 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M19 | Complete | Query-facet reranking and minimal sufficient evidence; 40 tests, real Bailian location QA, eval, E2E, and smoke passed | Pending |
 | M20 | Complete | Clickable intelligent-search results, typed source-detail API, responsive detail dialog, browser QA, and full regression validation passed | Pending |
 | M21 | Complete | Eight-scenario post Agent, text-only and VLM-enhanced drafting, shared LangGraph/API service, frontend controls, browser QA, and full validation passed | Pending |
+| M22 | Complete | Real continuous-conversation QA, runtime index reuse, memory/security/draft routing, timetable precision, 56 tests, full eval/E2E/smoke, and eight healthy services | Pending |
+
+## 2026-07-25 M22 Notes
+
+- Replaced single-answer chat rendering with a continuous transcript and added Redis-backed short-term query context. Browser QA confirmed `图书馆今天几点关门？` followed by `那周末呢？` stays on the library topic and returns one deduplicated official source.
+- Added explicit grounded-synthesis branches for memory commands, post drafting, and prompt injection. Real browser runs confirmed memory creation and management, safe refusal, evidence-insufficient refusal, and unconfirmed activity drafts without unrelated citations.
+- Persisted the embedding-model signature on Neo4j chunks and reused matching corpus vectors after API restarts. The one-time corpus migration took about 28-31 seconds; after restart, real Bailian QA took about 9 seconds and logs showed one query-embedding call instead of a full corpus rebuild.
+- Added official timetable knowledge and fixed `课表在哪里看` being misclassified as a physical-location question. The timetable document now ranks first and its complete source detail opens from the search result.
+- Improved chat-style activity topic extraction and verified a separate second-hand draft in the eight-scenario post assistant. Drafts remain unpublished until user confirmation and retain the five-edit cap.
+- Isolated fake-provider validation from runtime Redis and Neo4j. Final validation passed: lint, typecheck, 56 unit/integration tests, eval `eval-c555ec44e0` (80 intent / 18 retrieval / 14 QA), 2 backend E2E tests, frontend tests, real-provider smoke, full Compose rebuild, and eight healthy services.
 
 ## 2026-07-24 M21 Notes
 

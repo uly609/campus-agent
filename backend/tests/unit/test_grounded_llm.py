@@ -67,3 +67,20 @@ def test_duplicate_model_claims_are_collapsed() -> None:
     answer = parse_grounded_model_output(content, evidence())
     assert len(answer.claims) == 1
     assert len(answer.citations) == 1
+
+
+def test_distinct_claims_from_same_source_share_one_display_marker() -> None:
+    content = json.dumps(
+        {
+            "claims": [
+                {"text": "图书馆每天开放到 22:30。", "evidence_id": "ev-library"},
+                {"text": "图书馆开放时间是每天到 22:30。", "evidence_id": "ev-library"},
+            ]
+        },
+        ensure_ascii=False,
+    )
+    answer = parse_grounded_model_output(content, evidence())
+    assert len(answer.claims) == 2
+    assert len(answer.citations) == 2
+    assert answer.answer.count("[1]") == 2
+    assert "[2]" not in answer.answer
