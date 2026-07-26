@@ -12,4 +12,4 @@ async def test_exact_match_cache_hits_second_call() -> None:
     second = await router.chat("你好")
     assert first.content == second.content
     assert second.latency_ms == 0
-
+    assert second.cache_hit is True

@@ -33,6 +33,15 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M20 | Complete | Clickable intelligent-search results, typed source-detail API, responsive detail dialog, browser QA, and full regression validation passed | Pending |
 | M21 | Complete | Eight-scenario post Agent, text-only and VLM-enhanced drafting, shared LangGraph/API service, frontend controls, browser QA, and full validation passed | Pending |
 | M22 | Complete | Real continuous-conversation QA, runtime index reuse, memory/security/draft routing, timetable precision, 56 tests, full eval/E2E/smoke, and eight healthy services | Pending |
+| M23 | Complete | Honest evaluation v2 with exact graded qrels, hard cases, standard IR/QA/control-flow metrics, 60 tests, full validation, and eight healthy services | Pending |
+
+## 2026-07-26 M23 Notes
+
+- Replaced broad source-prefix judgments and repeated easy questions with exact graded qrels and paraphrase, overlap, hard-negative, partial-evidence, conflict, OOD, and prompt-injection cases while preserving the required 80 intent, 18 retrieval, and 14 QA counts.
+- Added intent macro precision/recall/F1 and standard retrieval Hit@8, Precision@8, Recall@8, MRR@8, MAP@8, and nDCG@8. QA now measures reference-fact recall, context relevance, citation precision, answer faithfulness, forbidden content, refusal F1, and replan F1 separately.
+- Fixed the old replan calculation that automatically passed every negative case, removed the misleading refusal-as-Judge-F1 label, and made provider cache hits explicit instead of inferring them from latency.
+- The final offline regression `eval-8645577496` reports realistic weaknesses: 76.25% intent accuracy, 71.63% nDCG@8, 71.43% answer-fact recall, 60% citation precision, 80% refusal F1, and 66.67% replan F1. The report lists individual failures and states that fake-provider scores are not production-quality claims.
+- Final validation passed: full Compose rebuild, eight healthy services, seed, lint, typecheck, 60 unit/integration tests, 112-case eval, 2 backend E2E tests, frontend tests, and smoke.
 
 ## 2026-07-25 M22 Notes
 

@@ -347,3 +347,14 @@ make smoke
 - [x] Improve chat-style activity drafting and retain eight standalone post scenarios.
 - [x] Validate real Bailian conversations, memory, drafting, search detail, refusal, and security behavior in the browser.
 - [x] Run the complete validation suite with all eight Compose services healthy.
+
+## M23 - Honest Evaluation V2
+
+- [x] Replace source-prefix relevance with exact human-authored graded qrels.
+- [x] Add paraphrase, overlapping-intent, implicit, hard-negative, partial-evidence, conflict, OOD, and prompt-injection cases.
+- [x] Add standard intent macro metrics and retrieval Hit, Precision, Recall, MRR, MAP, and nDCG metrics.
+- [x] Separate answer facts, context relevance, citation precision, faithfulness, refusal F1, and replan F1.
+- [x] Fix non-replan cases being counted as automatic successes and stop labeling refusal F1 as Judge F1.
+- [x] Record explicit cache-hit state instead of inferring it from zero latency.
+- [x] Show failed cases and offline fake-provider limitations in JSON, Markdown, and Vue reports.
+- [x] Run the complete validation suite with all eight Compose services healthy.

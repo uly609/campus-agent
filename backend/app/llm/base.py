@@ -20,6 +20,7 @@ class ProviderResult:
     content: str | list[float] | list[list[float]] | dict[str, object]
     degraded: bool
     latency_ms: int
+    cache_hit: bool = False
 
 
 class ChatProvider(Protocol):

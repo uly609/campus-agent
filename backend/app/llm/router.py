@@ -108,7 +108,7 @@ class ProviderRouter:
             cached = self.cache.get(cache_key)
             if cached is not None:
                 CACHE_HITS.labels(role=role).inc()
-                return ProviderResult(role, provider.name, provider.model, cached, True, 0)
+                return ProviderResult(role, provider.name, provider.model, cached, True, 0, cache_hit=True)
             start = time.perf_counter()
             try:
                 content = await call(provider)
