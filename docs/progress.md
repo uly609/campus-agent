@@ -35,6 +35,14 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M22 | Complete | Real continuous-conversation QA, runtime index reuse, memory/security/draft routing, timetable precision, 56 tests, full eval/E2E/smoke, and eight healthy services | Pending |
 | M23 | Complete | Honest evaluation v2 with exact graded qrels, hard cases, standard IR/QA/control-flow metrics, 60 tests, full validation, and eight healthy services | Pending |
 | M24 | Complete | Community BM25 plus Bailian reranking, facet-safe refusal, complete draft publishing, browser QA, 65 tests, full validation, and eight healthy services | Pending |
+| M25 | Complete | Published-post memory events, residence extraction, existing-post backfill, 66 tests, 3 E2E flows, eval, and smoke passed | Pending |
+
+## 2026-07-26 M25 Notes
+
+- Fixed a disconnected product path: AI chat emitted long-term-memory events, but confirmed post publication did not. Draft requests now carry the active user and session, and the first successful publication emits the post text to the same Redis Stream.
+- Extended conservative memory extraction to first-person residence statements such as `我住在生活区西区`. A generic post that only mentions the same location remains ineligible, so publication does not turn the whole feed into user memory.
+- Repeated publish requests remain idempotent and do not emit duplicate memory events. The already-published demo post was backfilled for `demo-user` and verified through the memory API.
+- Final validation passed: lint, typecheck, 66 unit/integration tests, eval `eval-da89926ec9`, 3 backend E2E tests, frontend tests, and smoke.
 
 ## 2026-07-26 M24 Notes
 

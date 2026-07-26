@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from app.domain.enums import PostCategory
 from app.domain.schemas import Post, PostCreate, SearchRequest
+from app.memory.producer import publish_memory_event
 from app.multimodal.image_attributes import enhance_query_with_image, extract_image_attributes
 from app.retrieval.ingestion import build_corpus
 from app.retrieval.service import RetrievalService
@@ -27,6 +28,8 @@ class DraftRequest(BaseModel):
     intent: str
     image_url: str | None = None
     category: PostCategory | None = None
+    user_id: str = "demo-user"
+    session_id: str = "post-assistant"
 
 
 class DraftFeedback(BaseModel):
@@ -69,7 +72,15 @@ async def draft(payload: DraftRequest) -> dict[str, Any]:
     if payload.image_url:
         attrs = await extract_image_attributes(payload.image_url)
     return {
-        "draft": draft_to_dict(create_draft(payload.intent, attrs, payload.category)),
+        "draft": draft_to_dict(
+            create_draft(
+                payload.intent,
+                attrs,
+                payload.category,
+                user_id=payload.user_id,
+                session_id=payload.session_id,
+            )
+        ),
         "image_attributes": attrs,
     }
 
@@ -83,6 +94,13 @@ def draft_feedback(draft_id: str, payload: DraftFeedback) -> dict[str, Any]:
         current_draft = get_draft(draft_id)
         if current_draft is None:
             raise HTTPException(status_code=404, detail={"code": "DRAFT_NOT_FOUND"})
+        if current_draft.memory_event_id is None:
+            current_draft.memory_event_id = publish_memory_event(
+                user_id=current_draft.user_id,
+                session_id=current_draft.session_id,
+                text=f"{current_draft.title}\n{current_draft.body}",
+                source="published_post",
+            )
         return {
             "ok": True,
             "draft": draft_to_dict(current_draft),

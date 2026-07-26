@@ -80,3 +80,27 @@ def test_platform_management_flows() -> None:
     assert client.delete(
         f"/api/v1/sessions/{session_id}?user_id=platform-user"
     ).status_code == 200
+
+
+def test_published_self_fact_is_available_as_long_term_memory() -> None:
+    client = TestClient(app)
+    user_id = "published-memory-user"
+    created = client.post(
+        "/api/v1/posts/draft",
+        json={
+            "intent": "我住在生活区西区，想找同学一起晨跑",
+            "category": "生活",
+            "user_id": user_id,
+            "session_id": "published-memory-session",
+        },
+    )
+    draft_id = created.json()["draft"]["draft_id"]
+    assert client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"confirm": True}
+    ).status_code == 200
+    published = client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
+    )
+    assert published.status_code == 200
+    memories = client.get(f"/api/v1/memories?user_id={user_id}").json()["memories"]
+    assert any("我住在生活区西区" in item["value"] for item in memories)

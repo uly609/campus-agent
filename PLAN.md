@@ -368,3 +368,11 @@ make smoke
 - [x] Add a real confirm-then-publish action to the Vue post assistant.
 - [x] Make draft publishing idempotent and block publication before confirmation.
 - [x] Validate real browser publishing, insufficient-evidence refusal, all tests, evals, E2E, smoke, and eight healthy services.
+
+## M25 - Published Post Memory Integration
+
+- [x] Carry the active user and session through post drafting and publication.
+- [x] Publish first-person facts and preferences from confirmed posts to Redis Streams.
+- [x] Recognize residence statements such as `我住在` without memorizing generic location posts.
+- [x] Create at most one memory event for repeated publication requests.
+- [x] Backfill the affected demo post and validate lint, typecheck, tests, eval, E2E, and smoke.

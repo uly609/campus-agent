@@ -21,7 +21,7 @@ def normalize_key(text: str) -> str:
 def extract_memories(user_id: str, text: str) -> list[MemoryRecord]:
     if contains_sensitive_memory(text):
         return []
-    if not any(marker in text for marker in ["记住", "我喜欢", "我的", "下周", "偏好"]):
+    if not any(marker in text for marker in ["记住", "我喜欢", "我的", "我住在", "我住", "下周", "偏好"]):
         return []
     key = normalize_key(text)
     memory_type = MemoryType.PREFERENCE if key == "preference" else MemoryType.EVENT if key == "event" else MemoryType.FACT
@@ -41,4 +41,3 @@ def extract_memories(user_id: str, text: str) -> list[MemoryRecord]:
             created_at=now_iso(),
         )
     ]
-

@@ -74,6 +74,8 @@ make smoke
 8. Add or check a Chat, Embedding, or VLM route in Model Routing.
 9. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
 
+Long-term memory accepts explicit chat memories and eligible first-person facts or preferences from confirmed published posts. Generic post content is not memorized. Open **记忆** after publishing to consume the Redis Stream and inspect or delete the resulting record.
+
 ## Main API
 
 - `POST /api/v1/chat`

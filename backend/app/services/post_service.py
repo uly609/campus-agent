@@ -24,6 +24,9 @@ class DraftSession:
     history: list[dict[str, Any]] = field(default_factory=list)
     confirmed: bool = False
     published_post_id: str | None = None
+    user_id: str = "demo-user"
+    session_id: str = "post-assistant"
+    memory_event_id: str | None = None
 
 
 _drafts: dict[str, DraftSession] = {}
@@ -141,6 +144,8 @@ def create_draft(
     intent: str,
     image_attributes: dict[str, Any] | None = None,
     requested_category: PostCategory | None = None,
+    user_id: str = "demo-user",
+    session_id: str = "post-assistant",
 ) -> DraftSession:
     attrs = image_attributes or {}
     category = requested_category or classify_post_category(intent)
@@ -153,6 +158,8 @@ def create_draft(
         category=category.value,
         tags=tags,
         location=location,
+        user_id=user_id,
+        session_id=session_id,
     )
     draft.history.append(
         {
@@ -235,4 +242,5 @@ def draft_to_dict(draft: DraftSession) -> dict[str, Any]:
         "confirmed": draft.confirmed,
         "published": draft.published_post_id is not None,
         "published_post_id": draft.published_post_id,
+        "memory_event_created": draft.memory_event_id is not None,
     }

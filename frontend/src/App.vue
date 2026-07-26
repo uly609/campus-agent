@@ -288,6 +288,8 @@ async function createDraft() {
         intent: draftIntent.value.trim(),
         image_url: draftImage.value || null,
         category: draftCategory.value || null,
+        user_id: "demo-user",
+        session_id: activeSessionId.value,
       }),
     });
     draft.value = data.draft;
