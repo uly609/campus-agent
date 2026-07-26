@@ -15,7 +15,7 @@ async def test_hybrid_retrieval_returns_evidence_with_explanations() -> None:
     service = RetrievalService(build_corpus(repo.load_posts(), repo.load_documents()))
     results = await service.search("图书馆开放时间", top_k=5)
     assert results
-    assert results[0].metadata["retrieval"] == "bm25+vector+graph+rrf"
+    assert "rank-bm25+neo4j-vector+graphrag+rrf" in results[0].metadata["retrieval"]
     assert "explanation" in results[0].metadata
 
 

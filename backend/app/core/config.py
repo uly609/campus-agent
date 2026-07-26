@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     local_backup_vlm_model: str = "qwen2.5-vl:3b"
     cloud_fallback_vlm_model: str = "qwen-vl-plus"
     vlm_api_key: Optional[str] = None
+    rerank_url: Optional[str] = None
+    rerank_api_key: Optional[str] = None
+    rerank_model: str = "qwen3-rerank"
+    rerank_min_score: float = 0.25
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
     provider_encryption_secret: str = Field(

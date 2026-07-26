@@ -303,7 +303,19 @@ async function updateDraft(confirm = false) {
       body: JSON.stringify({ feedback: draftFeedback.value.trim(), confirm }),
     });
     draft.value = data.draft;
-  }, confirm ? "草稿已确认，尚未发布" : "修改已应用");
+  }, confirm ? "草稿已确认，可以发布" : "修改已应用");
+}
+
+async function publishDraft() {
+  if (!draft.value?.confirmed || draft.value.published) return;
+  await run("publish", async () => {
+    const data = await api(`/api/v1/posts/draft/${draft.value.draft_id}/feedback`, {
+      method: "POST",
+      body: JSON.stringify({ publish: true }),
+    });
+    draft.value = data.draft;
+    await loadPosts();
+  }, "帖子已发布，可在帖子列表查看");
 }
 
 async function loadMemory() {
@@ -597,10 +609,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <article class="draft-preview">
           <div v-if="!draft" class="empty-state"><FileImage :size="28" /><h2>草稿预览</h2><p>描述内容，Agent 会判断场景并生成草稿。</p></div>
           <template v-else>
-            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.confirmed ? '已确认' : '待确认' }}</span><small>{{ draft.category }}<template v-if="draftAttributes?.confidence"> · 视觉识别 {{ Math.round(draftAttributes.confidence * 100) }}%</template></small></div>
+            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.published ? '已发布' : (draft.confirmed ? '已确认' : '待确认') }}</span><small>{{ draft.category }}<template v-if="draftAttributes?.confidence"> · 视觉识别 {{ Math.round(draftAttributes.confidence * 100) }}%</template></small></div>
             <h2>{{ draft.title }}</h2><p class="draft-body">{{ draft.body }}</p>
             <div class="attribute-list"><span v-if="draftAttributes?.category">{{ draftAttributes.category }}</span><span v-if="draftAttributes?.color">{{ draftAttributes.color }}</span><span v-if="draftAttributes?.material">{{ draftAttributes.material }}</span><span v-for="hint in draftAttributes?.location_hints || []" :key="hint">{{ hint }}</span></div>
-            <div class="edit-area"><input v-model="draftFeedback" :disabled="draft.confirmed" /><button class="secondary" :disabled="draft.confirmed || busy === 'edit' || draft.edit_round >= 5" @click="updateDraft(false)">修改</button><button class="primary icon-text" :disabled="draft.confirmed || busy === 'confirm'" @click="updateDraft(true)"><Check :size="18" />确认草稿</button></div>
+            <div class="edit-area"><input v-model="draftFeedback" :disabled="draft.confirmed" /><button class="secondary" :disabled="draft.confirmed || busy === 'edit' || draft.edit_round >= 5" @click="updateDraft(false)">修改</button><button v-if="!draft.confirmed" class="primary icon-text" :disabled="busy === 'confirm'" @click="updateDraft(true)"><Check :size="18" />确认草稿</button><button v-else class="primary icon-text" :disabled="draft.published || busy === 'publish'" @click="publishDraft"><Send :size="18" />{{ draft.published ? '已发布' : '发布帖子' }}</button></div>
           </template>
         </article>
       </section>

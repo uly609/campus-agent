@@ -6,7 +6,6 @@ import re
 LOCATION_QUERY_MARKERS = ("在哪", "哪里", "位置", "地点", "怎么走", "怎么去", "哪一层", "哪个门")
 LOCATION_EVIDENCE_MARKERS = (
     "位于",
-    "地点",
     "地址",
     "一楼",
     "二楼",

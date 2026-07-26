@@ -10,7 +10,13 @@ from app.domain.schemas import Post, PostCreate, SearchRequest
 from app.multimodal.image_attributes import enhance_query_with_image, extract_image_attributes
 from app.retrieval.ingestion import build_corpus
 from app.retrieval.service import RetrievalService
-from app.services.post_service import apply_feedback, create_draft, draft_to_dict, publish_confirmed_draft
+from app.services.post_service import (
+    apply_feedback,
+    create_draft,
+    draft_to_dict,
+    get_draft,
+    publish_confirmed_draft,
+)
 from app.services.repository import JsonRepository
 
 router = APIRouter(prefix="/api/v1")
@@ -70,12 +76,20 @@ async def draft(payload: DraftRequest) -> dict[str, Any]:
 
 @router.post("/posts/draft/{draft_id}/feedback")
 def draft_feedback(draft_id: str, payload: DraftFeedback) -> dict[str, Any]:
-    result = apply_feedback(draft_id, payload.feedback, confirm=payload.confirm)
-    if not result["ok"]:
-        raise HTTPException(status_code=400, detail=result)
     if payload.publish:
         post = publish_confirmed_draft(draft_id, repo)
         if post is None:
             raise HTTPException(status_code=409, detail={"code": "DRAFT_NOT_CONFIRMED"})
-        result["post"] = post.model_dump()
+        current_draft = get_draft(draft_id)
+        if current_draft is None:
+            raise HTTPException(status_code=404, detail={"code": "DRAFT_NOT_FOUND"})
+        return {
+            "ok": True,
+            "draft": draft_to_dict(current_draft),
+            "published": True,
+            "post": post.model_dump(),
+        }
+    result = apply_feedback(draft_id, payload.feedback, confirm=payload.confirm)
+    if not result["ok"]:
+        raise HTTPException(status_code=400, detail=result)
     return result

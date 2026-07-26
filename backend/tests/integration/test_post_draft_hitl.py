@@ -3,7 +3,14 @@ from __future__ import annotations
 import pytest
 
 from app.domain.enums import PostCategory
-from app.services.post_service import MAX_EDIT_ROUNDS, apply_feedback, create_draft
+from app.services.post_service import (
+    MAX_EDIT_ROUNDS,
+    apply_feedback,
+    create_draft,
+    draft_to_dict,
+    publish_confirmed_draft,
+)
+from app.services.repository import JsonRepository
 
 
 @pytest.mark.parametrize(
@@ -55,3 +62,19 @@ def test_hitl_draft_enforces_five_edit_rounds_and_confirmation() -> None:
     confirmed = apply_feedback(draft.draft_id, "", confirm=True)
     assert confirmed["ok"]
     assert confirmed["requires_user_post_call"]
+
+
+def test_confirmed_draft_publishes_once(tmp_path) -> None:
+    repo = JsonRepository(tmp_path)
+    draft = create_draft("周五晚七点学院迎新活动", requested_category=PostCategory.EVENT)
+    assert publish_confirmed_draft(draft.draft_id, repo) is None
+    assert apply_feedback(draft.draft_id, "", confirm=True)["ok"]
+
+    published = publish_confirmed_draft(draft.draft_id, repo)
+    repeated = publish_confirmed_draft(draft.draft_id, repo)
+
+    assert published is not None
+    assert repeated is not None
+    assert repeated.post_id == published.post_id
+    assert len(repo.load_posts()) == 1
+    assert draft_to_dict(draft)["published"] is True

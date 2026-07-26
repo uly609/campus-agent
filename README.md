@@ -2,7 +2,7 @@
 
 CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
 
-The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines Chinese-aware BM25, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, relevance reranking, and RRF.
+The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines `rank-bm25`, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, RRF, and optional Bailian `qwen3-rerank` reranking.
 
 ## Degraded Mode
 
@@ -26,6 +26,8 @@ LOCAL_PRIMARY_VLM_MODEL=qwen2.5-vl:7b
 ```
 
 For DashScope-compatible cloud fallback, set the relevant `CLOUD_FALLBACK_*_URL` to `https://dashscope.aliyuncs.com/compatible-mode/v1`, select the model, and provide `OPENAI_API_KEY` or `VLM_API_KEY`. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+
+To enable external candidate reranking, set `RERANK_MODEL=qwen3-rerank`; the endpoint and key can be supplied through `RERANK_URL` and `RERANK_API_KEY`, or derived from the DashScope chat endpoint and `OPENAI_API_KEY`. Without them, retrieval reports `reranker_not_configured` and uses its lexical fallback.
 
 Providers can also be added from the **模型** page. Runtime keys are encrypted at rest using `CAMPUSFLOW_PROVIDER_ENCRYPTION_SECRET`, never returned to the browser, and checked through the non-generating `/models` compatibility endpoint.
 
@@ -65,7 +67,7 @@ make smoke
 1. Open the web UI and refresh the post feed.
 2. Ask `图书馆今天几点关门？` in AI Assistant and inspect citations plus node trace.
 3. Run smart search with `南门 捡到 校园卡`; results show BM25/vector/graph/RRF explanations.
-4. Generate a post draft with synthetic image `synthetic-card-library-blue.png`, edit it up to five rounds, then confirm.
+4. Generate a post draft with optional synthetic image `synthetic-card-library-blue.png`, edit it up to five rounds, confirm it, click **发布帖子**, and verify it appears in the post feed.
 5. Ask the assistant `记住我喜欢图书馆靠窗座位`, open Memory Management, and delete the memory.
 6. Run Eval Dashboard and inspect the computed metrics.
 7. Add a TXT or Markdown notice in Knowledge Base and wait for its task to become searchable.

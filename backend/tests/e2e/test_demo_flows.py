@@ -20,6 +20,24 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     draft_id = draft["draft"]["draft_id"]
     feedback = client.post(f"/api/v1/posts/draft/{draft_id}/feedback", json={"feedback": "标题改成 图书馆校园卡招领"}).json()
     assert feedback["draft"]["edit_round"] == 1
+    blocked_publish = client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
+    )
+    assert blocked_publish.status_code == 409
+    confirmed = client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"confirm": True}
+    )
+    assert confirmed.json()["draft"]["confirmed"] is True
+    published = client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
+    )
+    assert published.status_code == 200
+    assert published.json()["draft"]["published"] is True
+    assert client.get(f"/api/v1/posts/{published.json()['post']['post_id']}").status_code == 200
+    repeated = client.post(
+        f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
+    )
+    assert repeated.json()["post"]["post_id"] == published.json()["post"]["post_id"]
     event_draft = client.post(
         "/api/v1/posts/draft",
         json={"intent": "发布学院迎新活动，周五晚七点开始", "category": "活动"},

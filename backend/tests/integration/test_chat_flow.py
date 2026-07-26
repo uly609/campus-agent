@@ -25,6 +25,14 @@ async def test_location_question_answers_with_location_instead_of_hours() -> Non
 
 
 @pytest.mark.asyncio
+async def test_unknown_building_location_refuses_instead_of_citing_the_shuttle() -> None:
+    seed_main()
+    response = await handle_chat(ChatRequest(message="诶，教学楼在哪？"))
+    assert "证据不足" in response.answer.answer
+    assert response.citations == []
+
+
+@pytest.mark.asyncio
 async def test_followup_question_keeps_previous_campus_topic() -> None:
     seed_main()
     session_id = "followup-library-session"

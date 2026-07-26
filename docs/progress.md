@@ -34,6 +34,15 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M21 | Complete | Eight-scenario post Agent, text-only and VLM-enhanced drafting, shared LangGraph/API service, frontend controls, browser QA, and full validation passed | Pending |
 | M22 | Complete | Real continuous-conversation QA, runtime index reuse, memory/security/draft routing, timetable precision, 56 tests, full eval/E2E/smoke, and eight healthy services | Pending |
 | M23 | Complete | Honest evaluation v2 with exact graded qrels, hard cases, standard IR/QA/control-flow metrics, 60 tests, full validation, and eight healthy services | Pending |
+| M24 | Complete | Community BM25 plus Bailian reranking, facet-safe refusal, complete draft publishing, browser QA, 65 tests, full validation, and eight healthy services | Pending |
+
+## 2026-07-26 M24 Notes
+
+- Replaced the custom BM25 formula with `rank-bm25` while preserving Neo4j Vector Index recall, GraphRAG expansion, and RRF fusion. The fused candidate set is reranked by Bailian `qwen3-rerank` when configured and uses an explicit lexical fallback otherwise.
+- Added a requested-answer facet gate after reranking. A location question now requires a passage that expresses a location relation, so a post that merely mentions a teaching building cannot be promoted as the building's address.
+- Completed the HITL posting lifecycle in the Vue UI: users generate and edit a draft, confirm it, then explicitly publish it. The backend blocks unconfirmed publication and returns the original post for repeated publish calls instead of creating duplicates.
+- Real browser QA generated, confirmed, and published an event post, verified it in the feed, and confirmed that `教学楼在哪` returns an evidence-insufficient refusal without citations or console errors.
+- Final validation passed after a full Compose rebuild with all eight services healthy: seed, lint, typecheck, 65 unit/integration tests, eval `eval-89cc80c036`, 2 backend E2E tests, frontend tests, and smoke.
 
 ## 2026-07-26 M23 Notes
 

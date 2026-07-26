@@ -23,6 +23,7 @@ class DraftSession:
     edit_round: int = 0
     history: list[dict[str, Any]] = field(default_factory=list)
     confirmed: bool = False
+    published_post_id: str | None = None
 
 
 _drafts: dict[str, DraftSession] = {}
@@ -166,6 +167,10 @@ def create_draft(
     return draft
 
 
+def get_draft(draft_id: str) -> DraftSession | None:
+    return _drafts.get(draft_id)
+
+
 def apply_feedback(draft_id: str, feedback: str, confirm: bool = False) -> dict[str, Any]:
     if draft_id not in _drafts:
         return {"ok": False, "error_code": "DRAFT_NOT_FOUND"}
@@ -200,7 +205,9 @@ def publish_confirmed_draft(draft_id: str, repo: JsonRepository | None = None) -
     if not draft or not draft.confirmed:
         return None
     active_repo = repo or JsonRepository()
-    return active_repo.create_post(
+    if draft.published_post_id:
+        return active_repo.find_post(draft.published_post_id)
+    post = active_repo.create_post(
         PostCreate(
             title=draft.title,
             body=draft.body,
@@ -210,6 +217,8 @@ def publish_confirmed_draft(draft_id: str, repo: JsonRepository | None = None) -
             images=[],
         )
     )
+    draft.published_post_id = post.post_id
+    return post
 
 
 def draft_to_dict(draft: DraftSession) -> dict[str, Any]:
@@ -224,4 +233,6 @@ def draft_to_dict(draft: DraftSession) -> dict[str, Any]:
         "max_edit_rounds": MAX_EDIT_ROUNDS,
         "history": draft.history,
         "confirmed": draft.confirmed,
+        "published": draft.published_post_id is not None,
+        "published_post_id": draft.published_post_id,
     }

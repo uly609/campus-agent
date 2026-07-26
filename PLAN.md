@@ -358,3 +358,13 @@ make smoke
 - [x] Record explicit cache-hit state instead of inferring it from zero latency.
 - [x] Show failed cases and offline fake-provider limitations in JSON, Markdown, and Vue reports.
 - [x] Run the complete validation suite with all eight Compose services healthy.
+
+## M24 - Community Retrieval And Complete Publishing
+
+- [x] Replace the custom BM25 scorer with the maintained `rank-bm25` implementation.
+- [x] Rerank RRF-fused candidates with Bailian `qwen3-rerank` when configured.
+- [x] Keep an explicit lexical fallback when the external reranker is unavailable.
+- [x] Reject same-topic passages that do not answer the requested location or time facet.
+- [x] Add a real confirm-then-publish action to the Vue post assistant.
+- [x] Make draft publishing idempotent and block publication before confirmation.
+- [x] Validate real browser publishing, insufficient-evidence refusal, all tests, evals, E2E, smoke, and eight healthy services.

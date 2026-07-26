@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from app.domain.schemas import Evidence
 from app.retrieval.bm25 import BM25Index
-from app.retrieval.chunking import Chunk
-from app.retrieval.routed_embeddings import RoutedEmbeddingProvider
-from app.retrieval.query_expansion import expand_campus_query
-from app.retrieval.chunking import tokenize
-from app.retrieval.graph_rag import GraphRAG
-from app.retrieval.graph_rag import extract_entities
+from app.retrieval.chunking import Chunk, tokenize
+from app.retrieval.graph_rag import GraphRAG, extract_entities
 from app.retrieval.neo4j_store import Neo4jVectorStore, VectorRecord
+from app.retrieval.query_expansion import expand_campus_query
 from app.retrieval.query_facets import query_facet, text_matches_query_facet
+from app.retrieval.reranker import RetrievalReranker
+from app.retrieval.routed_embeddings import RoutedEmbeddingProvider
 from app.retrieval.rrf import reciprocal_rank_fusion
 
 
@@ -20,6 +19,7 @@ class RetrievalService:
         self.bm25 = BM25Index(chunks)
         self.graph = GraphRAG(chunks)
         self.vector_store = Neo4jVectorStore()
+        self.reranker = RetrievalReranker()
         self._indexed = False
 
     async def rebuild(self) -> None:
@@ -72,11 +72,17 @@ class RetrievalService:
             official_boost = 0.08 if chunk.official and expanded_query != query else 0.0
             return item[1] + direct_overlap + expanded_overlap * 0.35 + facet_adjustment + official_boost
 
-        reranked = sorted(fused, key=rerank_score, reverse=True)
+        candidate_rows = sorted(fused, key=rerank_score, reverse=True)[:60]
+        community_ranked = await self.reranker.rerank(
+            query,
+            [payload[0] for _, _, payload in candidate_rows],
+            top_k,
+        )
         evidence = []
-        for index, (source_id, fused_score, payload) in enumerate(reranked[:top_k], start=1):
-            chunk = payload[0]
-            final_score = max(0.0, min(1.0, rerank_score((source_id, fused_score, payload))))
+        for index, ranked in enumerate(community_ranked, start=1):
+            chunk = ranked.chunk
+            source_id = chunk.source_id
+            final_score = max(0.0, min(1.0, ranked.score))
             evidence.append(
                 Evidence(
                     evidence_id=f"ev-{index}-{source_id}",
@@ -88,7 +94,9 @@ class RetrievalService:
                     official=chunk.official,
                     metadata={
                         **chunk.metadata,
-                        "retrieval": "bm25+vector+graph+rrf",
+                        "retrieval": f"rank-bm25+neo4j-vector+graphrag+rrf+{ranked.mode}",
+                        "rerank_model": ranked.mode,
+                        "rerank_degraded_reason": self.reranker.degraded_reason,
                         "expanded_query": expanded_query,
                         "neo4j_mode": "real" if not self.vector_store.degraded_reason else "degraded-memory",
                         "query_facet": facet or "general",
