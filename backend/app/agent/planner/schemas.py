@@ -23,7 +23,7 @@ class IntentPlan(BaseModel):
     intent: Intent
     tool_calls: list[ToolCall] = Field(default_factory=list, max_length=4)
     confidence: float = Field(ge=0.0, le=1.0)
-    source: Literal["structured", "fallback"] = "structured"
+    source: Literal["model", "fallback"] = "model"
 
     @model_validator(mode="after")
     def validate_tool_requirement(self) -> IntentPlan:

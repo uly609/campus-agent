@@ -21,10 +21,18 @@ def normalize_key(text: str) -> str:
 def extract_memories(user_id: str, text: str) -> list[MemoryRecord]:
     if contains_sensitive_memory(text):
         return []
-    if not any(marker in text for marker in ["记住", "我喜欢", "我的", "我住在", "我住", "下周", "偏好"]):
+    if not any(
+        marker in text for marker in ["记住", "我喜欢", "我的", "我住在", "我住", "下周", "偏好"]
+    ):
         return []
     key = normalize_key(text)
-    memory_type = MemoryType.PREFERENCE if key == "preference" else MemoryType.EVENT if key == "event" else MemoryType.FACT
+    memory_type = (
+        MemoryType.PREFERENCE
+        if key == "preference"
+        else MemoryType.EVENT
+        if key == "event"
+        else MemoryType.FACT
+    )
     clean_value = text.replace("记住", "").strip(" ：:")
     hash_value = hashlib.sha256(f"{user_id}:{key}:{clean_value}".encode("utf-8")).hexdigest()
     return [
@@ -35,7 +43,7 @@ def extract_memories(user_id: str, text: str) -> list[MemoryRecord]:
             key=key,
             value=clean_value,
             hash_value=hash_value,
-            embedding=embed_text(clean_value)[:32],
+            embedding=embed_text(clean_value),
             supersedes=None,
             expires_at=None,
             created_at=now_iso(),

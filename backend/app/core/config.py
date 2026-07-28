@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     rerank_api_key: Optional[str] = None
     rerank_model: str = "qwen3-rerank"
     rerank_min_score: float = 0.25
+    official_web_search_url: Optional[str] = None
+    official_web_search_api_key: Optional[str] = None
+    official_web_allowed_domains: str = ""
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
     provider_encryption_secret: str = Field(

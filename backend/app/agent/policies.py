@@ -7,7 +7,17 @@ from app.retrieval.query_facets import query_facet, text_matches_query_facet
 def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | bool]:
     if not evidence:
         return {"relevant": False, "score": 0.0, "coverage": 0.0}
-    unsupported_markers = ["不存在", "火星", "飞船", "量子", "传送门", "海底", "管理员密码", "忽略规则", "忽略指令"]
+    unsupported_markers = [
+        "不存在",
+        "火星",
+        "飞船",
+        "量子",
+        "传送门",
+        "海底",
+        "管理员密码",
+        "忽略规则",
+        "忽略指令",
+    ]
     if any(marker in query for marker in unsupported_markers):
         return {"relevant": False, "score": 0.0, "coverage": 0.0}
     supported_fact_anchors = [
@@ -35,7 +45,9 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
         "心理咨询",
         "社团",
     ]
-    if all(item.official for item in evidence) and not any(anchor in query for anchor in supported_fact_anchors):
+    if all(item.official for item in evidence) and not any(
+        anchor in query for anchor in supported_fact_anchors
+    ):
         return {"relevant": False, "score": 0.0, "coverage": 0.0}
     ignored = set("的是了在有和与或请问一下多少什么怎么如何能否校园官方说明")
     query_chars = {char for char in query.lower() if char.isalnum() and char not in ignored}
@@ -57,7 +69,11 @@ def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> Grounded
     official = [item for item in evidence if item.official]
     support = official or evidence
     if query_facet(query):
-        support = [item for item in support if text_matches_query_facet(query, f"{item.title} {item.excerpt}")]
+        support = [
+            item
+            for item in support
+            if text_matches_query_facet(query, f"{item.title} {item.excerpt}")
+        ]
     if support:
         best_score = max(item.score for item in support)
         support = [item for item in support if item.score >= best_score * 0.8]
@@ -92,6 +108,7 @@ def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> Grounded
                 evidence_id=item.evidence_id,
                 source_id=item.source_id,
                 title=item.title,
+                quoted_span=item.excerpt[:120],
             )
         )
         sentences.append(f"{claim_text} [{index}]")

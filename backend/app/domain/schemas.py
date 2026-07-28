@@ -52,6 +52,7 @@ class Citation(BaseModel):
     evidence_id: str
     source_id: str
     title: str
+    quoted_span: str = ""
 
 
 class Claim(BaseModel):
@@ -125,4 +126,3 @@ class EvalRun(BaseModel):
     created_at: str
     metrics: dict[str, float]
     report_path: str
-

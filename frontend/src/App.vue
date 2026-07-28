@@ -590,7 +590,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <article v-for="(message, index) in chatMessages" :key="`${index}-${message.role}`" :class="['chat-message', message.role]">
               <div v-if="message.role === 'assistant'" class="answer-label"><Sparkles :size="17" /> CampusFlow</div>
               <p>{{ message.text }}</p>
-              <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><button v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source" type="button" @click="openCitation(citation)"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small></div></button></div>
+              <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><button v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source" type="button" @click="openCitation(citation)"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small><q v-if="citation.quoted_span">{{ citation.quoted_span }}</q></div></button></div>
               <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
             </article>
           </div>

@@ -49,3 +49,13 @@ async def test_timetable_query_prioritizes_timetable_document() -> None:
     assert results
     assert results[0].source_id.startswith("doc-timetable-")
     assert "我的课表" in results[0].excerpt
+
+
+@pytest.mark.asyncio
+async def test_official_source_route_filters_before_top_k_reranking() -> None:
+    service = RetrievalService(build_corpus(JsonRepository().load_posts(), JsonRepository().load_documents()))
+    results = await service.search("图书馆今天几点关门？", source_type="official")
+
+    assert results
+    assert all(item.official for item in results)
+    assert results[0].source_id.startswith("doc-library-hours")

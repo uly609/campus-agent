@@ -44,7 +44,9 @@ class RetrievalService:
         self.vector_store.upsert_graph()
         self._indexed = True
 
-    async def search(self, query: str, top_k: int = 12) -> list[Evidence]:
+    async def search(
+        self, query: str, top_k: int = 12, source_type: str | None = None
+    ) -> list[Evidence]:
         if not self._indexed:
             await self.rebuild()
         expanded_query = expand_campus_query(query)
@@ -81,6 +83,10 @@ class RetrievalService:
             return item[1] + direct_overlap + expanded_overlap * 0.35 + facet_adjustment + official_boost
 
         candidate_rows = sorted(fused, key=rerank_score, reverse=True)[:60]
+        if source_type == "official":
+            candidate_rows = [row for row in candidate_rows if row[2][0].official]
+        elif source_type == "post":
+            candidate_rows = [row for row in candidate_rows if not row[2][0].official]
         community_ranked = await self.reranker.rerank(
             query,
             [payload[0] for _, _, payload in candidate_rows],

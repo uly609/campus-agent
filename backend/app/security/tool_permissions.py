@@ -2,6 +2,7 @@ from __future__ import annotations
 
 ALLOWED_TOOLS = {
     "search_campus_docs",
+    "search_official_web",
     "search_posts",
     "get_post_detail",
     "search_lost_and_found",

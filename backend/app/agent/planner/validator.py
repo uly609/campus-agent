@@ -15,6 +15,7 @@ class PlanValidator:
         "get_campus_service_info": frozenset({"query"}),
         "create_post_draft": frozenset({"intent"}),
         "load_user_memories": frozenset({"user_id"}),
+        "search_official_web": frozenset({"query"}),
     }
 
     _argument_types: dict[str, dict[str, type]] = {
@@ -24,6 +25,7 @@ class PlanValidator:
         "get_campus_service_info": {"query": str},
         "create_post_draft": {"intent": str},
         "load_user_memories": {"user_id": str},
+        "search_official_web": {"query": str},
     }
 
     def __init__(self, registered_tools: frozenset[str] | set[str]) -> None:
@@ -33,12 +35,18 @@ class PlanValidator:
         for call in plan.tool_calls:
             if call.tool_name not in self.registered_tools:
                 raise PlanValidationError(f"tool is not registered: {call.tool_name}")
-            missing = self._required_arguments.get(call.tool_name, frozenset()) - call.arguments.keys()
+            missing = (
+                self._required_arguments.get(call.tool_name, frozenset()) - call.arguments.keys()
+            )
             if missing:
                 names = ", ".join(sorted(missing))
-                raise PlanValidationError(f"{call.tool_name} is missing required arguments: {names}")
+                raise PlanValidationError(
+                    f"{call.tool_name} is missing required arguments: {names}"
+                )
             for argument, expected_type in self._argument_types.get(call.tool_name, {}).items():
-                if argument in call.arguments and not isinstance(call.arguments[argument], expected_type):
+                if argument in call.arguments and not isinstance(
+                    call.arguments[argument], expected_type
+                ):
                     raise PlanValidationError(
                         f"{call.tool_name}.{argument} must be {expected_type.__name__}"
                     )

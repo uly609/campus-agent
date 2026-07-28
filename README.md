@@ -97,3 +97,10 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 ## Data
 
 `make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
+
+
+## Dynamic Skills and official web fallback
+
+The Agent exposes five typed Skills backed by allowlisted tools: campus knowledge, community search, post creation, memory management, and evaluation. With a real Chat provider, the Planner returns a validated JSON tool plan; degraded mode uses an explicit deterministic planner.
+
+Optional corrective official-web search is configured with `OFFICIAL_WEB_SEARCH_URL`, `OFFICIAL_WEB_SEARCH_API_KEY`, and a comma-separated `OFFICIAL_WEB_ALLOWED_DOMAINS`. All three are required. When absent, CampusFlow reports the tool as unavailable and continues with local Hybrid RAG; it never reports fake external results. See `THIRD_PARTY_NOTICES.md` for reference-project attribution and reuse boundaries.

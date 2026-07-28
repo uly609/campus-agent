@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+
+import httpx
 from pathlib import Path
 
 from app.domain.enums import PostCategory
@@ -8,6 +10,7 @@ from app.domain.schemas import PostCreate, ToolResult
 from app.multimodal.image_attributes import extract_image_attributes
 from app.multimodal.ocr import verify_demo_student_card as verify_card
 from app.retrieval.ingestion import build_corpus
+from app.retrieval.official_web import OfficialWebSearch
 from app.retrieval.service import RetrievalService
 from app.services.post_service import create_draft, draft_to_dict
 from app.services.repository import JsonRepository
@@ -20,19 +23,22 @@ class CampusTools:
     def __init__(self, repo: JsonRepository | None = None) -> None:
         self.repo = repo or JsonRepository()
         self._retrieval: RetrievalService | None = None
+        self._official_web = OfficialWebSearch()
 
     async def retrieval(self) -> RetrievalService:
         global _shared_retrieval
         if self._retrieval is None:
             if _shared_retrieval is None:
-                _shared_retrieval = RetrievalService(build_corpus(self.repo.load_posts(), self.repo.load_documents()))
+                _shared_retrieval = RetrievalService(
+                    build_corpus(self.repo.load_posts(), self.repo.load_documents())
+                )
                 await _shared_retrieval.rebuild()
             self._retrieval = _shared_retrieval
         return self._retrieval
 
     async def search_campus_docs(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", ""))
-        evidence = [item for item in await (await self.retrieval()).search(query) if item.official]
+        evidence = [item for item in await (await self.retrieval()).search(query, source_type="official") if item.official]
         return ToolResult(
             tool_name="search_campus_docs",
             success=True,
@@ -45,7 +51,9 @@ class CampusTools:
 
     async def search_posts(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", ""))
-        evidence = [item for item in await (await self.retrieval()).search(query) if not item.official]
+        evidence = [
+            item for item in await (await self.retrieval()).search(query, source_type="post") if not item.official
+        ]
         return ToolResult(
             tool_name="search_posts",
             success=True,
@@ -54,6 +62,40 @@ class CampusTools:
             error_message=None,
             latency_ms=0,
             provenance=[],
+        )
+
+    async def search_official_web(self, payload: dict[str, object]) -> ToolResult:
+        query = str(payload.get("query", ""))
+        if not self._official_web.configured:
+            return ToolResult(
+                tool_name="search_official_web",
+                success=False,
+                data=None,
+                error_code="OFFICIAL_WEB_SEARCH_NOT_CONFIGURED",
+                error_message="Official web search is unavailable; local retrieval remains active.",
+                latency_ms=0,
+                provenance=[],
+            )
+        try:
+            evidence = await self._official_web.search(query)
+        except (httpx.HTTPError, ValueError, TypeError) as exc:
+            return ToolResult(
+                tool_name="search_official_web",
+                success=False,
+                data=None,
+                error_code="OFFICIAL_WEB_SEARCH_FAILED",
+                error_message=exc.__class__.__name__,
+                latency_ms=0,
+                provenance=[],
+            )
+        return ToolResult(
+            tool_name="search_official_web",
+            success=True,
+            data=[item.model_dump() for item in evidence],
+            error_code=None,
+            error_message=None,
+            latency_ms=0,
+            provenance=[{"kind": "official_web", "allowlisted": True}],
         )
 
     async def get_post_detail(self, payload: dict[str, object]) -> ToolResult:
@@ -83,7 +125,8 @@ class CampusTools:
         posts = [
             post.model_dump()
             for post in self.repo.load_posts()
-            if post.category == PostCategory.LOST_FOUND and (query in post.title or query in post.body or not query)
+            if post.category == PostCategory.LOST_FOUND
+            and (query in post.title or query in post.body or not query)
         ][:12]
         return ToolResult(
             tool_name="search_lost_and_found",
@@ -97,8 +140,18 @@ class CampusTools:
 
     async def get_campus_events(self, payload: dict[str, object]) -> ToolResult:
         events = [
-            {"event_id": "event-library-talk", "title": "图书馆信息素养讲座", "location": "图书馆", "time": "周三 19:00"},
-            {"event_id": "event-sports-night", "title": "体育馆夜跑活动", "location": "体育馆", "time": "周五 20:00"},
+            {
+                "event_id": "event-library-talk",
+                "title": "图书馆信息素养讲座",
+                "location": "图书馆",
+                "time": "周三 19:00",
+            },
+            {
+                "event_id": "event-sports-night",
+                "title": "体育馆夜跑活动",
+                "location": "体育馆",
+                "time": "周五 20:00",
+            },
         ]
         return ToolResult(
             tool_name="get_campus_events",
@@ -112,7 +165,11 @@ class CampusTools:
 
     async def get_campus_service_info(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", "服务"))
-        docs = [doc for doc in self.repo.load_documents() if query[:2] in doc["body"] or query[:2] in doc["title"]]
+        docs = [
+            doc
+            for doc in self.repo.load_documents()
+            if query[:2] in doc["body"] or query[:2] in doc["title"]
+        ]
         return ToolResult(
             tool_name="get_campus_service_info",
             success=True,
@@ -137,7 +194,9 @@ class CampusTools:
         )
 
     async def verify_demo_student_card(self, payload: dict[str, object]) -> ToolResult:
-        result = verify_card(str(payload.get("image_url", "")), str(payload.get("visible_text", "")))
+        result = verify_card(
+            str(payload.get("image_url", "")), str(payload.get("visible_text", ""))
+        )
         return ToolResult(
             tool_name="verify_demo_student_card",
             success=bool(result["verified"]),
@@ -233,6 +292,7 @@ def build_registry(tools: CampusTools | None = None):
     registry = ToolRegistry()
     registry.register("search_campus_docs", active.search_campus_docs)
     registry.register("search_posts", active.search_posts)
+    registry.register("search_official_web", active.search_official_web)
     registry.register("get_post_detail", active.get_post_detail)
     registry.register("search_lost_and_found", active.search_lost_and_found)
     registry.register("get_campus_events", active.get_campus_events)

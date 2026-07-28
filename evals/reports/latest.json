@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-da89926ec9",
-  "created_at": "2026-07-26T08:01:52.805758+00:00",
+  "run_id": "eval-d1b5c6f0ad",
+  "created_at": "2026-07-28T10:53:19.159215+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -33,7 +33,7 @@
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
     "qa_answer_fact_recall": 0.7142857142857143,
-    "qa_context_relevance": 0.21845238095238093,
+    "qa_context_relevance": 0.21317460317460318,
     "qa_citation_precision": 0.6,
     "qa_citation_faithfulness": 0.7,
     "qa_forbidden_content_rate": 0.0,
@@ -43,9 +43,11 @@
     "replan_precision": 0.375,
     "replan_recall": 1.0,
     "replan_f1": 0.5454545454545454,
-    "tool_success_rate": 1.0,
-    "p50_latency_ms": 116.9326879999062,
-    "p95_latency_ms": 133.81058300001314,
+    "tool_success_rate": 0.9027777777777778,
+    "corrective_rag_success_rate": 0.5,
+    "memory_recall_non_empty_rate": 0.0,
+    "p50_latency_ms": 85.85135449993686,
+    "p95_latency_ms": 103.48337499999616,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -811,11 +813,11 @@
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-counseling-31",
           "doc-counseling-10",
-          "doc-delivery-09",
+          "doc-counseling-31",
           "doc-delivery-30",
-          "doc-internship-39"
+          "doc-delivery-09",
+          "doc-internship-13"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -904,11 +906,11 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
+          "post-seed-217",
           "post-seed-089",
           "post-seed-025",
-          "post-seed-153",
           "post-seed-281",
-          "post-seed-217"
+          "post-seed-153"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -1002,11 +1004,11 @@
           "doc-delivery-09",
           "doc-delivery-30",
           "post-seed-037",
+          "post-seed-229",
           "post-seed-101",
           "post-seed-165",
-          "post-seed-229",
-          "post-seed-065",
-          "post-seed-001"
+          "post-seed-001",
+          "post-seed-193"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1199,7 +1201,7 @@
           "doc-library-hours-23",
           "doc-library-hours-24",
           "post-seed-143",
-          "post-seed-107",
+          "post-seed-043",
           "post-seed-015"
         ],
         "qrels": {
@@ -1232,7 +1234,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-library-hours-00"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-01",
@@ -1249,7 +1253,9 @@
         "expected_replan": false,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-02",
@@ -1268,7 +1274,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-card-loss-02"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-03",
@@ -1287,7 +1295,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-scholarship-03"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-04",
@@ -1306,7 +1316,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-clinic-04"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-05",
@@ -1325,7 +1337,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-canteen-05"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-06",
@@ -1342,7 +1356,9 @@
         "expected_replan": false,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-07",
@@ -1350,7 +1366,7 @@
         "question": "期末考试迟到 31 分钟还能进考场吗，需要带什么？",
         "answer": "官方信息：期末考试安排由教务处统一发布；学生须携带校园卡和身份证明，开考 30 分钟后不得进入考场。 本条适用于 2026 春夏学期。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.125,
+        "context_relevance": 0.1,
         "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1361,7 +1377,9 @@
         "replan_count": 0,
         "citation_source_ids": [
           "doc-exam-07"
-        ]
+        ],
+        "corrective_rag_triggered": false,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-08",
@@ -1378,7 +1396,9 @@
         "expected_replan": false,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-09",
@@ -1386,7 +1406,7 @@
         "question": "图书馆门口发现的蓝色校园卡被送到哪里了？",
         "answer": "官方信息：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条适用于 2026 春夏学期。 [1]",
         "answer_fact_recall": 0.0,
-        "context_relevance": 0.08333333333333333,
+        "context_relevance": 0.05555555555555555,
         "citation_precision": 0.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1397,7 +1417,9 @@
         "replan_count": 1,
         "citation_source_ids": [
           "doc-card-loss-17"
-        ]
+        ],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-10",
@@ -1414,7 +1436,9 @@
         "expected_replan": true,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-11",
@@ -1431,7 +1455,9 @@
         "expected_replan": true,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-12",
@@ -1448,7 +1474,9 @@
         "expected_replan": false,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       },
       {
         "id": "qa-13",
@@ -1465,7 +1493,9 @@
         "expected_replan": true,
         "predicted_replan": true,
         "replan_count": 2,
-        "citation_source_ids": []
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
+        "memory_recall_count": 0
       }
     ]
   }

@@ -12,8 +12,10 @@ from app.agent.policies import judge_relevance, synthesize_grounded_answer
 from app.agent.state import AgentState, REQUIRED_NODES, SIX_STAGES
 from app.agent.tools.campus_tools import build_registry
 from app.domain.enums import Intent
-from app.domain.schemas import Citation, Evidence
+from app.domain.schemas import Citation, Evidence, MemoryRecord
 from app.memory.producer import publish_memory_event
+from app.memory.recall import recall_relevant_memories
+from app.llm.base import ProviderRecoverableError
 from app.llm.router import ProviderRouter
 from app.multimodal.image_attributes import enhance_query_with_image
 from app.security.pii import redact_pii
@@ -22,7 +24,13 @@ from app.services.repository import JsonRepository
 
 
 NodeCallable = Callable[[AgentState], Any]
-GraphRoute = Literal["visual_understanding_node", "intent_planner_node", "tool_executor_node", "grounded_synthesis_node", "replan_node"]
+GraphRoute = Literal[
+    "visual_understanding_node",
+    "intent_planner_node",
+    "tool_executor_node",
+    "grounded_synthesis_node",
+    "replan_node",
+]
 
 
 class CampusFlowGraph:
@@ -30,7 +38,9 @@ class CampusFlowGraph:
         self.repo = repo or JsonRepository()
         self.provider_router = ProviderRouter()
         self.registry = build_registry()
-        self.planner = StructuredPlanner(PlanValidator(self.registry.tool_names))
+        self.planner = StructuredPlanner(
+            PlanValidator(self.registry.tool_names), self.provider_router
+        )
         self.nodes = {
             "input_guard_node": self.input_guard_node,
             "load_memory_node": self.load_memory_node,
@@ -82,7 +92,11 @@ class CampusFlowGraph:
 
     @staticmethod
     def _route_intent(state: AgentState) -> GraphRoute:
-        return "grounded_synthesis_node" if state.get("intent") == Intent.GREETING.value else "tool_executor_node"
+        return (
+            "grounded_synthesis_node"
+            if state.get("intent") == Intent.GREETING.value
+            else "tool_executor_node"
+        )
 
     @staticmethod
     def _route_relevance(state: AgentState) -> GraphRoute:
@@ -164,19 +178,19 @@ class CampusFlowGraph:
         result = await self.registry.call("load_user_memories", {"user_id": state["user_id"]})
         memories = list(result.data or [])
         query = state.get("raw_query", "")
-        relevant_memories = [
-            item
-            for item in memories
-            if any(token in str(item.get("value", "")) for token in query.split() if token)
-        ]
+        relevant_memories = recall_relevant_memories(
+            query, [MemoryRecord.model_validate(item) for item in memories]
+        )
         state["memory_context"] = relevant_memories
         state["tool_results"].append(result.model_dump())
-        state["trace"].append({
-            "event": "memory_recall",
-            "candidate_count": len(memories),
-            "used_count": len(relevant_memories),
-            "reason": "query_related_only",
-        })
+        state["trace"].append(
+            {
+                "event": "memory_recall",
+                "candidate_count": len(memories),
+                "used_count": len(relevant_memories),
+                "reason": "query_related_only",
+            }
+        )
 
     async def coreference_resolver_node(self, state: AgentState) -> None:
         query = state["raw_query"]
@@ -231,7 +245,7 @@ class CampusFlowGraph:
 
     async def intent_planner_node(self, state: AgentState) -> None:
         query = state["resolved_query"]
-        plan = self.planner.plan(query, state["user_id"])
+        plan = await self.planner.plan(query, state["user_id"], state.get("memory_context", []))
         state["intent"] = plan.intent.value
         state["intent_confidence"] = plan.confidence
         state["plan"] = plan.to_steps()
@@ -249,19 +263,37 @@ class CampusFlowGraph:
                 for item in result.data:
                     if isinstance(item, dict) and "evidence_id" in item:
                         isolated = isolate_untrusted_content(str(item.get("excerpt", "")))
-                        item["metadata"] = {**dict(item.get("metadata", {})), "untrusted": isolated["untrusted"]}
+                        item["metadata"] = {
+                            **dict(item.get("metadata", {})),
+                            "untrusted": isolated["untrusted"],
+                        }
                         evidence.append(item)
             elif not result.success:
-                state.setdefault("errors", []).append({"code": result.error_code or "TOOL_FAILED", "message": result.error_message or tool})
+                state.setdefault("errors", []).append(
+                    {
+                        "code": result.error_code or "TOOL_FAILED",
+                        "message": result.error_message or tool,
+                    }
+                )
         state["retrieved_evidence"] = evidence
 
     async def retrieval_gate_node(self, state: AgentState) -> None:
         evidence = state.get("retrieved_evidence", [])
         if not evidence:
-            state.setdefault("errors", []).append({"code": "NO_RETRIEVAL_RESULTS", "message": "No evidence was retrieved."})
-            state["trace"].append({"event": "corrective_rag", "action": "rewrite_query", "reason": "empty_retrieval"})
+            state.setdefault("errors", []).append(
+                {"code": "NO_RETRIEVAL_RESULTS", "message": "No evidence was retrieved."}
+            )
+            state["trace"].append(
+                {"event": "corrective_rag", "action": "rewrite_query", "reason": "empty_retrieval"}
+            )
         elif len(evidence) < 2:
-            state["trace"].append({"event": "corrective_rag", "action": "expand_retrieval", "reason": "low_evidence_count"})
+            state["trace"].append(
+                {
+                    "event": "corrective_rag",
+                    "action": "expand_retrieval",
+                    "reason": "low_evidence_count",
+                }
+            )
 
     async def relevance_judge_node(self, state: AgentState) -> None:
         evidence = [Evidence.model_validate(item) for item in state.get("retrieved_evidence", [])]
@@ -271,12 +303,39 @@ class CampusFlowGraph:
 
     async def replan_node(self, state: AgentState) -> None:
         state["replan_count"] = min(state.get("replan_count", 0) + 1, state.get("max_replans", 2))
-        state["trace"].append({"event": "replan", "count": state["replan_count"], "reason": "low_evidence_coverage"})
-        if state["replan_count"] >= state.get("max_replans", 2):
-            state["trace"].append({"event": "corrective_rag", "action": "degrade_answer", "reason": "retry_limit_reached"})
-            return
-        query = state["resolved_query"] + " 校园 官方 说明"
-        state["plan"] = [{"tool": "search_campus_docs", "args": {"query": query}}, {"tool": "search_posts", "args": {"query": query}}]
+        state["trace"].append(
+            {"event": "replan", "count": state["replan_count"], "reason": "low_evidence_coverage"}
+        )
+        query = await self._rewrite_query(state["resolved_query"])
+        if state["replan_count"] == 1:
+            state["plan"] = [
+                {"tool": "search_campus_docs", "args": {"query": query}},
+                {"tool": "search_posts", "args": {"query": query}},
+            ]
+            state["trace"].append(
+                {"event": "corrective_rag", "action": "local_query_rewrite", "query": query}
+            )
+        else:
+            state["plan"] = [
+                {"tool": "search_official_web", "args": {"query": query}},
+                {"tool": "search_campus_docs", "args": {"query": query}},
+            ]
+            state["trace"].append(
+                {"event": "corrective_rag", "action": "official_web_fallback", "query": query}
+            )
+
+    async def _rewrite_query(self, query: str) -> str:
+        if "fake_chat_provider" in self.provider_router.degraded_modes:
+            return f"{query} 校园 官方 说明"
+        try:
+            result = await self.provider_router.chat(
+                "Rewrite this campus query for retrieval. Return only the rewritten query: " + query
+            )
+            if isinstance(result.content, str) and not result.degraded and result.content.strip():
+                return result.content.strip()[:300]
+        except (ProviderRecoverableError, ValueError, TypeError):
+            pass
+        return f"{query} 校园 官方 说明"
 
     async def grounded_synthesis_node(self, state: AgentState) -> None:
         if "input_prompt_injection" in state.get("guardrail_flags", []):
@@ -294,7 +353,9 @@ class CampusFlowGraph:
             if any(marker in state["raw_query"] for marker in ("忘掉", "删除记忆")):
                 state["final_answer"] = "你可以在“记忆”页面查看并删除指定记录，我不会替你静默删除。"
             else:
-                state["final_answer"] = "好的，这条偏好已进入记忆处理队列。你可以在“记忆”页面查看或删除它。"
+                state["final_answer"] = (
+                    "好的，这条偏好已进入记忆处理队列。你可以在“记忆”页面查看或删除它。"
+                )
             state["citations"] = []
             return
         if state.get("intent") == Intent.POST_DRAFT.value:
@@ -321,10 +382,19 @@ class CampusFlowGraph:
             evidence = []
         fallback = synthesize_grounded_answer(state["resolved_query"], evidence)
         answer, used_fallback = await synthesize_with_provider(
-            state["resolved_query"], evidence, self.provider_router, fallback
+            state["resolved_query"],
+            evidence,
+            self.provider_router,
+            fallback,
+            state.get("memory_context", []),
         )
         if used_fallback:
-            state["trace"].append({"event": "grounded_synthesis_fallback", "reason": "fake_or_invalid_provider_output"})
+            state["trace"].append(
+                {
+                    "event": "grounded_synthesis_fallback",
+                    "reason": "fake_or_invalid_provider_output",
+                }
+            )
         state["final_answer"] = answer.answer
         state["citations"] = [citation.model_dump() for citation in answer.citations]
 

@@ -385,3 +385,35 @@ make smoke
 - [x] Keep the existing 13-node LangGraph workflow and legacy planner adapter compatible.
 - [x] Add planner schema, tool allowlist, argument validation, and graph regression tests.
 - [x] Add citation provenance validation, corrective retrieval trace metrics, memory recall metrics, and Vue citation/trace interaction improvements.
+
+## M27 - Eval And Final Regression Hardening
+
+- [x] Validate intent accuracy, planner/tool contract metrics, citation precision, faithfulness, and corrective RAG metrics.
+- [x] Validate memory recall evaluation coverage and conflict/supersedes behavior.
+- [x] Run offline deterministic eval reports and keep provider limitations explicit.
+- [ ] Complete final full validation, documentation sync, and release commit.
+
+
+## M28 - Dynamic Skills And Corrective Retrieval
+
+- [x] Model-driven typed Planner with deterministic degraded fallback.
+- [x] Skill catalog mapped to the allowlisted ToolRegistry.
+- [x] Query rewrite and bounded official-domain web fallback.
+- [x] Verbatim claim-evidence citation spans.
+- [x] Embedding Top-K long-term-memory recall for personalization only.
+- [x] Reference-project license and attribution notice.
+- [x] Frontend citation quote rendering.
+- [x] Ruff, Mypy, unit, integration, E2E, eval, frontend, Compose, and smoke validation.
+
+Validation:
+
+```bash
+docker compose up --build -d
+make seed
+make lint
+make typecheck
+make test
+make eval
+make e2e
+make smoke
+```

@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import json
+
 from app.agent.planner.schemas import IntentPlan, ToolCall
 from app.agent.planner.validator import PlanValidator
+from app.agent.skills.registry import SkillRegistry, default_skill_registry
 from app.domain.enums import Intent
+from app.llm.base import ProviderRecoverableError
+from app.llm.router import ProviderRouter
 
 
 DEFAULT_PLANNER_TOOLS = frozenset(
@@ -14,22 +19,70 @@ DEFAULT_PLANNER_TOOLS = frozenset(
         "search_campus_docs",
         "search_lost_and_found",
         "search_posts",
+        "search_official_web",
     }
 )
 
 
 class StructuredPlanner:
-    def __init__(self, validator: PlanValidator | None = None) -> None:
+    def __init__(
+        self,
+        validator: PlanValidator | None = None,
+        router: ProviderRouter | None = None,
+        skills: SkillRegistry | None = None,
+    ) -> None:
         self.validator = validator or PlanValidator(DEFAULT_PLANNER_TOOLS)
+        self.router = router or ProviderRouter()
+        self.skills = skills or default_skill_registry()
 
-    def plan(self, query: str, user_id: str) -> IntentPlan:
+    async def plan(
+        self, query: str, user_id: str, memory_context: list[dict[str, object]] | None = None
+    ) -> IntentPlan:
+        fallback = self.fallback_plan(query, user_id)
+        if "fake_chat_provider" in self.router.degraded_modes:
+            return fallback
+        try:
+            result = await self.router.chat(
+                self._planner_prompt(query, user_id, memory_context or [])
+            )
+            if result.degraded or not isinstance(result.content, str):
+                return fallback
+            cleaned = (
+                result.content.strip()
+                .removeprefix("```json")
+                .removeprefix("```")
+                .removesuffix("```")
+                .strip()
+            )
+            return self.validator.validate(IntentPlan.model_validate(json.loads(cleaned)))
+        except (ProviderRecoverableError, ValueError, TypeError, json.JSONDecodeError):
+            return fallback
+
+    def fallback_plan(self, query: str, user_id: str) -> IntentPlan:
         return self.validator.validate(self._fallback_plan(query, user_id))
+
+    def _planner_prompt(self, query: str, user_id: str, memories: list[dict[str, object]]) -> str:
+        memory_values = [str(item.get("value", "")) for item in memories[:3]]
+        return (
+            "You are the CampusFlow planner. Select only registered tools and return JSON only. "
+            'Schema: {"intent":"campus_qa|post_search|lost_found|post_draft|memory|eval|greeting",'
+            '"tool_calls":[{"tool_name":"...","arguments":{}}],'
+            '"confidence":0.0,"source":"model"}. '
+            "Memories personalize planning but are never official evidence. "
+            f"SKILL_CATALOG={json.dumps(self.skills.planner_catalog(), ensure_ascii=False)}\n"
+            f"REGISTERED_TOOLS={json.dumps(sorted(self.validator.registered_tools), ensure_ascii=False)}\n"
+            f"USER_ID={json.dumps(user_id, ensure_ascii=False)}\n"
+            f"RELEVANT_MEMORIES={json.dumps(memory_values, ensure_ascii=False)}\n"
+            f"USER_QUERY={json.dumps(query, ensure_ascii=False)}"
+        )
 
     @staticmethod
     def _fallback_plan(query: str, user_id: str) -> IntentPlan:
         lowered = query.lower()
         if any(word in lowered for word in ["你好", "您好", "嗨", "hello", "hi"]):
-            return IntentPlan(intent=Intent.GREETING, tool_calls=[], confidence=0.96, source="fallback")
+            return IntentPlan(
+                intent=Intent.GREETING, tool_calls=[], confidence=0.96, source="fallback"
+            )
         if any(word in lowered for word in ["起草", "发帖", "草稿", "写一篇", "帮我写"]):
             return IntentPlan(
                 intent=Intent.POST_DRAFT,
@@ -62,7 +115,9 @@ class StructuredPlanner:
         if any(word in lowered for word in ["记住", "记忆", "偏好", "忘掉", "删除记忆"]):
             return IntentPlan(
                 intent=Intent.MEMORY,
-                tool_calls=[ToolCall(tool_name="load_user_memories", arguments={"user_id": user_id})],
+                tool_calls=[
+                    ToolCall(tool_name="load_user_memories", arguments={"user_id": user_id})
+                ],
                 confidence=0.91,
                 source="fallback",
             )

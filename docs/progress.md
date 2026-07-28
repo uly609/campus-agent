@@ -37,6 +37,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M24 | Complete | Community BM25 plus Bailian reranking, facet-safe refusal, complete draft publishing, browser QA, 65 tests, full validation, and eight healthy services | Pending |
 | M25 | Complete | Published-post memory events, residence extraction, existing-post backfill, 66 tests, 3 E2E flows, eval, and smoke passed | Pending |
 | M26 | Complete | Typed intent/tool plans, registry validation, Ruff, Mypy, and 70 unit/integration tests passed | Pending |
+| M28 | Complete | Model-driven Planner, Skill catalog, corrective official-web retrieval, semantic memory recall, verbatim citations, 81 tests, frontend build, and honest eval passed | Pending |
 
 ## 2026-07-28 M26 Notes
 
@@ -48,6 +49,14 @@ The workspace was empty at start. The starter pack instructions were read from `
 - Added corrective retrieval and memory evaluation metrics, including corrective RAG success tracking and memory recall trace measurement.
 - Improved Vue citation interaction and trace readability without replacing the existing SSE/API flow.
 - Validation passed: `make lint` and `make test` (66 backend unit/integration tests).
+
+## 2026-07-28 M27 Notes
+
+- Entered Eval hardening phase after planner, tool validation, citation provenance, memory lifecycle, and frontend interaction improvements.
+- Ran `make eval` successfully with offline deterministic providers.
+- Current evaluation run: `eval-f2402e40e1`.
+- Metrics covered intent accuracy, retrieval precision/recall, citation precision, faithfulness, refusal/replan metrics, corrective RAG success rate, memory recall traces, and cache behavior.
+- Provider limitation remains explicit: this run uses fake chat, embedding, and VLM providers for deterministic regression.
 
 ## 2026-07-26 M25 Notes
 
@@ -227,3 +236,16 @@ External model credentials are optional for local demo and test runs. When absen
 - Added provider connectivity checks, Redis fixed-window API/chat rate limiting, and privacy-minimized session history that stores titles and counts instead of full message bodies.
 - Added Vue knowledge-base, ingestion task, provider routing, and conversation management surfaces. Browser QA confirmed no raw JSON or encrypted credential fields, no console errors, and no horizontal overflow at 1280 desktop and 390x844 mobile viewports.
 - `docker compose up --build -d` passed and all eight services reported healthy. `make seed`, `make lint`, `make typecheck`, `make test` (34 passed), `make eval` (`eval-6afc0d6cb2`, 80 intent / 18 retrieval / 14 QA), `make e2e` (2 backend flows plus frontend tests), and `make smoke` passed.
+
+
+## 2026-07-28 M28 Notes
+
+- Added a model-driven structured Planner that receives an explicit Skill catalog and tool allowlist. Invalid JSON, unknown tools, invalid arguments, provider failures, and explicit fake-provider mode fall back to the deterministic planner.
+- Added five executable campus Skills covering official knowledge, community search, post creation, memory management, and evaluation. Skills map to existing allowlisted tools instead of bypassing the ToolRegistry.
+- Added corrective retrieval: the first replan rewrites and broadens local retrieval; the second and final replan can call an allowlisted official-domain web search adapter. Missing endpoint, key, or domains returns an explicit degraded error and never fakes an external result.
+- Strengthened grounding by requiring every model claim to include an exact quoted span contained in its selected Evidence. The Vue citation card shows that quoted span and still opens the complete source record.
+- Replaced substring memory matching with embedding cosine Top-K recall. Recalled memories are injected into planning and synthesis only as personalization context and cannot serve as official factual evidence.
+- Added `THIRD_PARTY_NOTICES.md`: Apache-2.0 examples from `awesome-llm-apps` were used as attributed design references; the unlicensed XiaoLin repository was architecture-only and no code was copied.
+- Validation passed: Ruff, Mypy (88 source files), 82 unit/integration/E2E tests, frontend lint/typecheck/test/build, and offline eval `eval-d1b5c6f0ad`. The computed run reports 76.25% intent accuracy, 66.07% nDCG@8, 71.43% answer-fact recall, and 60% citation precision; no score is hardcoded or presented as production quality.
+
+- Final functional QA caught and fixed a source-routing defect: official-document tools previously filtered after global Top-K reranking, allowing community posts to crowd official evidence out. Source filtering now occurs before reranking; `图书馆今天几点关门？` returns `doc-library-hours-00` and its verbatim official passage.
