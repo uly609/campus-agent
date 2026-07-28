@@ -162,8 +162,21 @@ class CampusFlowGraph:
 
     async def load_memory_node(self, state: AgentState) -> None:
         result = await self.registry.call("load_user_memories", {"user_id": state["user_id"]})
-        state["memory_context"] = list(result.data or [])
+        memories = list(result.data or [])
+        query = state.get("raw_query", "")
+        relevant_memories = [
+            item
+            for item in memories
+            if any(token in str(item.get("value", "")) for token in query.split() if token)
+        ]
+        state["memory_context"] = relevant_memories
         state["tool_results"].append(result.model_dump())
+        state["trace"].append({
+            "event": "memory_recall",
+            "candidate_count": len(memories),
+            "used_count": len(relevant_memories),
+            "reason": "query_related_only",
+        })
 
     async def coreference_resolver_node(self, state: AgentState) -> None:
         query = state["raw_query"]
