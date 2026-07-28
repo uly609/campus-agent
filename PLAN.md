@@ -391,7 +391,7 @@ make smoke
 - [x] Validate intent accuracy, planner/tool contract metrics, citation precision, faithfulness, and corrective RAG metrics.
 - [x] Validate memory recall evaluation coverage and conflict/supersedes behavior.
 - [x] Run offline deterministic eval reports and keep provider limitations explicit.
-- [ ] Complete final full validation, documentation sync, and release commit.
+- [x] Complete final full validation, documentation sync, and release commit.
 
 
 ## M28 - Dynamic Skills And Corrective Retrieval
@@ -417,3 +417,14 @@ make eval
 make e2e
 make smoke
 ```
+
+## M29 - Authorized XiaoLin Campus Skill Integration
+
+- [x] Adapt authorized course-schedule, campus-notice, venue, synthetic-profile, and weather services.
+- [x] Register five new typed Skills and six allowlisted tools in the Planner-Executor workflow.
+- [x] Add multi-tool campus activity planning with schedule, venue, weather, and notice fan-out.
+- [x] Add a runnable FastMCP stdio weather server backed by Open-Meteo.
+- [x] Add privacy-safe profile projection and confirmation-only venue reservation drafts.
+- [x] Add campus capability APIs and a clickable Vue campus-skills demonstration page.
+- [x] Add regression coverage for natural-language routing, notice filtering, venue conflicts, MCP registration, and safe profile fields.
+- [x] Complete full Compose, test, eval, E2E, smoke, functional UI, documentation, commit, and push validation.

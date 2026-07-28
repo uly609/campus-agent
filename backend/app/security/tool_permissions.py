@@ -3,6 +3,12 @@ from __future__ import annotations
 ALLOWED_TOOLS = {
     "search_campus_docs",
     "search_official_web",
+    "query_course_schedule",
+    "query_campus_notices",
+    "query_campus_venues",
+    "query_campus_weather",
+    "get_student_profile",
+    "create_venue_reservation_draft",
     "search_posts",
     "get_post_detail",
     "search_lost_and_found",

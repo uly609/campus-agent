@@ -14,7 +14,7 @@ INGESTION_STREAM = "campusflow:knowledge:ingest"
 
 
 class DuplicateKnowledgeError(ValueError):
-    pass
+    """Raised when identical knowledge content already exists under another source."""
 
 
 class KnowledgeService:

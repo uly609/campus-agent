@@ -4,6 +4,7 @@ import {
   Activity,
   Bot,
   BookOpen,
+  CalendarDays,
   Check,
   ChevronRight,
   CircleAlert,
@@ -30,6 +31,7 @@ const views = [
   { id: "chat", label: "AI 助手", icon: MessageSquareText },
   { id: "search", label: "智能搜索", icon: Search },
   { id: "draft", label: "发帖助手", icon: Sparkles },
+  { id: "campus", label: "校园技能", icon: CalendarDays },
   { id: "knowledge", label: "知识库", icon: BookOpen },
   { id: "memory", label: "记忆", icon: MemoryStick },
   { id: "eval", label: "评测", icon: Gauge },
@@ -71,6 +73,7 @@ const draftImageName = ref("");
 const memories = ref([]);
 const evalReport = ref(null);
 const traces = ref([]);
+const campusCapabilities = ref(null);
 const knowledgeDocuments = ref([]);
 const ingestionJobs = ref([]);
 const knowledgeForm = ref({ source_id: "", title: "", body: "", official: true });
@@ -131,8 +134,19 @@ function switchView(id) {
   if (id === "memory" && !memories.value.length) loadMemory();
   if (id === "eval" && !evalReport.value) loadLatestEval();
   if (id === "trace" && !traces.value.length) loadTrace();
+  if (id === "campus" && !campusCapabilities.value) loadCampusCapabilities();
   if (id === "knowledge") loadKnowledge();
   if (id === "platform") loadProviders();
+}
+
+async function loadCampusCapabilities() {
+  await run("campus", async () => { campusCapabilities.value = await api("/api/v1/campus/capabilities"); });
+}
+
+async function runCampusPrompt(prompt) {
+  chatInput.value = prompt;
+  activeView.value = "chat";
+  await sendChat();
 }
 
 async function loadPosts() {
@@ -493,11 +507,12 @@ function uniqueCitations(citations = []) {
 }
 
 async function openCitation(citation) {
-  await openSourceDetail({
-    source_id: citation.source_id,
-    title: citation.title,
-    official: false,
-  });
+  if (String(citation.source_id).startsWith("xiaolin-") || String(citation.source_id).startsWith("open-meteo-")) {
+    selectedResult.value = { source_id: citation.source_id, title: citation.title, official: false };
+    sourceDetail.value = { source_id: citation.source_id, title: citation.title, body: citation.quoted_span, official: false, tags: ["Agent Skill", "演示或实时数据"] };
+    return;
+  }
+  await openSourceDetail({ source_id: citation.source_id, title: citation.title, official: false });
 }
 
 function readableTrace(trace) {
@@ -635,6 +650,19 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <div class="edit-area"><input v-model="draftFeedback" :disabled="draft.confirmed" /><button class="secondary" :disabled="draft.confirmed || busy === 'edit' || draft.edit_round >= 5" @click="updateDraft(false)">修改</button><button v-if="!draft.confirmed" class="primary icon-text" :disabled="busy === 'confirm'" @click="updateDraft(true)"><Check :size="18" />确认草稿</button><button v-else class="primary icon-text" :disabled="draft.published || busy === 'publish'" @click="publishDraft"><Send :size="18" />{{ draft.published ? '已发布' : '发布帖子' }}</button></div>
           </template>
         </article>
+      </section>
+
+      <section v-else-if="activeView === 'campus'" class="view">
+        <div class="section-head"><div><h2>校园 Agent 技能</h2><p>Planner 会按问题动态选择工具，也能一次组合多项能力</p></div><button class="secondary icon-text" :disabled="busy === 'campus'" @click="loadCampusCapabilities"><RefreshCw :class="{ spin: busy === 'campus' }" :size="18" />刷新</button></div>
+        <div class="post-grid campus-skill-grid">
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('查一下我周二的课表')"><span class="result-icon"><CalendarDays :size="20" /></span><h3>个人课表</h3><p>按日期、课程、教师或校区查询演示课表。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('查最新奖学金通知')"><span class="result-icon"><BookOpen :size="20" /></span><h3>校园通知</h3><p>检索结构化公告、发布部门与时间。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('找东湖校区能坐200人的讲座场地，要投影')"><span class="result-icon"><Search :size="20" /></span><h3>场地协调</h3><p>筛选容量、设备和时段冲突。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('东湖校区未来3天天气怎么样')"><span class="result-icon"><Activity :size="20" /></span><h3>实时天气</h3><p>通过 Open-Meteo 适配器获取外部实时信息。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('我的导师是谁')"><span class="result-icon"><Bot :size="20" /></span><h3>学生画像</h3><p>只读取演示画像的非敏感字段。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('帮我规划一场东湖校区200人讲座')"><span class="result-icon"><Sparkles :size="20" /></span><h3>活动统筹</h3><p>一次规划课表、场地、天气与通知多个工具。</p></button>
+        </div>
+        <div v-if="campusCapabilities" class="run-meta"><span>{{ campusCapabilities.skills.length }} 项可用技能</span><small>业务数据为合成演示；天气为外部实时数据；预约必须人工确认</small></div>
       </section>
 
       <section v-else-if="activeView === 'knowledge'" class="view platform-layout">

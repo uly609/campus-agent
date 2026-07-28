@@ -44,6 +44,16 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
         "通勤车",
         "心理咨询",
         "社团",
+        "课表",
+        "课程",
+        "教室",
+        "讲座",
+        "场地",
+        "场馆",
+        "天气",
+        "导师",
+        "专业",
+        "班级",
     ]
     if all(item.official for item in evidence) and not any(
         anchor in query for anchor in supported_fact_anchors
@@ -66,8 +76,9 @@ def judge_relevance(query: str, evidence: list[Evidence]) -> dict[str, float | b
 
 
 def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> GroundedAnswer:
+    multi_evidence = any(marker in query for marker in ("规划", "统筹", "方案", "讲座"))
     official = [item for item in evidence if item.official]
-    support = official or evidence
+    support = evidence if multi_evidence else (official or evidence)
     if query_facet(query):
         support = [
             item
@@ -96,9 +107,26 @@ def synthesize_grounded_answer(query: str, evidence: list[Evidence]) -> Grounded
             continue
         seen_excerpts.add(normalized)
         unique_support.append(item)
-    for index, item in enumerate(unique_support[:1], start=1):
+    selected_support = unique_support
+    if multi_evidence:
+        selected_support = []
+        seen_skills: set[str] = set()
+        for item in unique_support:
+            skill = str(item.metadata.get("skill", item.source_type))
+            if skill in seen_skills:
+                continue
+            seen_skills.add(skill)
+            selected_support.append(item)
+    for index, item in enumerate(selected_support[: 4 if multi_evidence else 1], start=1):
         claim_id = f"claim-{index}"
-        source_note = "官方信息" if item.official else "社区信息，可能过时"
+        if item.source_type == "skill":
+            source_note = "校园业务数据（演示）"
+        elif item.source_type == "external":
+            source_note = "外部实时信息"
+        elif item.source_type == "profile":
+            source_note = "演示学生画像"
+        else:
+            source_note = "官方信息" if item.official else "社区信息，可能过时"
         claim_text = f"{source_note}：{item.excerpt[:120]}"
         claims.append(Claim(claim_id=claim_id, text=claim_text, evidence_ids=[item.evidence_id]))
         citations.append(

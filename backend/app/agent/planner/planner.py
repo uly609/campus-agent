@@ -13,9 +13,15 @@ from app.llm.router import ProviderRouter
 DEFAULT_PLANNER_TOOLS = frozenset(
     {
         "create_post_draft",
+        "create_venue_reservation_draft",
         "get_campus_service_info",
         "get_eval_report",
+        "get_student_profile",
         "load_user_memories",
+        "query_campus_notices",
+        "query_campus_venues",
+        "query_campus_weather",
+        "query_course_schedule",
         "search_campus_docs",
         "search_lost_and_found",
         "search_posts",
@@ -82,6 +88,60 @@ class StructuredPlanner:
         if any(word in lowered for word in ["你好", "您好", "嗨", "hello", "hi"]):
             return IntentPlan(
                 intent=Intent.GREETING, tool_calls=[], confidence=0.96, source="fallback"
+            )
+        if ("讲座" in lowered or "活动" in lowered) and any(
+            word in lowered for word in ["规划", "统筹", "安排", "举办", "办一场"]
+        ):
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[
+                    ToolCall(tool_name="query_course_schedule", arguments={"query": query}),
+                    ToolCall(tool_name="query_campus_venues", arguments={"query": query}),
+                    ToolCall(tool_name="query_campus_weather", arguments={"query": query}),
+                    ToolCall(tool_name="query_campus_notices", arguments={"query": query}),
+                ],
+                confidence=0.95,
+                source="fallback",
+            )
+        if any(word in lowered for word in ["课表", "课程", "上课", "什么课", "教室", "任课老师"]):
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[ToolCall(tool_name="query_course_schedule", arguments={"query": query})],
+                confidence=0.95,
+                source="fallback",
+            )
+        if any(word in lowered for word in ["通知", "公告", "奖学金", "开学安排", "运动会"]):
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[ToolCall(tool_name="query_campus_notices", arguments={"query": query})],
+                confidence=0.94,
+                source="fallback",
+            )
+        if any(word in lowered for word in ["场地", "场馆", "报告厅", "会议室", "预约教室", "预约单", "预约草稿"]):
+            tool_name = (
+                "create_venue_reservation_draft"
+                if any(word in lowered for word in ["生成预约单", "预约草稿"])
+                else "query_campus_venues"
+            )
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[ToolCall(tool_name=tool_name, arguments={"query": query})],
+                confidence=0.94,
+                source="fallback",
+            )
+        if any(word in lowered for word in ["天气", "下雨", "气温", "带伞"]):
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[ToolCall(tool_name="query_campus_weather", arguments={"query": query})],
+                confidence=0.94,
+                source="fallback",
+            )
+        if any(word in lowered for word in ["我的导师", "我的专业", "我的班级", "我在哪个校区"]):
+            return IntentPlan(
+                intent=Intent.CAMPUS_QA,
+                tool_calls=[ToolCall(tool_name="get_student_profile", arguments={"query": query})],
+                confidence=0.94,
+                source="fallback",
             )
         if any(word in lowered for word in ["起草", "发帖", "草稿", "写一篇", "帮我写"]):
             return IntentPlan(

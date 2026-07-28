@@ -38,7 +38,7 @@ class Post(PostCreate):
 class Evidence(BaseModel):
     evidence_id: str
     source_id: str
-    source_type: Literal["official", "post", "event", "image"]
+    source_type: Literal["official", "post", "event", "image", "skill", "external", "profile"]
     title: str
     excerpt: str
     score: float = Field(ge=0)

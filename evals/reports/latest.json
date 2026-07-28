@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-d1b5c6f0ad",
-  "created_at": "2026-07-28T10:53:19.159215+00:00",
+  "run_id": "eval-08f82f61ba",
+  "created_at": "2026-07-28T12:09:20.130254+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -33,21 +33,21 @@
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
     "qa_answer_fact_recall": 0.7142857142857143,
-    "qa_context_relevance": 0.21317460317460318,
-    "qa_citation_precision": 0.6,
-    "qa_citation_faithfulness": 0.7,
+    "qa_context_relevance": 0.1465079365079365,
+    "qa_citation_precision": 0.5,
+    "qa_citation_faithfulness": 0.9,
     "qa_forbidden_content_rate": 0.0,
-    "refusal_precision": 0.5714285714285714,
+    "refusal_precision": 0.8,
     "refusal_recall": 1.0,
-    "refusal_f1": 0.7272727272727273,
-    "replan_precision": 0.375,
+    "refusal_f1": 0.888888888888889,
+    "replan_precision": 0.42857142857142855,
     "replan_recall": 1.0,
-    "replan_f1": 0.5454545454545454,
-    "tool_success_rate": 0.9027777777777778,
-    "corrective_rag_success_rate": 0.5,
+    "replan_f1": 0.6,
+    "tool_success_rate": 0.9206349206349206,
+    "corrective_rag_success_rate": 0.7142857142857143,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 85.85135449993686,
-    "p95_latency_ms": 103.48337499999616,
+    "p50_latency_ms": 212.83487499931653,
+    "p95_latency_ms": 298.7599579992093,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -128,16 +128,16 @@
     },
     "qa": {
       "refusal": {
-        "accuracy": 0.7857142857142857,
-        "precision": 0.5714285714285714,
+        "accuracy": 0.9285714285714286,
+        "precision": 0.8,
         "recall": 1.0,
-        "f1": 0.7272727272727273
+        "f1": 0.888888888888889
       },
       "replan": {
-        "accuracy": 0.6428571428571429,
-        "precision": 0.375,
+        "accuracy": 0.7142857142857143,
+        "precision": 0.42857142857142855,
         "recall": 1.0,
-        "f1": 0.5454545454545454
+        "f1": 0.6
       }
     }
   },
@@ -815,9 +815,9 @@
           "doc-dorm-repair-26",
           "doc-counseling-10",
           "doc-counseling-31",
-          "doc-delivery-30",
           "doc-delivery-09",
-          "doc-internship-13"
+          "doc-delivery-30",
+          "doc-internship-39"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -906,9 +906,9 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
+          "post-seed-025",
           "post-seed-217",
           "post-seed-089",
-          "post-seed-025",
           "post-seed-281",
           "post-seed-153"
         ],
@@ -1004,9 +1004,9 @@
           "doc-delivery-09",
           "doc-delivery-30",
           "post-seed-037",
-          "post-seed-229",
-          "post-seed-101",
           "post-seed-165",
+          "post-seed-101",
+          "post-seed-229",
           "post-seed-001",
           "post-seed-193"
         ],
@@ -1284,19 +1284,19 @@
         "question": "奖学金申请要哪些条件，材料交给谁？",
         "answer": "官方信息：奖学金申请需要成绩排名、志愿服务记录和学院公示，材料由辅导员统一收取。 本条适用于 2026 春夏学期。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.16666666666666666,
-        "citation_precision": 1.0,
+        "context_relevance": 0.14285714285714285,
+        "citation_precision": 0.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
         "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": false,
-        "replan_count": 0,
+        "predicted_replan": true,
+        "replan_count": 1,
         "citation_source_ids": [
-          "doc-scholarship-03"
+          "doc-scholarship-36"
         ],
-        "corrective_rag_triggered": false,
+        "corrective_rag_triggered": true,
         "memory_recall_count": 0
       },
       {
@@ -1345,19 +1345,21 @@
         "id": "qa-06",
         "difficulty": "conflict",
         "question": "补退选什么时候截止，课程容量听群里的还是系统里的？",
-        "answer": "证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
+        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为东湖校区信息楼A A101。 [1]",
         "answer_fact_recall": 0.0,
-        "context_relevance": 0.5,
+        "context_relevance": 0.0,
         "citation_precision": 0.0,
-        "citation_faithfulness": 0.0,
+        "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
-        "predicted_refusal": true,
+        "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 2,
-        "citation_source_ids": [],
-        "corrective_rag_triggered": true,
+        "predicted_replan": false,
+        "replan_count": 0,
+        "citation_source_ids": [
+          "xiaolin-course-CS101"
+        ],
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {
@@ -1385,19 +1387,21 @@
         "id": "qa-08",
         "difficulty": "multi_fact",
         "question": "怎么查个人课表，临时换教室以哪里为准？",
-        "answer": "证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
+        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为东湖校区信息楼A A101。 [1]",
         "answer_fact_recall": 0.0,
-        "context_relevance": 0.14285714285714285,
+        "context_relevance": 0.0,
         "citation_precision": 0.0,
-        "citation_faithfulness": 0.0,
+        "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
-        "predicted_refusal": true,
+        "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 2,
-        "citation_source_ids": [],
-        "corrective_rag_triggered": true,
+        "predicted_replan": false,
+        "replan_count": 0,
+        "citation_source_ids": [
+          "xiaolin-course-CS101"
+        ],
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {

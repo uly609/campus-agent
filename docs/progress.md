@@ -38,6 +38,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M25 | Complete | Published-post memory events, residence extraction, existing-post backfill, 66 tests, 3 E2E flows, eval, and smoke passed | Pending |
 | M26 | Complete | Typed intent/tool plans, registry validation, Ruff, Mypy, and 70 unit/integration tests passed | Pending |
 | M28 | Complete | Model-driven Planner, Skill catalog, corrective official-web retrieval, semantic memory recall, verbatim citations, 81 tests, frontend build, and honest eval passed | Pending |
+| M29 | Complete | Authorized XiaoLin campus Skills, FastMCP weather, clickable Vue demos, 92 tests, honest eval, 3 E2E flows, smoke, and 8 healthy services | Pending |
 
 ## 2026-07-28 M26 Notes
 
@@ -249,3 +250,15 @@ External model credentials are optional for local demo and test runs. When absen
 - Validation passed: Ruff, Mypy (88 source files), 82 unit/integration/E2E tests, frontend lint/typecheck/test/build, and offline eval `eval-d1b5c6f0ad`. The computed run reports 76.25% intent accuracy, 66.07% nDCG@8, 71.43% answer-fact recall, and 60% citation precision; no score is hardcoded or presented as production quality.
 
 - Final functional QA caught and fixed a source-routing defect: official-document tools previously filtered after global Top-K reranking, allowing community posts to crowd official evidence out. Source filtering now occurs before reranking; `图书馆今天几点关门？` returns `doc-library-hours-00` and its verbatim official passage.
+
+## 2026-07-28 M29 Notes
+
+- Adapted the actually implemented campus capabilities from the authorized `20czy/zafu_xiaolin_campus_agent` revision `1b678bd`: course schedules, structured notices, venue filtering and conflict checks, safe synthetic profile context, Open-Meteo weather, and its FastMCP stdio server.
+- Registered six new allowlisted tools behind five typed Skills. Deterministic and model-driven planners can route natural queries to individual tools; complex lecture planning fans out to schedule, venue, weather, and notice tools in one bounded plan.
+- Added `GET /api/v1/campus/capabilities` plus typed course, notice, venue, weather, profile, and reservation-draft endpoints. Reservation remains a synthetic confirmation-required draft and never performs a real campus booking.
+- Added a Vue campus-skills page with executable demonstrations and local source details for dynamic Skill citations. Fixed duplicate draft validation in the frontend.
+- Corrected upstream edge cases found during integration: natural `查最新...通知` normalization, missing notice-id mapping, unspecified-time venue conflict handling, mixed-type course-id comparison, and nullable venue-id typing.
+- Real functional checks returned the Tuesday timetable through `query_course_schedule`, venue candidates through `query_campus_venues`, safe advisor context through `get_student_profile`, and a four-tool activity-planning trace. FastMCP stdio tool discovery and a live `campus_weather` call succeeded.
+- Final validation passed after a full Compose rebuild: all eight services remained healthy; `make seed`, `make lint`, `make typecheck`, `make test` (92 passed), `make eval` (`eval-08f82f61ba`), `make e2e` (3 backend flows plus frontend tests), and `make smoke` passed.
+- The computed offline report remains intentionally honest: 76.25% intent accuracy, 72.22% Hit@8, 66.07% nDCG@8, 71.43% answer-fact recall, 50% citation precision, 88.89% refusal F1, and 60% replan F1. No score is hardcoded or presented as production quality.
+- The migrated boundary is explicit: the implemented XiaoLin course, notice, venue, weather, profile, and MCP capabilities were adapted with author permission. README-only future features and unrelated Hello Agents projects were not represented as migrated code.

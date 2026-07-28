@@ -4,7 +4,7 @@ from app.agent.planner.schemas import IntentPlan
 
 
 class PlanValidationError(ValueError):
-    pass
+    """Raised when a generated plan violates the active tool contract."""
 
 
 class PlanValidator:
@@ -16,6 +16,12 @@ class PlanValidator:
         "create_post_draft": frozenset({"intent"}),
         "load_user_memories": frozenset({"user_id"}),
         "search_official_web": frozenset({"query"}),
+        "query_course_schedule": frozenset({"query"}),
+        "query_campus_notices": frozenset({"query"}),
+        "query_campus_venues": frozenset({"query"}),
+        "query_campus_weather": frozenset({"query"}),
+        "get_student_profile": frozenset({"query"}),
+        "create_venue_reservation_draft": frozenset({"query"}),
     }
 
     _argument_types: dict[str, dict[str, type]] = {
@@ -26,6 +32,12 @@ class PlanValidator:
         "create_post_draft": {"intent": str},
         "load_user_memories": {"user_id": str},
         "search_official_web": {"query": str},
+        "query_course_schedule": {"query": str},
+        "query_campus_notices": {"query": str},
+        "query_campus_venues": {"query": str},
+        "query_campus_weather": {"query": str},
+        "get_student_profile": {"query": str},
+        "create_venue_reservation_draft": {"query": str},
     }
 
     def __init__(self, registered_tools: frozenset[str] | set[str]) -> None:

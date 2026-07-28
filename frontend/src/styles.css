@@ -94,6 +94,13 @@ main { min-width: 0; padding: 0 34px 42px; }
 .job-list { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e6e4; }.job-list > h3 { margin: 0 0 10px; font-size: 13px; }.job-list article { padding: 9px 0; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }.job-list strong, .job-list small { display: block; font-size: 11px; }.job-list small { margin-top: 3px; color: #83908b; }.progress { height: 4px; margin-top: 7px; border-radius: 2px; background: #e4e9e7; overflow: hidden; }.progress span { height: 100%; display: block; background: #4a9f80; }
 .provider-list article { padding: 14px; border: 1px solid #dce2df; border-radius: 6px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto 38px; gap: 10px; align-items: center; }
 .provider-main > span { color: #28765d; font-size: 9px; font-weight: 800; }.provider-main h3 { margin: 3px 0; font-size: 14px; }.provider-main p { margin: 0; color: #596762; font-size: 12px; }.provider-main small { max-width: 360px; margin-top: 4px; display: block; color: #8a9691; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.provider-state { text-align: right; }.provider-state small { margin-top: 5px; display: block; color: #89948f; font-size: 9px; }
+.skill-action { width: 100%; color: inherit; text-align: left; cursor: pointer; }
+.skill-action:hover { border-color: #83ad9d; background: #f7fbf9; }
+.skill-action:focus-visible { outline: 2px solid #4a9f80; outline-offset: 2px; }
+.skill-action .result-icon { flex: 0 0 auto; }
+.skill-action h3 { margin-top: 13px; }
+.campus-skill-grid + .run-meta { margin-top: 16px; padding-top: 14px; border-top: 1px solid #dce2df; }
+
 .spin { animation: spin .8s linear infinite; }@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 980px) { .post-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }.draft-layout, .platform-layout { grid-template-columns: 1fr; }.draft-workspace { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }.draft-workspace .section-head { grid-column: 1 / -1; }.draft-workspace .draft-categories { grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); }.draft-workspace .upload-zone, .draft-workspace .image-preview { grid-row: span 2; }.draft-workspace .field { margin: 0; align-content: end; } }

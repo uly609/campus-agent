@@ -101,6 +101,8 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 
 ## Dynamic Skills and official web fallback
 
-The Agent exposes five typed Skills backed by allowlisted tools: campus knowledge, community search, post creation, memory management, and evaluation. With a real Chat provider, the Planner returns a validated JSON tool plan; degraded mode uses an explicit deterministic planner.
+The Agent exposes ten typed Skills backed by allowlisted tools: campus knowledge, community search, post creation, memory management, evaluation, course schedule, campus notices, venue coordination, campus weather, and a privacy-safe synthetic student profile. A complex campus activity request can fan out to schedule, venue, weather, and notice tools in one validated plan. With a real Chat provider, the Planner returns validated JSON; degraded mode uses an explicit deterministic planner.
+
+The weather capability is available both through the internal ToolRegistry and as a FastMCP stdio server: `python -m scripts.weather_mcp_server` from `backend/`. Course, notice, venue, and profile fixtures are explicitly synthetic demonstration data; weather uses Open-Meteo and reports failure instead of fabricating live data.
 
 Optional corrective official-web search is configured with `OFFICIAL_WEB_SEARCH_URL`, `OFFICIAL_WEB_SEARCH_API_KEY`, and a comma-separated `OFFICIAL_WEB_ALLOWED_DOMAINS`. All three are required. When absent, CampusFlow reports the tool as unavailable and continues with local Hybrid RAG; it never reports fake external results. See `THIRD_PARTY_NOTICES.md` for reference-project attribution and reuse boundaries.

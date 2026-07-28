@@ -1,4 +1,4 @@
-# Eval Report eval-d1b5c6f0ad
+# Eval Report eval-08f82f61ba
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -20,21 +20,21 @@
 | retrieval_hit_at_8 | 0.7222 |
 | retrieval_hard_negative_rate_at_5 | 0.2778 |
 | qa_answer_fact_recall | 0.7143 |
-| qa_context_relevance | 0.2132 |
-| qa_citation_precision | 0.6000 |
-| qa_citation_faithfulness | 0.7000 |
+| qa_context_relevance | 0.1465 |
+| qa_citation_precision | 0.5000 |
+| qa_citation_faithfulness | 0.9000 |
 | qa_forbidden_content_rate | 0.0000 |
-| refusal_precision | 0.5714 |
+| refusal_precision | 0.8000 |
 | refusal_recall | 1.0000 |
-| refusal_f1 | 0.7273 |
-| replan_precision | 0.3750 |
+| refusal_f1 | 0.8889 |
+| replan_precision | 0.4286 |
 | replan_recall | 1.0000 |
-| replan_f1 | 0.5455 |
-| tool_success_rate | 0.9028 |
-| corrective_rag_success_rate | 0.5000 |
+| replan_f1 | 0.6000 |
+| tool_success_rate | 0.9206 |
+| corrective_rag_success_rate | 0.7143 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 85.8514 |
-| p95_latency_ms | 103.4834 |
+| p50_latency_ms | 212.8349 |
+| p95_latency_ms | 298.7600 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases
@@ -67,6 +67,7 @@
 - Retrieval `ret-10`: nDCG@8=0.000 - 想预约心理咨询，突发危机应该联系哪里？
 - Retrieval `ret-11`: nDCG@8=0.631 - 宿舍电脑连不上网，重置账号和报障分别怎么做？
 - QA `qa-01`: fact=0.000, citation=0.000 - 宿舍突然漏水，应该在哪里报修，紧急电话是多少？
+- QA `qa-03`: fact=1.000, citation=0.000 - 奖学金申请要哪些条件，材料交给谁？
 - QA `qa-06`: fact=0.000, citation=0.000 - 补退选什么时候截止，课程容量听群里的还是系统里的？
 - QA `qa-08`: fact=0.000, citation=0.000 - 怎么查个人课表，临时换教室以哪里为准？
 - QA `qa-09`: fact=0.000, citation=0.000 - 图书馆门口发现的蓝色校园卡被送到哪里了？

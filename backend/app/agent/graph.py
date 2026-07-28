@@ -100,6 +100,12 @@ class CampusFlowGraph:
 
     @staticmethod
     def _route_relevance(state: AgentState) -> GraphRoute:
+        if any(
+            result.get("tool_name") == "create_venue_reservation_draft"
+            and result.get("success")
+            for result in state.get("tool_results", [])
+        ):
+            return "grounded_synthesis_node"
         if state.get("evidence_coverage", 0.0) >= 0.25:
             return "grounded_synthesis_node"
         if state.get("replan_count", 0) >= state.get("max_replans", 2):
@@ -334,7 +340,7 @@ class CampusFlowGraph:
             if isinstance(result.content, str) and not result.degraded and result.content.strip():
                 return result.content.strip()[:300]
         except (ProviderRecoverableError, ValueError, TypeError):
-            pass
+            return f"{query} 校园 官方 说明"
         return f"{query} 校园 官方 说明"
 
     async def grounded_synthesis_node(self, state: AgentState) -> None:
@@ -375,6 +381,30 @@ class CampusFlowGraph:
                 )
             else:
                 state["final_answer"] = "草稿生成失败，请补充发帖主题后重试。"
+            state["citations"] = []
+            return
+        venue_draft = next(
+            (
+                result.get("data")
+                for result in reversed(state.get("tool_results", []))
+                if result.get("tool_name") == "create_venue_reservation_draft"
+                and result.get("success")
+            ),
+            None,
+        )
+        if isinstance(venue_draft, dict):
+            if venue_draft.get("status") == "success":
+                booking = dict(venue_draft.get("booking", {}))
+                state["final_answer"] = (
+                    f"已生成待审批的场地预约草稿：{booking.get('venue_name', '')}，"
+                    f"{booking.get('date', '')} {booking.get('period', '')}。"
+                    "尚未提交，必须由你确认后再进入真实预约系统。"
+                )
+            else:
+                missing = "、".join(
+                    str(item) for item in venue_draft.get("missing_fields", [])
+                ) or "场地、日期和时段"
+                state["final_answer"] = f"可以生成预约草稿，但还需要补充：{missing}。"
             state["citations"] = []
             return
         evidence = [Evidence.model_validate(item) for item in state.get("retrieved_evidence", [])]

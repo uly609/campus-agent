@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import chat, evals, health, ingest, memory, posts, providers, search, sessions
+from app.api import campus_skills, chat, evals, health, ingest, memory, posts, providers, search, sessions
 from app.core.logging import configure_logging
 from app.observability.metrics import REQUEST_LATENCY, REQUESTS, metrics_response
 from app.security.rate_limit import RateLimiter
@@ -54,6 +54,7 @@ async def metrics_middleware(request: Request, call_next):
 
 
 app.include_router(health.router)
+app.include_router(campus_skills.router)
 app.include_router(chat.router)
 app.include_router(posts.router)
 app.include_router(ingest.router)

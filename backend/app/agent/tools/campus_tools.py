@@ -6,7 +6,15 @@ import httpx
 from pathlib import Path
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import PostCreate, ToolResult
+from app.campus_skills.adapters import (
+    course_evidence,
+    notice_evidence,
+    profile_evidence,
+    reservation_draft,
+    venue_evidence,
+    weather_evidence,
+)
+from app.domain.schemas import Evidence, PostCreate, ToolResult
 from app.multimodal.image_attributes import extract_image_attributes
 from app.multimodal.ocr import verify_demo_student_card as verify_card
 from app.retrieval.ingestion import build_corpus
@@ -96,6 +104,44 @@ class CampusTools:
             error_message=None,
             latency_ms=0,
             provenance=[{"kind": "official_web", "allowlisted": True}],
+        )
+
+    async def query_course_schedule(self, payload: dict[str, object]) -> ToolResult:
+        evidence = course_evidence(payload)
+        return self._evidence_result("query_course_schedule", evidence)
+
+    async def query_campus_notices(self, payload: dict[str, object]) -> ToolResult:
+        evidence = notice_evidence(payload)
+        return self._evidence_result("query_campus_notices", evidence)
+
+    async def query_campus_venues(self, payload: dict[str, object]) -> ToolResult:
+        evidence = venue_evidence(payload)
+        return self._evidence_result("query_campus_venues", evidence)
+
+    async def query_campus_weather(self, payload: dict[str, object]) -> ToolResult:
+        evidence, error = await weather_evidence(payload)
+        if error:
+            return ToolResult(tool_name="query_campus_weather", success=False, data=None, error_code="WEATHER_SERVICE_UNAVAILABLE", error_message=error, latency_ms=0, provenance=[])
+        return self._evidence_result("query_campus_weather", evidence)
+
+    async def get_student_profile(self, payload: dict[str, object]) -> ToolResult:
+        return self._evidence_result("get_student_profile", profile_evidence())
+
+    async def create_venue_reservation_draft(self, payload: dict[str, object]) -> ToolResult:
+        draft = reservation_draft(payload)
+        success = draft.get("status") != "error"
+        return ToolResult(tool_name="create_venue_reservation_draft", success=success, data=draft, error_code=None if success else "VENUE_DRAFT_INVALID", error_message=None if success else str(draft.get("message")), latency_ms=0, provenance=[{"kind": "xiaolin_authorized_adaptation", "synthetic_demo": True}])
+
+    @staticmethod
+    def _evidence_result(tool_name: str, evidence: list[Evidence]) -> ToolResult:
+        return ToolResult(
+            tool_name=tool_name,
+            success=True,
+            data=[item.model_dump() for item in evidence],
+            error_code=None,
+            error_message=None,
+            latency_ms=0,
+            provenance=[{"kind": "xiaolin_authorized_adaptation", "synthetic_demo": True}],
         )
 
     async def get_post_detail(self, payload: dict[str, object]) -> ToolResult:
@@ -293,6 +339,12 @@ def build_registry(tools: CampusTools | None = None):
     registry.register("search_campus_docs", active.search_campus_docs)
     registry.register("search_posts", active.search_posts)
     registry.register("search_official_web", active.search_official_web)
+    registry.register("query_course_schedule", active.query_course_schedule)
+    registry.register("query_campus_notices", active.query_campus_notices)
+    registry.register("query_campus_venues", active.query_campus_venues)
+    registry.register("query_campus_weather", active.query_campus_weather)
+    registry.register("get_student_profile", active.get_student_profile)
+    registry.register("create_venue_reservation_draft", active.create_venue_reservation_draft)
     registry.register("get_post_detail", active.get_post_detail)
     registry.register("search_lost_and_found", active.search_lost_and_found)
     registry.register("get_campus_events", active.get_campus_events)
