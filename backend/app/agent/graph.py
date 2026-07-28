@@ -243,8 +243,12 @@ class CampusFlowGraph:
         state["retrieved_evidence"] = evidence
 
     async def retrieval_gate_node(self, state: AgentState) -> None:
-        if not state.get("retrieved_evidence"):
+        evidence = state.get("retrieved_evidence", [])
+        if not evidence:
             state.setdefault("errors", []).append({"code": "NO_RETRIEVAL_RESULTS", "message": "No evidence was retrieved."})
+            state["trace"].append({"event": "corrective_rag", "action": "rewrite_query", "reason": "empty_retrieval"})
+        elif len(evidence) < 2:
+            state["trace"].append({"event": "corrective_rag", "action": "expand_retrieval", "reason": "low_evidence_count"})
 
     async def relevance_judge_node(self, state: AgentState) -> None:
         evidence = [Evidence.model_validate(item) for item in state.get("retrieved_evidence", [])]
@@ -256,6 +260,7 @@ class CampusFlowGraph:
         state["replan_count"] = min(state.get("replan_count", 0) + 1, state.get("max_replans", 2))
         state["trace"].append({"event": "replan", "count": state["replan_count"], "reason": "low_evidence_coverage"})
         if state["replan_count"] >= state.get("max_replans", 2):
+            state["trace"].append({"event": "corrective_rag", "action": "degrade_answer", "reason": "retry_limit_reached"})
             return
         query = state["resolved_query"] + " 校园 官方 说明"
         state["plan"] = [{"tool": "search_campus_docs", "args": {"query": query}}, {"tool": "search_posts", "args": {"query": query}}]
