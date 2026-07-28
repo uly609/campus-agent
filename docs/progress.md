@@ -44,6 +44,8 @@ The workspace was empty at start. The starter pack instructions were read from `
 - Added pre-execution validation for registered tool names and required arguments, with the active `ToolRegistry` as the graph's allowlist source.
 - Preserved the compiled 13-node LangGraph workflow and deterministic fallback behavior. Added four focused planner tests.
 - Validation passed: Ruff, Mypy across 84 source files, and 70 unit/integration tests.
+- Added planner argument type validation before execution and regression coverage for invalid tool parameters.
+- Validation after hardening: `make test` passed with 66 backend unit/integration tests, `make lint` passed. Frontend typecheck was blocked because the local frontend container lacked the `vite` executable dependency.
 
 ## 2026-07-26 M25 Notes
 

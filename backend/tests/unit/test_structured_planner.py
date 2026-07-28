@@ -40,3 +40,14 @@ def test_plan_rejects_missing_required_arguments() -> None:
 def test_plan_schema_rejects_invalid_confidence() -> None:
     with pytest.raises(ValidationError):
         IntentPlan(intent=Intent.GREETING, tool_calls=[], confidence=1.1)
+
+
+def test_plan_rejects_invalid_argument_type_before_execution() -> None:
+    plan = IntentPlan(
+        intent=Intent.POST_SEARCH,
+        tool_calls=[ToolCall(tool_name="search_posts", arguments={"query": 123})],
+        confidence=0.8,
+    )
+
+    with pytest.raises(PlanValidationError, match="must be str"):
+        PlanValidator({"search_posts"}).validate(plan)
