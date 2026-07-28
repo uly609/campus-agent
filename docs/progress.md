@@ -36,6 +36,14 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M23 | Complete | Honest evaluation v2 with exact graded qrels, hard cases, standard IR/QA/control-flow metrics, 60 tests, full validation, and eight healthy services | Pending |
 | M24 | Complete | Community BM25 plus Bailian reranking, facet-safe refusal, complete draft publishing, browser QA, 65 tests, full validation, and eight healthy services | Pending |
 | M25 | Complete | Published-post memory events, residence extraction, existing-post backfill, 66 tests, 3 E2E flows, eval, and smoke passed | Pending |
+| M26 | Complete | Typed intent/tool plans, registry validation, Ruff, Mypy, and 70 unit/integration tests passed | Pending |
+
+## 2026-07-28 M26 Notes
+
+- Replaced the graph's untyped tuple/dictionary intent-planning path with Pydantic v2 `IntentPlan` and `ToolCall` schemas while preserving the legacy `plan_intent` adapter.
+- Added pre-execution validation for registered tool names and required arguments, with the active `ToolRegistry` as the graph's allowlist source.
+- Preserved the compiled 13-node LangGraph workflow and deterministic fallback behavior. Added four focused planner tests.
+- Validation passed: Ruff, Mypy across 84 source files, and 70 unit/integration tests.
 
 ## 2026-07-26 M25 Notes
 

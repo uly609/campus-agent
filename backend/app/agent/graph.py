@@ -6,9 +6,9 @@ from typing import Any, Awaitable, Callable, Literal
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agent.policies import judge_relevance, synthesize_grounded_answer
-from app.agent.planning import plan_intent
 from app.agent.grounded_llm import synthesize_with_provider
+from app.agent.planner import PlanValidator, StructuredPlanner
+from app.agent.policies import judge_relevance, synthesize_grounded_answer
 from app.agent.state import AgentState, REQUIRED_NODES, SIX_STAGES
 from app.agent.tools.campus_tools import build_registry
 from app.domain.enums import Intent
@@ -30,6 +30,7 @@ class CampusFlowGraph:
         self.repo = repo or JsonRepository()
         self.provider_router = ProviderRouter()
         self.registry = build_registry()
+        self.planner = StructuredPlanner(PlanValidator(self.registry.tool_names))
         self.nodes = {
             "input_guard_node": self.input_guard_node,
             "load_memory_node": self.load_memory_node,
@@ -217,10 +218,10 @@ class CampusFlowGraph:
 
     async def intent_planner_node(self, state: AgentState) -> None:
         query = state["resolved_query"]
-        intent, plan, confidence = plan_intent(query, state["user_id"])
-        state["intent"] = intent.value
-        state["intent_confidence"] = confidence
-        state["plan"] = plan
+        plan = self.planner.plan(query, state["user_id"])
+        state["intent"] = plan.intent.value
+        state["intent_confidence"] = plan.confidence
+        state["plan"] = plan.to_steps()
         state["current_step"] = 0
 
     async def tool_executor_node(self, state: AgentState) -> None:

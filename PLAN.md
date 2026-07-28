@@ -376,3 +376,11 @@ make smoke
 - [x] Recognize residence statements such as `我住在` without memorizing generic location posts.
 - [x] Create at most one memory event for repeated publication requests.
 - [x] Backfill the affected demo post and validate lint, typecheck, tests, eval, E2E, and smoke.
+
+## M26 - Typed Intent Planning
+
+- [x] Add Pydantic v2 `IntentPlan` and `ToolCall` boundary schemas.
+- [x] Add `StructuredPlanner` while retaining the deterministic fallback planner.
+- [x] Validate planned tools and required arguments against the active `ToolRegistry` before execution.
+- [x] Keep the existing 13-node LangGraph workflow and legacy planner adapter compatible.
+- [x] Add planner schema, tool allowlist, argument validation, and graph regression tests.

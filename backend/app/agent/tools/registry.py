@@ -18,6 +18,10 @@ class ToolRegistry:
         assert_tool_allowed(name)
         self._tools[name] = tool
 
+    @property
+    def tool_names(self) -> frozenset[str]:
+        return frozenset(self._tools)
+
     async def call(self, name: str, payload: dict[str, object]) -> ToolResult:
         assert_tool_allowed(name)
         if name not in self._tools:
