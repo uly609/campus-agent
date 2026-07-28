@@ -15,3 +15,6 @@ data/generated/runtime_*.json
 evals/reports/*.tmp
 infra/alertmanager/bin/
 *.pyc
+.DS_Store
+evals/reports/eval-*.json
+evals/reports/eval-*.md
