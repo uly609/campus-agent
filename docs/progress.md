@@ -40,6 +40,9 @@ The workspace was empty at start. The starter pack instructions were read from `
 
 ## 2026-07-28 M26 Notes
 
+- Added strict citation provenance validation in grounded synthesis. Generated citations now verify claim ids, evidence ids, and source provenance before returning an answer.
+
+
 - Replaced the graph's untyped tuple/dictionary intent-planning path with Pydantic v2 `IntentPlan` and `ToolCall` schemas while preserving the legacy `plan_intent` adapter.
 - Added pre-execution validation for registered tool names and required arguments, with the active `ToolRegistry` as the graph's allowlist source.
 - Preserved the compiled 13-node LangGraph workflow and deterministic fallback behavior. Added four focused planner tests.

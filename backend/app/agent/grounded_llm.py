@@ -11,6 +11,19 @@ from app.retrieval.chunking import tokenize
 from app.retrieval.query_facets import query_facet, text_matches_query_facet
 
 
+def validate_claim_citations(claims: list[Claim], citations: list[Citation], evidence: list[Evidence]) -> None:
+    evidence_ids = {item.evidence_id for item in evidence}
+    source_by_evidence = {item.evidence_id: item.source_id for item in evidence}
+    claim_ids = {item.claim_id for item in claims}
+    for citation in citations:
+        if citation.claim_id not in claim_ids:
+            raise ValueError("citation references unknown claim")
+        if citation.evidence_id not in evidence_ids:
+            raise ValueError("citation references unknown evidence")
+        if source_by_evidence[citation.evidence_id] != citation.source_id:
+            raise ValueError("citation source does not match evidence provenance")
+
+
 class ModelClaim(BaseModel):
     text: str = Field(min_length=2, max_length=300)
     evidence_id: str
@@ -57,6 +70,7 @@ def parse_grounded_model_output(content: str, evidence: list[Evidence], query: s
             )
         )
         sentences.append(f"{candidate.text} [{source_index}]")
+    validate_claim_citations(claims, citations, evidence)
     return GroundedAnswer(answer="\n".join(sentences), claims=claims, citations=citations, confidence=0.8)
 
 
