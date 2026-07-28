@@ -135,7 +135,13 @@ class JsonRepository:
 
     def load_memories(self, user_id: str) -> list[MemoryRecord]:
         rows = self._read_json(self.memories_path, [])
-        return [MemoryRecord.model_validate(row) for row in rows if row.get("user_id") == user_id]
+        now = datetime.now(timezone.utc).isoformat()
+        return [
+            MemoryRecord.model_validate(row)
+            for row in rows
+            if row.get("user_id") == user_id
+            and (not row.get("expires_at") or row.get("expires_at") > now)
+        ]
 
     def save_memory(self, memory: MemoryRecord) -> MemoryRecord:
         rows = self._read_json(self.memories_path, [])
