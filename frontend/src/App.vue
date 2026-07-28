@@ -492,6 +492,24 @@ function uniqueCitations(citations = []) {
   });
 }
 
+async function openCitation(citation) {
+  await openSourceDetail({
+    source_id: citation.source_id,
+    title: citation.title,
+    official: false,
+  });
+}
+
+function readableTrace(trace) {
+  const event = trace?.event || trace?.node || "执行";
+  return ({
+    memory_recall: "记忆召回",
+    corrective_rag: "检索纠正",
+    replan: "重新规划",
+    grounded_synthesis_fallback: "降级回答",
+  })[event] || event;
+}
+
 function statusLabel(value) {
   return ({
     queued: "排队中",
@@ -572,7 +590,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <article v-for="(message, index) in chatMessages" :key="`${index}-${message.role}`" :class="['chat-message', message.role]">
               <div v-if="message.role === 'assistant'" class="answer-label"><Sparkles :size="17" /> CampusFlow</div>
               <p>{{ message.text }}</p>
-              <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><div v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small></div></div></div>
+              <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><button v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source" type="button" @click="openCitation(citation)"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small></div></button></div>
               <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
             </article>
           </div>
@@ -663,7 +681,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
       <section v-else-if="activeView === 'trace'" class="view">
         <div class="section-head"><div><h2>执行轨迹</h2><p>最近 50 次 Agent 执行记录</p></div><button class="secondary icon-text" :disabled="busy === 'trace'" @click="loadTrace"><RefreshCw :class="{ spin: busy === 'trace' }" :size="18" />刷新</button></div>
-        <div v-if="traces.length" class="trace-list"><article v-for="(trace, index) in traces.slice(0, 20)" :key="trace.request_id || index"><span class="trace-dot"></span><div><strong>{{ intentLabel(trace.intent) }}</strong><small>{{ trace.request_id || trace.trace_id }}</small><p>{{ trace.node || trace.status || '已完成' }}</p></div></article></div>
+        <div v-if="traces.length" class="trace-list"><article v-for="(trace, index) in traces.slice(0, 20)" :key="trace.request_id || index"><span class="trace-dot"></span><div><strong>{{ intentLabel(trace.intent) }}</strong><small>{{ trace.request_id || trace.trace_id }}</small><p>{{ readableTrace(trace) }}</p></div></article></div>
         <div v-else class="empty-state"><Activity :size="28" /><h2>暂无执行轨迹</h2><p>完成一次聊天后刷新。</p></div>
       </section>
 
