@@ -384,3 +384,4 @@ make smoke
 - [x] Validate planned tools and required arguments against the active `ToolRegistry` before execution.
 - [x] Keep the existing 13-node LangGraph workflow and legacy planner adapter compatible.
 - [x] Add planner schema, tool allowlist, argument validation, and graph regression tests.
+- [x] Add citation provenance validation, corrective retrieval trace metrics, memory recall metrics, and Vue citation/trace interaction improvements.
