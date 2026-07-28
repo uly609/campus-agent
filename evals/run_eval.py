@@ -161,6 +161,15 @@ async def evaluate_qa(cases: list[dict[str, Any]]) -> tuple[dict[str, float], li
                 "predicted_replan": predicted_replan,
                 "replan_count": state.get("replan_count", 0),
                 "citation_source_ids": cited_sources,
+                "corrective_rag_triggered": any(
+                    item.get("event") == "corrective_rag"
+                    for item in state.get("trace", [])
+                ),
+                "memory_recall_count": sum(
+                    int(item.get("used_count", 0))
+                    for item in state.get("trace", [])
+                    if item.get("event") == "memory_recall"
+                ),
             }
         )
 
@@ -188,6 +197,18 @@ async def evaluate_qa(cases: list[dict[str, Any]]) -> tuple[dict[str, float], li
         "replan_recall": replan["recall"],
         "replan_f1": replan["f1"],
         "tool_success_rate": safe_div(tool_successes, tool_calls),
+        "corrective_rag_success_rate": safe_div(
+            sum(
+                item["answer_fact_recall"] > 0
+                for item in results
+                if item["corrective_rag_triggered"]
+            ),
+            sum(item["corrective_rag_triggered"] for item in results),
+        ),
+        "memory_recall_non_empty_rate": safe_div(
+            sum(item["memory_recall_count"] > 0 for item in results),
+            len(results),
+        ),
         "p50_latency_ms": statistics.median(ordered),
         "p95_latency_ms": ordered[p95_index],
     }
