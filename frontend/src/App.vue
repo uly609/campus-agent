@@ -911,13 +911,26 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <button type="button" aria-label="关闭提示" @click="notice = null"><X :size="17" /></button>
       </div>
 
-      <section v-if="activeView === 'feed'" class="view">
+      <section v-if="activeView === 'feed'" class="view feed-view">
         <div class="section-head"><div><h2>匿名校园动态</h2><p>最新发布的问答、活动与失物招领</p></div><button class="icon-button" title="刷新帖子" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
         <div class="post-grid">
-          <button v-for="post in posts" :key="post.post_id" type="button" class="post-card post-card-button" @click="openPost(post)">
-            <div class="post-meta"><span>{{ categoryLabel(post.category) }}</span><time>{{ post.created_at.slice(0, 10) }}</time></div>
-            <h3>{{ post.title }}</h3><p>{{ post.body }}</p>
-            <footer><span>{{ post.author_alias }}</span><span class="comment-count"><MessageCircle :size="14" />{{ post.comment_count || 0 }}</span></footer>
+          <button v-for="post in posts" :key="post.post_id" type="button" class="feed-post-card" @click="openPost(post)">
+            <span class="post-avatar" aria-hidden="true">{{ post.author_alias?.includes('外部') ? '社' : '匿' }}</span>
+            <span class="feed-post-content">
+              <span class="post-byline">
+                <span><strong>{{ post.author_alias }}</strong><em>{{ categoryLabel(post.category) }}</em></span>
+                <time>{{ post.created_at.slice(0, 10) }}</time>
+              </span>
+              <strong class="post-title">{{ post.title }}</strong>
+              <span class="post-excerpt">{{ post.body }}</span>
+              <span class="post-footer">
+                <span class="post-context">
+                  <span v-if="post.location">{{ post.location }}</span>
+                  <span v-for="tag in post.tags?.slice(0, post.location ? 1 : 2)" :key="tag">#{{ tag }}</span>
+                </span>
+                <span class="comment-count"><MessageCircle :size="15" />评论 {{ post.comment_count || 0 }}<ChevronRight :size="15" /></span>
+              </span>
+            </span>
           </button>
         </div>
       </section>

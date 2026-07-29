@@ -41,6 +41,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M29 | Complete | Authorized XiaoLin campus Skills, FastMCP weather, clickable Vue demos, 92 tests, honest eval, 3 E2E flows, smoke, and 8 healthy services | Pending |
 | M30 | Complete | XiaoLin Planner/Selector/Executor chat workbench, streamed task trace, planning-style grounded answers, 94 tests, eval, E2E, smoke, and 8 healthy services | Pending |
 | M37 | Complete | Persistent anonymous post comments, synchronized counts, frontend checks, focused backend tests, browser QA, and healthy rebuilt API/Web services | Pending |
+| M38 | Complete | Compact community feed, direct-voice imported posts, 18-post runtime migration, regression coverage, and responsive browser QA | Pending |
 
 ## 2026-07-29 M30 Notes
 
@@ -348,3 +349,10 @@ External model credentials are optional for local demo and test runs. When absen
 - Added typed comment listing and creation APIs, persistent JSON storage, post-level comment counts, and a relational model for future database-backed persistence.
 - Kept verification data isolated from the live feed so automated comments do not pollute the user's existing campus posts.
 - Validation passed with Ruff, Mypy (113 source files), 107 unit/integration tests, 3 E2E flows, frontend lint/build/tests, offline eval `eval-74c66feb68`, smoke, browser QA, and healthy rebuilt API/Web services.
+
+## 2026-07-29 M38 Notes
+
+- Replaced the oversized card grid with a compact, centered community feed. Each row now presents an anonymous avatar, author, category, date, concise body, relevant tags, and an explicit comment action.
+- Removed the third-person `匿名摘要：有同学...` presentation from all 18 imported community posts. Their bodies now speak directly while remaining anonymized.
+- Preserved provenance honestly through a `社区转帖` tag instead of presenting imported content as native CampusFlow authorship. Usernames, contact details, source images, and other sensitive fields remain excluded.
+- Browser QA at the active 710px viewport measured a 140px first row, 12 visible feed records, no horizontal overflow, and no console errors.

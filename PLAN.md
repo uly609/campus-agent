@@ -500,3 +500,11 @@ make smoke
 - [x] Return and synchronize comment counts in the feed and detail view.
 - [x] Validate blank and oversized comments at the typed API boundary.
 - [x] Add unit, E2E, frontend, and running-service regression coverage.
+
+## M38 - Community Feed Presentation
+
+- [x] Replace oversized showcase cards with a compact single-column community feed.
+- [x] Surface author, category, tags, date, and comment count in each post row.
+- [x] Replace third-person imported summaries with direct post-style wording.
+- [x] Keep a visible community-repost marker while removing imported usernames and contact details.
+- [x] Migrate the 18 existing imported posts and complete responsive browser QA.
