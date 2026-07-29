@@ -318,3 +318,14 @@ External model credentials are optional for local demo and test runs. When absen
 - Replaced the former character portrait with an original green campus-AI avatar combining a conversation symbol, graduation cap, and small golden accent.
 - Updated the browser title, rebuilt API/Web, and verified the header and empty-state avatar in the running 5173 page with no console errors.
 - Validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-9a1a3df130`, smoke, and all eight Compose services healthy.
+
+## 2026-07-29 M35 Notes
+
+- Corrected the project's most important trust boundary: seeded campus documents and copied XiaoLin course, notice, venue, profile, and community results now disclose that they are demonstration data rather than live Zhejiang Gongshang University records.
+- Added three manually verified public sources from the university library, campus-card borrowing rules, and logistics service center. Each source stores its official URL and verification date; verified sources receive a bounded retrieval boost over demo fixtures.
+- Removed the fake `campus.example.edu` URLs. The 40 legacy RAG records remain available for feature demonstrations, but their text and metadata explicitly state that they are not official school publications.
+- Normal chat now uses a code-level campus-fact gate before model invocation, so school-specific locations, hours, people, phone numbers, procedures, schedules, and notices cannot be freely generated on the non-retrieval path. Agent synthesis must distinguish verified official, live external, demo, and model-generated data.
+- The chat UI now displays source-mode badges for every Agent task and a prominent answer-level disclosure. Normal responses display `模型直接回答 · 未检索校园资料`.
+- Migrated the live RAG corpus without deleting sessions, memories, or posts: it now contains 40 explicit demo records and 3 verified official sources. No user-uploaded knowledge documents existed, so no custom document was overwritten.
+- Browser QA verified both critical paths on port 5173. Agent timetable results display `演示数据` and `回答使用演示数据，不代表你的真实校务信息`; normal-mode `学校图书馆在哪` is blocked before model invocation and returns no fabricated location. The page reported no console errors.
+- Final validation passed with Ruff, Mypy (113 source files), 101 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-382a460e32`, smoke, and all eight Compose services healthy.

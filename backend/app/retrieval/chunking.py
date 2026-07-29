@@ -85,7 +85,12 @@ def chunks_from_documents(documents: Iterable[dict[str, str]]) -> list[Chunk]:
                 title=doc["title"],
                 text=doc["body"],
                 official=doc.get("official", "true") == "true",
-                metadata={"path": doc.get("path", ""), "url": doc.get("url", "")},
+                metadata={
+                    "path": doc.get("path", ""),
+                    "url": doc.get("url", ""),
+                    "data_mode": doc.get("data_mode", "unverified"),
+                    "verified_at": doc.get("verified_at", ""),
+                },
             )
         )
     return chunks

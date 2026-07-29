@@ -47,6 +47,7 @@ class CampusTools:
     async def search_campus_docs(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", ""))
         evidence = [item for item in await (await self.retrieval()).search(query, source_type="official") if item.official]
+        modes = {str(item.metadata.get("data_mode", "unverified")) for item in evidence}
         return ToolResult(
             tool_name="search_campus_docs",
             success=True,
@@ -54,7 +55,7 @@ class CampusTools:
             error_code=None,
             error_message=None,
             latency_ms=0,
-            provenance=[],
+            provenance=[{"kind": "rag_corpus", "data_modes": sorted(modes)}],
         )
 
     async def search_posts(self, payload: dict[str, object]) -> ToolResult:
@@ -69,7 +70,7 @@ class CampusTools:
             error_code=None,
             error_message=None,
             latency_ms=0,
-            provenance=[],
+            provenance=[{"kind": "community_corpus", "synthetic_demo": True}],
         )
 
     async def search_official_web(self, payload: dict[str, object]) -> ToolResult:
@@ -122,7 +123,15 @@ class CampusTools:
         evidence, error = await weather_evidence(payload)
         if error:
             return ToolResult(tool_name="query_campus_weather", success=False, data=None, error_code="WEATHER_SERVICE_UNAVAILABLE", error_message=error, latency_ms=0, provenance=[])
-        return self._evidence_result("query_campus_weather", evidence)
+        return ToolResult(
+            tool_name="query_campus_weather",
+            success=True,
+            data=[item.model_dump() for item in evidence],
+            error_code=None,
+            error_message=None,
+            latency_ms=0,
+            provenance=[{"kind": "open_meteo", "live_external": True}],
+        )
 
     async def get_student_profile(self, payload: dict[str, object]) -> ToolResult:
         return self._evidence_result("get_student_profile", profile_evidence())

@@ -710,6 +710,44 @@ function xiaolinResultSummary(message, taskId) {
   return "执行完成";
 }
 
+function xiaolinTaskDataMode(message, taskId) {
+  const result = xiaolinTaskResult(message, taskId);
+  if (!result || result.status !== "success") return null;
+  const apiResult = result.api_result || {};
+  const data = apiResult?.data ?? apiResult;
+  const rows = Array.isArray(data) ? data : data && typeof data === "object" ? [data] : [];
+  const provenance = Array.isArray(apiResult?.provenance) ? apiResult.provenance : [];
+  const metadata = rows.map((row) => row?.metadata || {}).filter(Boolean);
+  const selectedTool = xiaolinSelection(message, taskId)?.tool || "";
+
+  if (
+    provenance.some((item) => item?.synthetic_demo) ||
+    metadata.some((item) => item?.synthetic_demo || item?.data_mode === "demo") ||
+    ["course-schedule", "course_schedule", "query_course_schedule", "campus-notice", "query_campus_notices", "venue-booking", "query_campus_venues", "student_profile", "get_student_profile", "community_search", "search_posts"].includes(selectedTool)
+  ) return { label: "演示数据", tone: "demo" };
+  if (
+    provenance.some((item) => item?.live_external) ||
+    ["campus_weather", "query_campus_weather"].includes(selectedTool)
+  ) return { label: "实时数据", tone: "live" };
+  if (
+    metadata.some((item) => item?.data_mode === "verified_official") ||
+    provenance.some((item) => item?.data_modes?.includes?.("verified_official"))
+  ) return { label: "官方来源", tone: "verified" };
+  if (selectedTool === "general_assistant") return { label: "模型生成", tone: "model" };
+  return { label: "来源未核验", tone: "unknown" };
+}
+
+function xiaolinMessageDataMode(message) {
+  const modes = (message.processInfo?.taskPlan || [])
+    .map((task) => xiaolinTaskDataMode(message, task.id))
+    .filter(Boolean);
+  if (modes.some((item) => item.tone === "demo")) return { label: "回答使用演示数据，不代表你的真实校务信息", tone: "demo" };
+  if (modes.some((item) => item.tone === "verified")) return { label: "回答包含已核验的学校官方来源", tone: "verified" };
+  if (modes.some((item) => item.tone === "live")) return { label: "回答包含实时外部数据", tone: "live" };
+  if (modes.length) return { label: "回答来源尚未核验", tone: "unknown" };
+  return null;
+}
+
 function markdownParts(text) {
   const parts = [];
   const pattern = /(\*\*[^*]+\*\*|`[^`]+`)/g;
@@ -869,13 +907,15 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                     <div v-if="message.processInfo.taskPlan.length" class="xiaolin-task-plan">
                       <div class="task-plan-title"><span>任务计划</span><small>{{ message.processInfo.taskPlan.length }} 项</small></div>
                       <article v-for="task in message.processInfo.taskPlan" :key="task.id" class="xiaolin-task">
-                        <div class="xiaolin-task-head"><strong>{{ task.task }}</strong><span :class="['task-status', xiaolinTaskStatus(message, task.id)]">{{ xiaolinTaskStatus(message, task.id) }}</span></div>
+                        <div class="xiaolin-task-head"><strong>{{ task.task }}</strong><div class="task-badges"><span v-if="xiaolinTaskDataMode(message, task.id)" :class="['data-origin', xiaolinTaskDataMode(message, task.id).tone]">{{ xiaolinTaskDataMode(message, task.id).label }}</span><span :class="['task-status', xiaolinTaskStatus(message, task.id)]">{{ xiaolinTaskStatus(message, task.id) }}</span></div></div>
                         <p v-if="xiaolinSelection(message, task.id)">使用工具：{{ toolLabel(xiaolinSelection(message, task.id).tool) }} · {{ xiaolinSelection(message, task.id).reason }}</p>
                         <small>{{ xiaolinResultSummary(message, task.id) }}</small>
                       </article>
                     </div>
                   </template>
                 </div>
+                <div v-if="message.role === 'assistant' && !message.processInfo" class="answer-origin model">模型直接回答 · 未检索校园资料</div>
+                <div v-if="message.role === 'assistant' && message.processInfo && xiaolinMessageDataMode(message)" :class="['answer-origin', xiaolinMessageDataMode(message).tone]">{{ xiaolinMessageDataMode(message).label }}</div>
                 <div class="message-content">
                   <div v-for="block in messageBlocks(message.text)" :key="block.key" :class="['message-block', block.type, `level-${block.level || 0}`]">
                     <span v-if="block.marker" class="message-marker">{{ block.marker }}</span>

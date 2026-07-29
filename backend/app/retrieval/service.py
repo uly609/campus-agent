@@ -80,7 +80,15 @@ class RetrievalService:
             if facet and not text_matches_query_facet(query, candidate_text):
                 facet_adjustment = -0.2
             official_boost = 0.08 if chunk.official and expanded_query != query else 0.0
-            return item[1] + direct_overlap + expanded_overlap * 0.35 + facet_adjustment + official_boost
+            verified_boost = 0.18 if chunk.metadata.get("data_mode") == "verified_official" else 0.0
+            return (
+                item[1]
+                + direct_overlap
+                + expanded_overlap * 0.35
+                + facet_adjustment
+                + official_boost
+                + verified_boost
+            )
 
         candidate_rows = sorted(fused, key=rerank_score, reverse=True)[:60]
         if source_type == "official":

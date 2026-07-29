@@ -96,12 +96,12 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 
 ## Data
 
-`make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
+`make seed` creates 300 Chinese demo campus posts, 40 explicitly labeled demo documents, and 3 manually verified Zhejiang Gongshang University public sources under `data/generated`. Verified records retain their official URLs and verification dates; demo records never use fake official URLs. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
 
 
 ## ZJSU XiaoLin chat workbench: 浙小商助手
 
-The **AI 学问** page is the primary XiaoLin-style Agent surface; the separate reference application is not required. Each completed response shows the validated task plan, selected allowlisted tools, per-tool success/result count/latency, the relevance decision, the grounded answer, and clickable citations. The profile and campus fixtures are localized to Zhejiang Gongshang University. Only user-provided profile facts are used; unknown advisor, dormitory, contact, and student-id fields remain explicitly unconfigured.
+The **AI 学问** page is the primary XiaoLin-style Agent surface; the separate reference application is not required. Each Agent response shows its task plan, selected tools, execution results, and source mode. Verified official, live external, demo, and model-generated results are visibly distinguished. Normal mode performs no campus retrieval and is instructed to refuse school-specific factual claims that would require current sources. The profile and campus fixtures are localized to Zhejiang Gongshang University. Only user-provided profile facts are used; unknown advisor, dormitory, contact, and student-id fields remain explicitly unconfigured.
 
 ## Dynamic Skills and official web fallback
 

@@ -39,6 +39,9 @@ if (!app.includes("normalizeXiaolinTaskResult") || !app.includes('{ status: "suc
   throw new Error("successful XiaoLin task events must not be displayed as failures");
 }
 if (!app.includes("uniqueCitations")) throw new Error("chat citations must be de-duplicated for display");
+if (!app.includes("xiaolinTaskDataMode") || !app.includes("回答使用演示数据") || !app.includes("模型直接回答 · 未检索校园资料")) {
+  throw new Error("chat answers must disclose verified, demo, live, and ungrounded data modes");
+}
 if (!app.includes("runCampusPrompt") || !app.includes("活动统筹") || !app.includes("200人的讲座场地")) {
   throw new Error("campus skills need executable demo actions");
 }

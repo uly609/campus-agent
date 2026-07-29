@@ -39,6 +39,55 @@ DOC_TOPICS = [
     ),
 ]
 
+VERIFIED_OFFICIAL_DOCS = [
+    {
+        "source_id": "zjsu-library-overview-2022",
+        "source_type": "official",
+        "title": "浙江工商大学图书馆本馆介绍",
+        "body": (
+            "浙江工商大学图书馆由下沙校区图书馆和教工路校区图书馆组成。"
+            "下沙校区图书馆地址为浙江省杭州市下沙高教园区学正街18号，"
+            "图书馆提供书刊外借、阅览、参考咨询、文献检索、馆际互借和文献传递等服务。"
+            "该页面标注更新时间为2022年3月，具体开放安排应以图书馆最新通知为准。"
+        ),
+        "official": "true",
+        "path": "official://lib.zjsu.edu.cn/gybg/list.htm",
+        "url": "https://lib.zjsu.edu.cn/gybg/list.htm",
+        "data_mode": "verified_official",
+        "verified_at": "2026-07-29",
+    },
+    {
+        "source_id": "zjsu-library-card-rules",
+        "source_type": "official",
+        "title": "浙江工商大学图书借阅规则中的校园卡规定",
+        "body": (
+            "浙江工商大学图书借阅规则规定，读者凭本人校园卡办理图书借阅。"
+            "校园卡遗失后，可凭有效证件到校园卡服务部或图书馆挂失。"
+            "这是借阅规则，不代表当前校园卡补办地点或办理时间；相关事项应以学校最新服务通知为准。"
+        ),
+        "official": "true",
+        "path": "official://ck.zjsu.edu.cn/library-card-rules.pdf",
+        "url": "https://ck.zjsu.edu.cn/_upload/article/files/d6/77/df8c2e8246239ba853c346726497/b50f2b32-0cfb-4d91-ae2b-cca5ee2cef30.pdf",
+        "data_mode": "verified_official",
+        "verified_at": "2026-07-29",
+    },
+    {
+        "source_id": "zjsu-logistics-services-2026",
+        "source_type": "official",
+        "title": "浙江工商大学后勤服务中心服务信息",
+        "body": (
+            "浙江工商大学后勤服务中心网站提供餐饮、公寓、校园卡、物业、商贸和校车等服务入口。"
+            "页面列出的24小时服务热线为0571-28008899（下沙）和0571-89808899（教工路），"
+            "维修报修热线为0571-28877866。电话和服务安排可能调整，使用前应核对官网最新页面。"
+        ),
+        "official": "true",
+        "path": "official://hq.zjsu.edu.cn/main.htm",
+        "url": "https://hq.zjsu.edu.cn/main.htm",
+        "data_mode": "verified_official",
+        "verified_at": "2026-07-29",
+    },
+]
+
 # High-confidence service answers need several independently retrievable notices.
 # The remaining documents preserve broad campus-demo coverage.
 RETRIEVAL_SUPPORT_TOPICS = [
@@ -96,13 +145,15 @@ def build_documents() -> list[dict[str, str]]:
                 "source_id": f"{source_id}-{index:02d}",
                 "source_type": "official",
                 "title": title if index < len(DOC_TOPICS) else f"{title}（补充说明）",
-                "body": f"{body} 本条适用于 2026 春夏学期。",
+                "body": f"演示资料，非浙江工商大学官方发布：{body} 本条仅用于功能演示。",
                 "official": "true",
-                "path": f"data/campus_docs/{source_id}-{index:02d}.md",
-                "url": f"https://campus.example.edu/docs/{source_id}-{index:02d}",
+                "path": f"demo://campus_docs/{source_id}-{index:02d}.md",
+                "url": "",
+                "data_mode": "demo",
+                "verified_at": "",
             }
         )
-    return docs
+    return docs + VERIFIED_OFFICIAL_DOCS
 
 
 def build_posts() -> list[Post]:
@@ -170,9 +221,11 @@ def build_posts() -> list[Post]:
 
 def main() -> None:
     repo = JsonRepository()
-    repo.save_documents(build_documents())
-    repo.save_posts(build_posts())
-    print("seeded 300 posts and 40 official documents")
+    documents = build_documents()
+    posts = build_posts()
+    repo.save_documents(documents)
+    repo.save_posts(posts)
+    print(f"seeded {len(posts)} demo posts and {len(documents)} campus documents")
 
 
 if __name__ == "__main__":

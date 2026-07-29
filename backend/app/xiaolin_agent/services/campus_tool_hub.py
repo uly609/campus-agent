@@ -124,6 +124,7 @@ class CampusToolHub:
         return {
             "status": "success",
             "tool": "general_assistant",
+            "data_mode": "model_generated",
             "query_type": query_type,
             "keywords": keywords,
             "result": response.content,
@@ -132,6 +133,8 @@ class CampusToolHub:
     @classmethod
     async def _call_course_info(cls, params: dict[str, Any]) -> dict[str, Any]:
         return {
+            "data_mode": "demo",
+            "disclaimer": "演示课程数据，未连接浙江工商大学教务系统。",
             "courses": [
                 {
                     "id": str(params.get("course_id") or "CS101"),
@@ -151,6 +154,8 @@ class CampusToolHub:
             "name": location,
             "coordinates": "30.315, 120.389",
             "category": "校园地点",
+            "data_mode": "demo",
+            "disclaimer": "演示地图数据，位置与设施未经过学校官方核验。",
         }
         if detail:
             basic_info.update(

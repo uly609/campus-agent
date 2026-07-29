@@ -1,4 +1,4 @@
-# Eval Report eval-9a1a3df130
+# Eval Report eval-382a460e32
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -14,27 +14,27 @@
 | intent_macro_f1 | 0.7866 |
 | retrieval_precision_at_8 | 0.0903 |
 | retrieval_recall_at_8 | 0.7222 |
-| retrieval_mrr_at_8 | 0.6389 |
-| retrieval_map_at_8 | 0.6389 |
-| retrieval_ndcg_at_8 | 0.6607 |
+| retrieval_mrr_at_8 | 0.6111 |
+| retrieval_map_at_8 | 0.6111 |
+| retrieval_ndcg_at_8 | 0.6402 |
 | retrieval_hit_at_8 | 0.7222 |
 | retrieval_hard_negative_rate_at_5 | 0.2778 |
 | qa_answer_fact_recall | 0.7143 |
-| qa_context_relevance | 0.1465 |
+| qa_context_relevance | 0.1415 |
 | qa_citation_precision | 0.5000 |
-| qa_citation_faithfulness | 0.9000 |
+| qa_citation_faithfulness | 1.0000 |
 | qa_forbidden_content_rate | 0.0000 |
-| refusal_precision | 0.8000 |
+| refusal_precision | 1.0000 |
 | refusal_recall | 1.0000 |
-| refusal_f1 | 0.8889 |
-| replan_precision | 0.4286 |
+| refusal_f1 | 1.0000 |
+| replan_precision | 0.5000 |
 | replan_recall | 1.0000 |
-| replan_f1 | 0.6000 |
-| tool_success_rate | 0.9206 |
-| corrective_rag_success_rate | 0.7143 |
+| replan_f1 | 0.6667 |
+| tool_success_rate | 0.9322 |
+| corrective_rag_success_rate | 0.8333 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 186.5677 |
-| p95_latency_ms | 352.4546 |
+| p50_latency_ms | 105.6845 |
+| p95_latency_ms | 175.3770 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases
@@ -59,6 +59,7 @@
 - Intent `intent-75`: expected `eval`, got `campus_qa` - 看看这一版到底测得怎么样
 - Intent `intent-79`: expected `eval`, got `campus_qa` - 这次质量回归有没有退步
 - Retrieval `ret-00`: nDCG@8=0.000 - 今晚想在馆里复习，普通周最晚能待到什么时候？
+- Retrieval `ret-01`: nDCG@8=0.631 - 寝室水管突然漏水，紧急联系电话和处理入口是什么？
 - Retrieval `ret-02`: nDCG@8=0.000 - 学生卡不见了，先冻结还是直接去补？在哪里办？
 - Retrieval `ret-03`: nDCG@8=0.000 - 评奖评优要交哪些证明，最后交给谁？
 - Retrieval `ret-04`: nDCG@8=0.000 - 晚上身体不舒服校内还能看吗，校外就诊凭证怎么办？

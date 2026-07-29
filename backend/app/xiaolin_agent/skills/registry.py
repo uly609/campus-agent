@@ -53,9 +53,9 @@ class SkillRegistry:
     """The original XiaoLin local-skill boundary, backed by Zhejiang Gongshang data."""
 
     _skills: ClassVar[dict[str, SkillRecord]] = {
-        "course-schedule": SkillRecord("course-schedule", "查询浙江工商大学课程表", _query_schedule),
-        "campus-notice": SkillRecord("campus-notice", "查询浙江工商大学校园通知", _query_notices),
-        "venue-booking": SkillRecord("venue-booking", "查询或生成浙江工商大学场地预约草稿", _query_or_reserve_venue),
+        "course-schedule": SkillRecord("course-schedule", "查询演示课表；未连接真实教务系统", _query_schedule),
+        "campus-notice": SkillRecord("campus-notice", "查询演示校园通知；不是学校实时通知", _query_notices),
+        "venue-booking": SkillRecord("venue-booking", "查询演示场地或生成不会提交的预约草稿", _query_or_reserve_venue),
     }
     _aliases: ClassVar[dict[str, str]] = {
         "course_schedule": "course-schedule",

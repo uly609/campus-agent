@@ -135,6 +135,7 @@ async def test_copied_tools_are_registered_and_executable() -> None:
     result = await registry.call("query_course_schedule", {"query": "我的周二课表"})
     assert result.success is True
     assert result.data
+    assert result.provenance[0]["synthetic_demo"] is True
 
 
 @pytest.mark.asyncio

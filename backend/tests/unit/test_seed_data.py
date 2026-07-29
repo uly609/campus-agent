@@ -6,7 +6,7 @@ def test_seed_data_covers_multiple_campus_demo_scenarios() -> None:
     documents = build_documents()
 
     assert len(posts) == 300
-    assert len(documents) == 40
+    assert len(documents) == 43
     assert {post.category.value for post in posts[:12]} == {
         "校园问答",
         "失物招领",
@@ -25,3 +25,6 @@ def test_seed_data_covers_multiple_campus_demo_scenarios() -> None:
         "校园网与宿舍网络",
         "课表与上课时间查询",
     } <= titles
+    assert len([item for item in documents if item["data_mode"] == "verified_official"]) == 3
+    assert len([item for item in documents if item["data_mode"] == "demo"]) == 40
+    assert all("campus.example.edu" not in item["url"] for item in documents)

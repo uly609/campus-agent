@@ -473,3 +473,13 @@ make smoke
 - [x] Rename the user-facing assistant to `浙小商助手` in frontend and backend response identity prompts.
 - [x] Replace the former character portrait with a distinct campus AI avatar.
 - [x] Rebuild, validate, deploy, and commit the identity update.
+
+## M35 - Trustworthy Campus Data Boundaries
+
+- [x] Label seeded RAG documents, community posts, timetable, notices, venues, and profile results as demo data instead of presenting them as live school records.
+- [x] Add verified Zhejiang Gongshang University library, campus-card borrowing, and logistics sources with official URLs and verification dates.
+- [x] Prefer verified official RAG documents over demo fixtures during reranking.
+- [x] Prevent normal mode from inventing Zhejiang Gongshang University locations, hours, people, procedures, schedules, and notices without retrieval.
+- [x] Require Agent answers to distinguish verified official, live external, demo, and model-generated results.
+- [x] Display source-mode badges on normal answers, Agent answers, and individual task results.
+- [x] Rebuild the corpus and services, complete regression and browser QA, and create a local commit.

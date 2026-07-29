@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-9a1a3df130",
-  "created_at": "2026-07-29T05:53:38.451291+00:00",
+  "run_id": "eval-382a460e32",
+  "created_at": "2026-07-29T06:33:16.525963+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -27,27 +27,27 @@
     "intent_macro_f1": 0.7865889175169408,
     "retrieval_precision_at_8": 0.09027777777777778,
     "retrieval_recall_at_8": 0.7222222222222222,
-    "retrieval_mrr_at_8": 0.6388888888888888,
-    "retrieval_map_at_8": 0.6388888888888888,
-    "retrieval_ndcg_at_8": 0.6607105144841319,
+    "retrieval_mrr_at_8": 0.6111111111111112,
+    "retrieval_map_at_8": 0.6111111111111112,
+    "retrieval_ndcg_at_8": 0.6402066119047684,
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
     "qa_answer_fact_recall": 0.7142857142857143,
-    "qa_context_relevance": 0.1465079365079365,
+    "qa_context_relevance": 0.14150793650793653,
     "qa_citation_precision": 0.5,
-    "qa_citation_faithfulness": 0.9,
+    "qa_citation_faithfulness": 1.0,
     "qa_forbidden_content_rate": 0.0,
-    "refusal_precision": 0.8,
+    "refusal_precision": 1.0,
     "refusal_recall": 1.0,
-    "refusal_f1": 0.888888888888889,
-    "replan_precision": 0.42857142857142855,
+    "refusal_f1": 1.0,
+    "replan_precision": 0.5,
     "replan_recall": 1.0,
-    "replan_f1": 0.6,
-    "tool_success_rate": 0.9206349206349206,
-    "corrective_rag_success_rate": 0.7142857142857143,
+    "replan_f1": 0.6666666666666666,
+    "tool_success_rate": 0.9322033898305084,
+    "corrective_rag_success_rate": 0.8333333333333334,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 186.5677499990852,
-    "p95_latency_ms": 352.45462500461144,
+    "p50_latency_ms": 105.68445800163317,
+    "p95_latency_ms": 175.37699999957113,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -128,16 +128,16 @@
     },
     "qa": {
       "refusal": {
-        "accuracy": 0.9285714285714286,
-        "precision": 0.8,
+        "accuracy": 1.0,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.888888888888889
+        "f1": 1.0
       },
       "replan": {
-        "accuracy": 0.7142857142857143,
-        "precision": 0.42857142857142855,
+        "accuracy": 0.7857142857142857,
+        "precision": 0.5,
         "recall": 1.0,
-        "f1": 0.6
+        "f1": 0.6666666666666666
       }
     }
   },
@@ -810,14 +810,14 @@
         "difficulty": "multi_fact",
         "query": "寝室水管突然漏水，紧急联系电话和处理入口是什么？",
         "returned_source_ids": [
+          "zjsu-logistics-services-2026",
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-counseling-10",
           "doc-counseling-31",
+          "doc-counseling-10",
           "doc-delivery-09",
-          "doc-delivery-30",
-          "doc-internship-39"
+          "doc-delivery-30"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -825,9 +825,9 @@
         "hard_negative_hits": [],
         "precision_at_8": 0.125,
         "recall_at_8": 1.0,
-        "mrr_at_8": 1.0,
-        "map_at_8": 1.0,
-        "ndcg_at_8": 1.0,
+        "mrr_at_8": 0.5,
+        "map_at_8": 0.5,
+        "ndcg_at_8": 0.6309297535714575,
         "hit_at_8": 1.0
       },
       {
@@ -881,11 +881,11 @@
         "difficulty": "multi_fact",
         "query": "晚上身体不舒服校内还能看吗，校外就诊凭证怎么办？",
         "returned_source_ids": [
-          "doc-club-14",
-          "doc-club-34",
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
-          "doc-dorm-repair-26"
+          "doc-dorm-repair-26",
+          "doc-club-14",
+          "doc-club-34"
         ],
         "qrels": {
           "doc-clinic-04": 3
@@ -906,11 +906,11 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
-          "post-seed-217",
           "post-seed-089",
+          "post-seed-217",
+          "post-seed-153",
           "post-seed-025",
-          "post-seed-281",
-          "post-seed-153"
+          "post-seed-281"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -931,13 +931,7 @@
         "query": "这学期补退课最后什么时候截止？",
         "returned_source_ids": [
           "doc-course-selection-06",
-          "doc-course-selection-28",
-          "doc-internship-13",
-          "doc-internship-39",
-          "doc-library-hours-00",
-          "doc-library-hours-22",
-          "doc-library-hours-23",
-          "doc-library-hours-24"
+          "doc-course-selection-28"
         ],
         "qrels": {
           "doc-course-selection-06": 3
@@ -957,11 +951,11 @@
         "returned_source_ids": [
           "doc-exam-07",
           "doc-exam-38",
-          "post-demo-05",
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-timetable-16"
+          "doc-timetable-16",
+          "post-demo-05"
         ],
         "qrels": {
           "doc-exam-07": 3
@@ -1003,12 +997,12 @@
         "returned_source_ids": [
           "doc-delivery-09",
           "doc-delivery-30",
-          "post-seed-101",
           "post-seed-037",
+          "post-seed-101",
           "post-seed-165",
           "post-seed-229",
           "post-seed-001",
-          "post-seed-193"
+          "post-seed-065"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1026,6 +1020,7 @@
         "difficulty": "safety",
         "query": "想预约心理咨询，突发危机应该联系哪里？",
         "returned_source_ids": [
+          "zjsu-library-overview-2022",
           "post-demo-02",
           "doc-delivery-09",
           "doc-delivery-30",
@@ -1102,9 +1097,9 @@
           "doc-internship-13",
           "doc-internship-39",
           "post-demo-07",
+          "post-demo-11",
           "doc-exam-07",
           "doc-exam-38",
-          "post-demo-11",
           "doc-scholarship-03",
           "doc-scholarship-36"
         ],
@@ -1171,13 +1166,13 @@
         "query": "我在哪里看今天的课和临时换教室通知？",
         "returned_source_ids": [
           "doc-timetable-16",
+          "zjsu-library-overview-2022",
+          "zjsu-library-card-rules",
           "doc-bus-12",
           "doc-bus-33",
           "doc-graduation-15",
           "doc-graduation-35",
-          "post-seed-011",
-          "post-demo-11",
-          "post-seed-139"
+          "post-seed-011"
         ],
         "qrels": {
           "doc-timetable-16": 3
@@ -1196,13 +1191,13 @@
         "query": "有人见到图书馆门口那张蓝色学生卡吗？",
         "returned_source_ids": [
           "post-demo-09",
+          "zjsu-library-overview-2022",
           "doc-library-hours-00",
           "doc-library-hours-22",
           "doc-library-hours-23",
           "doc-library-hours-24",
-          "post-seed-143",
           "post-seed-043",
-          "post-seed-107"
+          "post-seed-143"
         ],
         "qrels": {
           "post-demo-09": 3
@@ -1221,9 +1216,9 @@
         "id": "qa-00",
         "difficulty": "multi_fact",
         "question": "普通周图书馆最晚几点关门，闭馆前多久停止入馆？",
-        "answer": "官方信息：图书馆周一至周日 8:00-22:30 开放，考试周延长到 23:30。闭馆前 15 分钟停止入馆。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：图书馆周一至周日 8:00-22:30 开放，考试周延长到 23:30。闭馆前 15 分钟停止入馆。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.25,
+        "context_relevance": 0.2,
         "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1242,26 +1237,28 @@
         "id": "qa-01",
         "difficulty": "multi_fact",
         "question": "宿舍突然漏水，应该在哪里报修，紧急电话是多少？",
-        "answer": "证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
+        "answer": "官方信息：浙江工商大学后勤服务中心网站提供餐饮、公寓、校园卡、物业、商贸和校车等服务入口。页面列出的24小时服务热线为0571-[REDACTED_ID]（下沙）和0571-[REDACTED_ID]（教工路），维修报修热线为0571-[REDACTED_ID]。电话和服务安排可 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,
-        "citation_faithfulness": 0.0,
+        "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
-        "predicted_refusal": true,
+        "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 2,
-        "citation_source_ids": [],
-        "corrective_rag_triggered": true,
+        "predicted_replan": false,
+        "replan_count": 0,
+        "citation_source_ids": [
+          "zjsu-logistics-services-2026"
+        ],
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {
         "id": "qa-02",
         "difficulty": "multi_fact",
         "question": "校园卡丢失以后先做什么，补办地点在哪里？",
-        "answer": "官方信息：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
         "context_relevance": 0.16666666666666666,
         "citation_precision": 1.0,
@@ -1282,7 +1279,7 @@
         "id": "qa-03",
         "difficulty": "multi_fact",
         "question": "奖学金申请要哪些条件，材料交给谁？",
-        "answer": "官方信息：奖学金申请需要成绩排名、志愿服务记录和学院公示，材料由辅导员统一收取。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：奖学金申请需要成绩排名、志愿服务记录和学院公示，材料由辅导员统一收取。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
         "context_relevance": 0.14285714285714285,
         "citation_precision": 0.0,
@@ -1303,7 +1300,7 @@
         "id": "qa-04",
         "difficulty": "multi_fact",
         "question": "夜间校医院还能看诊吗？如果去合作医院要保留什么？",
-        "answer": "官方信息：校医院工作日 8:30-17:00 开诊；夜间急诊请前往合作医院并保留票据。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：校医院工作日 8:30-17:00 开诊；夜间急诊请前往合作医院并保留票据。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
         "context_relevance": 0.25,
         "citation_precision": 1.0,
@@ -1324,7 +1321,7 @@
         "id": "qa-05",
         "difficulty": "partial_evidence",
         "question": "二食堂清真窗口在哪里？它晚上几点结束供应？",
-        "answer": "官方信息：一食堂位于生活区东侧，二食堂位于宿舍区南侧。一食堂工作日供应早餐 6:50-9:00、午餐 10:50-13:30、晚餐 16:40-19:30；二食堂一层设有清真窗口。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：一食堂位于生活区东侧，二食堂位于宿舍区南侧。一食堂工作日供应早餐 6:50-9:00、午餐 10:50-13:30、晚餐 16:40-19:30；二食堂一层设有清真窗口。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
         "context_relevance": 0.5,
         "citation_precision": 1.0,
@@ -1366,7 +1363,7 @@
         "id": "qa-07",
         "difficulty": "reasoning",
         "question": "期末考试迟到 31 分钟还能进考场吗，需要带什么？",
-        "answer": "官方信息：期末考试安排由教务处统一发布；学生须携带校园卡和身份证明，开考 30 分钟后不得进入考场。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：期末考试安排由教务处统一发布；学生须携带校园卡和身份证明，开考 30 分钟后不得进入考场。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
         "context_relevance": 0.1,
         "citation_precision": 1.0,
@@ -1408,7 +1405,7 @@
         "id": "qa-09",
         "difficulty": "post_fact",
         "question": "图书馆门口发现的蓝色校园卡被送到哪里了？",
-        "answer": "官方信息：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条适用于 2026 春夏学期。 [1]",
+        "answer": "官方信息：演示资料，非浙江工商大学官方发布：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.05555555555555555,
         "citation_precision": 0.0,

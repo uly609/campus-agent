@@ -79,7 +79,15 @@ main { min-width: 0; padding: 0 34px 42px; }
 .xiaolin-task { padding: 10px; border: 1px solid #e1e8e5; border-radius: 6px; background: #f7faf8; }
 .xiaolin-task-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .xiaolin-task-head strong { color: #2f3c38; font-size: 12px; line-height: 1.45; }
+.task-badges { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; }
 .task-status { flex: 0 0 auto; padding: 2px 6px; border-radius: 4px; background: #e5f1ec; color: #236b54; font-size: 10px; font-weight: 800; }
+.data-origin, .answer-origin { display: inline-flex; align-items: center; width: fit-content; border: 1px solid transparent; border-radius: 4px; font-weight: 800; letter-spacing: 0; }
+.data-origin { padding: 2px 6px; font-size: 10px; }
+.answer-origin { margin: 2px 0 12px; padding: 5px 8px; font-size: 11px; }
+.data-origin.demo, .answer-origin.demo { border-color: #e7c77f; background: #fff7df; color: #785713; }
+.data-origin.verified, .answer-origin.verified { border-color: #a8d3bf; background: #ecf8f1; color: #21664f; }
+.data-origin.live, .answer-origin.live { border-color: #a9c9db; background: #edf7fb; color: #275f78; }
+.data-origin.model, .answer-origin.model, .data-origin.unknown, .answer-origin.unknown { border-color: #d7dcda; background: #f4f6f5; color: #5f6965; }
 .xiaolin-task p { margin: 6px 0 3px; color: #68766f; font-size: 11px; line-height: 1.45; }
 .xiaolin-task small { color: #87938e; font-size: 10px; }
 .answer { max-width: 760px; margin: 0 auto; }.answer-label { display: flex; align-items: center; gap: 8px; color: #28765d; font-size: 13px; font-weight: 800; }.answer > p { margin: 18px 0 26px; font-size: 16px; line-height: 1.9; white-space: pre-wrap; }.sources { padding-top: 20px; border-top: 1px solid #e2e6e4; }.sources h3 { margin: 0 0 12px; font-size: 13px; }.source { display: flex; gap: 10px; padding: 9px 0; }.source > span { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; background: #e5f1ec; color: #28765d; font-size: 11px; font-weight: 800; }.source strong, .source small { display: block; }.source strong { font-size: 13px; }.source small { margin-top: 3px; color: #89948f; font-size: 10px; }.mode-warning { margin-top: 18px; padding: 10px; display: flex; align-items: center; gap: 8px; background: #fff4db; color: #7a5c18; font-size: 12px; }

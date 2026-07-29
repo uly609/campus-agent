@@ -58,4 +58,7 @@ async def test_official_source_route_filters_before_top_k_reranking() -> None:
 
     assert results
     assert all(item.official for item in results)
-    assert results[0].source_id.startswith("doc-library-hours")
+    assert results[0].source_id == "zjsu-library-overview-2022"
+    assert results[0].metadata["data_mode"] == "verified_official"
+    assert any(item.source_id.startswith("doc-library-hours") for item in results)
+    assert any(item.metadata["data_mode"] == "demo" for item in results)
