@@ -91,6 +91,7 @@ class ChatRequest(BaseModel):
     user_id: str = "demo-user"
     message: str = Field(min_length=1, max_length=2000)
     image_urls: list[str] = Field(default_factory=list, max_length=4)
+    is_agent: bool = False
 
 
 class ChatResponse(BaseModel):

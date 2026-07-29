@@ -14,6 +14,7 @@ from app.campus_skills.adapters import (
 from scripts.weather_mcp_server import mcp
 from app.domain.schemas import ChatRequest
 from app.services.chat_service import handle_chat
+from app.services.xiaolin_service import stream_xiaolin_events
 
 
 def test_course_skill_uses_safe_demo_profile_to_filter_tuesday_schedule() -> None:
@@ -134,3 +135,22 @@ async def test_venue_reservation_chat_returns_unpublished_confirmation_draft() -
         for item in response.trace
     )
     assert not any(item.get("event") == "replan" for item in response.trace)
+
+
+@pytest.mark.asyncio
+async def test_xiaolin_stream_emits_full_planner_tool_answer_flow() -> None:
+    request = ChatRequest(
+        session_id="xiaolin-stream-session",
+        user_id="demo-user",
+        message="找下沙校区能坐200人的讲座场地，要投影",
+        is_agent=True,
+    )
+    events = [event async for event in stream_xiaolin_events(request)]
+
+    assert any(event.get("subtype") == "task_plan" for event in events)
+    assert any(event.get("subtype") == "tool_selections" for event in events)
+    assert any(event.get("subtype") == "task_result" for event in events)
+    answer = "".join(
+        str(event.get("content", "")) for event in events if event.get("type") is None
+    )
+    assert "下沙校区" in answer

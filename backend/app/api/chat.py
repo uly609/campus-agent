@@ -6,20 +6,23 @@ import json
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from app.domain.schemas import ChatRequest, ChatResponse
+from app.domain.platform_schemas import UserSession
+from app.domain.schemas import ChatRequest
 from app.services.chat_service import handle_chat
 from app.services.repository import JsonRepository, now_iso
-from app.domain.platform_schemas import UserSession
+from app.services.xiaolin_service import stream_xiaolin_events
 
 router = APIRouter(prefix="/api/v1")
 repo = JsonRepository()
 
 
-@router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
-    response = await handle_chat(request)
+def _save_session(request: ChatRequest) -> None:
     existing = next(
-        (item for item in repo.load_sessions(request.user_id) if item.session_id == request.session_id),
+        (
+            item
+            for item in repo.load_sessions(request.user_id)
+            if item.session_id == request.session_id
+        ),
         None,
     )
     timestamp = now_iso()
@@ -37,23 +40,41 @@ async def chat(request: ChatRequest) -> ChatResponse:
             updated_at=timestamp,
         )
     )
+
+
+@router.post("/chat", response_model=None)
+@router.post("/chat/", response_model=None)
+async def chat(request: ChatRequest):
+    if request.is_agent:
+        return chat_stream(request)
+    response = await handle_chat(request)
+    _save_session(request)
     return response
+
+
+@router.post("/chat/stream")
+def chat_stream(request: ChatRequest) -> StreamingResponse:
+    async def event_stream():
+        try:
+            async for event in stream_xiaolin_events(request):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        except Exception as exc:
+            error = {"type": "error", "content": str(exc)}
+            yield f"data: {json.dumps(error, ensure_ascii=False)}\n\n"
+
+    _save_session(request)
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/chat/{session_id}/events")
 async def chat_events(session_id: str) -> StreamingResponse:
     async def event_stream():
-        events = [
-            {"event": "accepted", "session_id": session_id},
-            {"event": "node_started", "node": "coreference_resolver_node"},
-            {"event": "node_finished", "node": "coreference_resolver_node"},
-            {"event": "tool_called", "tool": "search_campus_docs"},
-            {"event": "citation", "source_id": "doc-library-hours-00"},
-            {"event": "token", "text": "这是带引用的校园回答。"},
-            {"event": "completed"},
-        ]
-        for event in events:
-            yield f"event: {event['event']}\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
-            await asyncio.sleep(0.01)
+        event = {"event": "accepted", "session_id": session_id}
+        yield f"event: accepted\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+        await asyncio.sleep(0.01)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

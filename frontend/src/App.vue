@@ -23,6 +23,7 @@ import {
   Sparkles,
   Trash2,
   Upload,
+  Wrench,
   X,
 } from "lucide-vue-next";
 
@@ -58,6 +59,7 @@ const posts = ref([]);
 const chatInput = ref("图书馆今天几点关门？");
 const chatResult = ref(null);
 const chatMessages = ref([]);
+const xiaolinAgentEnabled = ref(true);
 const chatSurface = ref(null);
 const searchInput = ref("南门捡到蓝色校园卡");
 const searchResults = ref([]);
@@ -153,28 +155,109 @@ async function loadPosts() {
   await run("posts", async () => { posts.value = (await api("/api/v1/posts")).slice(0, 12); });
 }
 
+function createXiaolinProcessInfo() {
+  return { steps: [], taskPlan: [], toolSelections: {}, taskResults: {} };
+}
+
+function applyXiaolinEvent(messageIndex, event) {
+  const target = chatMessages.value[messageIndex];
+  if (!target) return;
+  if (event.type === "step") {
+    target.processInfo.steps.push(String(event.content || ""));
+  } else if (event.type === "data" && event.subtype === "task_plan") {
+    target.processInfo.taskPlan = event.content || [];
+  } else if (event.type === "data" && event.subtype === "tool_selections") {
+    target.processInfo.toolSelections = event.content || {};
+  } else if (event.type === "data" && event.subtype === "task_result") {
+    target.processInfo.taskResults[event.content.task_id] = event.content.result;
+  } else if (event.type === "data") {
+    return;
+  } else if (event.content) {
+    target.text += String(event.content || "");
+  }
+}
+
+async function streamXiaolinChat(message, messageIndex) {
+  const response = await fetch("/api/v1/chat/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      session_id: activeSessionId.value,
+      user_id: "demo-user",
+      message,
+      is_agent: true,
+    }),
+  });
+  if (!response.ok || !response.body) throw new Error("小林 Agent 流式连接失败");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop() || "";
+    for (const block of blocks) {
+      const payload = block.split("\n").find((line) => line.startsWith("data: "));
+      if (!payload) continue;
+      const event = JSON.parse(payload.slice(6));
+      if (event.type === "error") throw new Error(String(event.content || "Agent 执行失败"));
+      applyXiaolinEvent(messageIndex, event);
+      await scrollChatToBottom();
+    }
+  }
+}
+
 async function sendChat() {
   if (!chatInput.value.trim()) return;
   const message = chatInput.value.trim();
   chatMessages.value.push({ role: "user", text: message });
   chatInput.value = "";
+  busy.value = "chat";
+  notice.value = null;
   await scrollChatToBottom();
-  await run("chat", async () => {
-    chatResult.value = await api("/api/v1/chat", {
-      method: "POST",
-      body: JSON.stringify({ session_id: activeSessionId.value, user_id: "demo-user", message }),
-    });
-    chatMessages.value.push({
-      role: "assistant",
-      text: chatResult.value.answer.answer,
-      citations: chatResult.value.citations,
-      degraded_mode: chatResult.value.degraded_mode,
-      trace: chatResult.value.trace,
-      intent: chatResult.value.intent,
-    });
+  try {
+    if (xiaolinAgentEnabled.value) {
+      const assistantIndex = chatMessages.value.length;
+      chatMessages.value.push({
+        role: "assistant",
+        text: "",
+        processInfo: createXiaolinProcessInfo(),
+        processing: true,
+        citations: [],
+      });
+      await streamXiaolinChat(message, assistantIndex);
+    } else {
+      chatResult.value = await api("/api/v1/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          session_id: activeSessionId.value,
+          user_id: "demo-user",
+          message,
+          is_agent: false,
+        }),
+      });
+      chatMessages.value.push({
+        role: "assistant",
+        text: chatResult.value.answer.answer,
+        citations: chatResult.value.citations,
+        degraded_mode: chatResult.value.degraded_mode,
+        trace: chatResult.value.trace,
+        intent: chatResult.value.intent,
+      });
+    }
     await loadSessions();
     await scrollChatToBottom();
-  });
+  } catch (error) {
+    const last = chatMessages.value.at(-1);
+    if (last?.role === "assistant" && !last.text) last.text = "处理失败，请稍后重试。";
+    notice.value = { type: "error", text: error instanceof Error ? error.message : "操作失败" };
+  } finally {
+    const last = chatMessages.value.at(-1);
+    if (last?.role === "assistant") last.processing = false;
+    busy.value = "";
+  }
 }
 
 async function scrollChatToBottom() {
@@ -535,6 +618,33 @@ function toolLabel(value) {
   })[value] || value;
 }
 
+
+function xiaolinSelection(message, taskId) {
+  return message.processInfo?.toolSelections?.[taskId] || null;
+}
+
+function xiaolinTaskResult(message, taskId) {
+  return message.processInfo?.taskResults?.[taskId] || null;
+}
+
+function xiaolinTaskStatus(message, taskId) {
+  const result = xiaolinTaskResult(message, taskId);
+  if (!result) return message.processing ? "等待中" : "未执行";
+  if (result.status === "success") return "完成";
+  if (result.status === "skipped") return "已跳过";
+  return "失败";
+}
+
+function xiaolinResultSummary(message, taskId) {
+  const result = xiaolinTaskResult(message, taskId);
+  if (!result) return "等待前置任务或工具执行";
+  if (result.status === "error") return result.error || "工具执行失败";
+  if (result.status === "skipped") return result.reason || "依赖任务未完成";
+  const data = result.api_result?.data;
+  if (Array.isArray(data)) return `返回 ${data.length} 条结果`;
+  if (data && typeof data === "object") return data.title || data.message || data.status || "返回结构化结果";
+  return "执行完成";
+}
 function agentProcess(trace = []) {
   const plan = trace.find((item) => item.event === "intent_planned");
   const tools = trace.filter((item) => item.event === "tool_called");
@@ -626,6 +736,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <span>{{ session.title }}</span>
             <Trash2 :size="14" @click.stop="deleteSession(session.session_id)" />
           </button>
+          <div class="agent-mode-control" aria-label="问答模式">
+            <button type="button" :class="{ active: !xiaolinAgentEnabled }" @click="xiaolinAgentEnabled = false">普通</button>
+            <button type="button" :class="{ active: xiaolinAgentEnabled }" @click="xiaolinAgentEnabled = true"><Bot :size="14" />Agent</button>
+          </div>
         </div>
         <div class="agent-profile-bar">
           <span class="agent-avatar"><Bot :size="20" /></span>
@@ -649,6 +763,23 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                   <span class="step-index">{{ agentProcess(message.trace).tools.length + 2 }}</span><div><strong>证据相关性判断</strong><p>相关度 {{ Math.round(agentProcess(message.trace).judge.score * 100) }}% · 证据覆盖 {{ Math.round(agentProcess(message.trace).judge.coverage * 100) }}%<template v-if="agentProcess(message.trace).replans.length"> · 已重规划 {{ agentProcess(message.trace).replans.length }} 次</template></p></div><span :class="['step-state', { failed: !agentProcess(message.trace).judge.sufficient }]">{{ agentProcess(message.trace).judge.sufficient ? "充分" : "不足" }}</span>
                 </div>
               </div>
+              <div v-if="message.role === 'assistant' && message.processInfo" class="xiaolin-process-card">
+                <header><span><Activity :size="16" />处理过程</span><button type="button" @click="message.processExpanded = message.processExpanded === false">{{ message.processExpanded === false ? "显示详情" : "隐藏详情" }}</button></header>
+                <template v-if="message.processExpanded !== false">
+                  <div class="xiaolin-steps">
+                    <div v-for="(step, stepIndex) in message.processInfo.steps" :key="`${step}-${stepIndex}`"><Check :size="14" /><span>{{ step }}</span></div>
+                    <div v-if="message.processing"><LoaderCircle class="spin" :size="14" /><span>处理中...</span></div>
+                  </div>
+                  <div v-if="message.processInfo.taskPlan.length" class="xiaolin-task-plan">
+                    <div class="task-plan-title"><span>任务计划</span><small>{{ message.processInfo.taskPlan.length }} 项</small></div>
+                    <article v-for="task in message.processInfo.taskPlan" :key="task.id" class="xiaolin-task">
+                      <div class="xiaolin-task-head"><strong>{{ task.task }}</strong><span :class="['task-status', xiaolinTaskStatus(message, task.id)]">{{ xiaolinTaskStatus(message, task.id) }}</span></div>
+                      <p v-if="xiaolinSelection(message, task.id)">使用工具：{{ toolLabel(xiaolinSelection(message, task.id).tool) }} · {{ xiaolinSelection(message, task.id).reason }}</p>
+                      <small>{{ xiaolinResultSummary(message, task.id) }}</small>
+                    </article>
+                  </div>
+                </template>
+              </div>
               <p>{{ message.text }}</p>
               <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><button v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source" type="button" @click="openCitation(citation)"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small><q v-if="citation.quoted_span">{{ citation.quoted_span }}</q></div></button></div>
               <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
@@ -656,7 +787,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
           </div>
           <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>浙商小林正在规划任务并调用校园工具…</span></div>
         </div>
-        <form class="composer" @submit.prevent="sendChat"><input v-model="chatInput" aria-label="校园问题" maxlength="2000" placeholder="例如：查一下我周二的课表" /><button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button></form>
+        <form class="composer xiaolin-composer" @submit.prevent="sendChat">
+          <input v-model="chatInput" aria-label="校园问题" maxlength="2000" placeholder="例如：帮我规划一场下沙校区 200 人讲座" />
+          <button class="icon-button" type="button" title="查看 Tool 与 Skill" @click="switchView('campus')"><Wrench :size="18" /></button>
+          <button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button>
+        </form>
       </section>
 
       <section v-else-if="activeView === 'search'" class="view">

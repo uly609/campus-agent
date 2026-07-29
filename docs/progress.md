@@ -39,6 +39,16 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M26 | Complete | Typed intent/tool plans, registry validation, Ruff, Mypy, and 70 unit/integration tests passed | Pending |
 | M28 | Complete | Model-driven Planner, Skill catalog, corrective official-web retrieval, semantic memory recall, verbatim citations, 81 tests, frontend build, and honest eval passed | Pending |
 | M29 | Complete | Authorized XiaoLin campus Skills, FastMCP weather, clickable Vue demos, 92 tests, honest eval, 3 E2E flows, smoke, and 8 healthy services | Pending |
+| M30 | Complete | XiaoLin Planner/Selector/Executor chat workbench, streamed task trace, planning-style grounded answers, 94 tests, eval, E2E, smoke, and 8 healthy services | Pending |
+
+## 2026-07-29 M30 Notes
+
+- Replaced the broken AI 学问 merge with a complete `浙商小林` chat workbench inside the existing CampusFlow Vue app, not as a separate mode or separate localhost service.
+- Connected the chat endpoint to the XiaoLin pipeline: `TaskPlanner -> ToolSelector -> TaskExecutor -> ResponseGenerator`, with the upstream XiaoLin SSE protocol on `POST /api/v1/chat/`: `step`, `task_plan`, `tool_selections`, `task_result`, `process_summary`, then streamed `{content: ...}` chunks.
+- Kept all execution behind the existing ToolRegistry and grounding/citation schemas. Tool calls now expose course schedule, campus notices, venues, weather, and campus knowledge outputs with timings and execution status in the answer UI.
+- Changed activity-planning responses from raw evidence snippets into actionable Zhejiang Gongshang University plans, while still citing retrieved skill/weather evidence and explicitly refusing to invent missing personal/contact fields.
+- Rebuilt API/Web images and refreshed `http://localhost:5173`. Verified the running 5173 proxy streams XiaoLin task planning, tool selection, task execution, process summary, and answer content chunks using the upstream event shape.
+- Validation passed: `make lint`, `make typecheck`, `make test` (94 passed), `make eval` (`eval-68849bcce7`), `make e2e` (3 backend flows plus frontend tests), `make smoke`, direct XiaoLin SSE verification through 5173, and all 8 Docker services healthy.
 
 ## 2026-07-28 M26 Notes
 
