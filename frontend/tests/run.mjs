@@ -17,7 +17,7 @@ if (!app.includes("publishDraft") || !app.includes("发布帖子")) {
 if (!app.includes("chatMessages") || !app.includes("新对话")) {
   throw new Error("chat must preserve and present a continuous conversation");
 }
-for (const text of ["浙商小林", "浙江工商大学校园 Agent", "Agent 执行过程", "任务规划", "证据相关性判断"]) {
+for (const text of ["浙商小林", "浙江工商大学校园 AI 助手", "Agent 执行过程", "任务计划", "处理步骤"]) {
   if (!app.includes(text)) throw new Error(`missing xiaolin workbench ${text}`);
 }
 if (!app.includes("agentProcess") || !app.includes("toolLabel")) {
@@ -29,8 +29,14 @@ if (!app.includes("const xiaolinAgentEnabled = ref(false)")) {
 if (!app.includes("is_agent: isAgent") || !app.includes("processInfo: xiaolinAgentEnabled.value ?")) {
   throw new Error("normal and Agent modes must use different chat flows");
 }
-if (!app.includes("composer-mode-control") || !app.includes('@keydown="handleChatKeydown"')) {
+if (!app.includes("xiaolin-agent-toggle") || !app.includes('@keydown="handleChatKeydown"')) {
   throw new Error("xiaolin composer must expose mode switching and upstream keyboard behavior");
+}
+if (!app.includes("xiaolin-avatar.png") || !app.includes("xiaolin-header-actions") || !app.includes("xiaolin-history-panel")) {
+  throw new Error("xiaolin chat must preserve the upstream avatar, header actions, and history drawer");
+}
+if (!app.includes("normalizeXiaolinTaskResult") || !app.includes('{ status: "success", api_result: result }')) {
+  throw new Error("successful XiaoLin task events must not be displayed as failures");
 }
 if (!app.includes("uniqueCitations")) throw new Error("chat citations must be de-duplicated for display");
 if (!app.includes("runCampusPrompt") || !app.includes("活动统筹") || !app.includes("200人的讲座场地")) {

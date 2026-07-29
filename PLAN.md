@@ -458,3 +458,12 @@ make smoke
 - [x] Expose executable tool names to XiaoLin and retain compatibility aliases for former Skill group names.
 - [x] Remove unverified personal names and identifiers from XiaoLin's chat prompt.
 - [x] Rebuild the web service and verify both modes in the browser.
+
+## M33 - Upstream-Faithful XiaoLin Chat Presentation
+
+- [x] Replace the compact CampusFlow chat treatment with XiaoLin's spacious card-based conversation layout.
+- [x] Restore the upstream avatar, header Tool/New/History actions, history drawer, dark user bubbles, dashed process panel, and floating composer controls.
+- [x] Render safe inline Markdown structure for XiaoLin answers without raw HTML injection.
+- [x] Load persisted XiaoLin messages and process details when selecting a history session.
+- [x] Normalize live and persisted task results so successful tools display as completed.
+- [x] Complete responsive browser QA, full validation, deployment, and local commit.

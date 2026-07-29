@@ -302,3 +302,12 @@ External model credentials are optional for local demo and test runs. When absen
 - XiaoLin's chat prompt now receives only non-identifying campus context and explicitly forbids guessing or addressing the user by an unverified name.
 - Final real-model verification confirmed that normal mode emitted answer chunks without process events, while Agent mode emitted task planning, exact tool selection, successful `query_campus_venues` execution with three results, and a result-based final answer. Browser QA confirmed the composer control in both states above the mobile navigation.
 - Validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-b41554b123`, smoke, and all eight Compose services healthy.
+
+## 2026-07-29 M33 Notes
+
+- Rebuilt the AI Assistant surface around the upstream XiaoLin frontend instead of styling the existing CampusFlow chat panel. The page now uses the original green character asset, in-card identity header, Tool/New/History icon actions, large white message area, dark user bubbles, dashed process panel, floating composer, Agent pill, and circular send action.
+- Replaced the crowded session strip with a functional history drawer. Selecting a session now loads persisted XiaoLin messages and associates saved process information with the correct assistant response.
+- Added safe structured rendering for headings, numbered items, bullets, bold text, and inline code without injecting model-produced HTML. Text and Markdown attachments are read locally into the message composer.
+- Fixed both live and historical process rendering so a successful raw `task_result` is normalized to `status: success`; the verified venue conversation now shows `完成` and `返回 3 条结果` instead of the incorrect failure badge.
+- Responsive browser QA passed at the active 710px viewport and desktop sizing: the header actions, history drawer, process details, messages, composer, mode control, and fixed navigation remain usable without overlap.
+- Final validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-4c47729f46`, smoke, and all eight Compose services healthy.
