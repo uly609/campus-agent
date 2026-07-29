@@ -56,6 +56,16 @@ def test_normal_mode_refuses_to_invent_unretrieved_campus_facts() -> None:
     assert "不代表已连接真实学籍或教务系统" in prompt
 
 
+def test_xiaolin_llm_service_supports_dashscope_qwen_models(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "test-key")
+
+    llm = LLMService._create_llm("qwen-plus")
+
+    assert llm.model_name == "qwen-plus"
+
+
 @pytest.mark.asyncio
 async def test_normal_mode_blocks_campus_fact_generation_before_calling_llm(
     monkeypatch: pytest.MonkeyPatch,

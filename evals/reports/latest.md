@@ -1,4 +1,4 @@
-# Eval Report eval-382a460e32
+# Eval Report eval-15c25f6947
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -33,8 +33,8 @@
 | tool_success_rate | 0.9322 |
 | corrective_rag_success_rate | 0.8333 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 105.6845 |
-| p95_latency_ms | 175.3770 |
+| p50_latency_ms | 115.1145 |
+| p95_latency_ms | 195.3717 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases

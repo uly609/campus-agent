@@ -876,7 +876,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
           <div v-if="llmConfigStatus && !llmConfigStatus.configured" class="xiaolin-config-warning">
             <CircleAlert :size="17" />
-            <div><strong>请先配置 LLM</strong><span>在 {{ llmConfigStatus.env_file }} 中设置 DEEPSEEK_API_KEY，然后重启 API 服务。</span></div>
+            <div><strong>请先配置百炼</strong><span>在 {{ llmConfigStatus.env_file }} 中设置 DASHSCOPE_API_KEY，然后重启 API 服务。</span></div>
           </div>
 
           <div ref="chatSurface" class="chat-surface">
@@ -981,7 +981,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <article class="draft-preview">
           <div v-if="!draft" class="empty-state"><FileImage :size="28" /><h2>草稿预览</h2><p>描述内容，Agent 会判断场景并生成草稿。</p></div>
           <template v-else>
-            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.published ? '已发布' : (draft.confirmed ? '已确认' : '待确认') }}</span><small>{{ draft.category }}<template v-if="draftAttributes?.confidence"> · 视觉识别 {{ Math.round(draftAttributes.confidence * 100) }}%</template></small></div>
+            <div class="draft-status"><span :class="{ confirmed: draft.confirmed }">{{ draft.published ? '已发布' : (draft.confirmed ? '已确认' : '待确认') }}</span><small>{{ draft.category }}<template v-if="draftAttributes?._analysis"> · {{ draftAttributes._analysis.degraded ? '演示识图' : `百炼识图 ${draftAttributes._analysis.model}` }}</template><template v-if="draftAttributes?.confidence"> · {{ Math.round(draftAttributes.confidence * 100) }}%</template></small></div>
             <h2>{{ draft.title }}</h2><p class="draft-body">{{ draft.body }}</p>
             <div class="attribute-list"><span v-if="draftAttributes?.category">{{ draftAttributes.category }}</span><span v-if="draftAttributes?.color">{{ draftAttributes.color }}</span><span v-if="draftAttributes?.material">{{ draftAttributes.material }}</span><span v-for="hint in draftAttributes?.location_hints || []" :key="hint">{{ hint }}</span></div>
             <div class="edit-area"><input v-model="draftFeedback" :disabled="draft.confirmed" /><button class="secondary" :disabled="draft.confirmed || busy === 'edit' || draft.edit_round >= 5" @click="updateDraft(false)">修改</button><button v-if="!draft.confirmed" class="primary icon-text" :disabled="busy === 'confirm'" @click="updateDraft(true)"><Check :size="18" />确认草稿</button><button v-else class="primary icon-text" :disabled="draft.published || busy === 'publish'" @click="publishDraft"><Send :size="18" />{{ draft.published ? '已发布' : '发布帖子' }}</button></div>

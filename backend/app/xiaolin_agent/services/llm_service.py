@@ -11,8 +11,17 @@ from pydantic import SecretStr
 load_dotenv()
 
 DEEPSEEK_API_BASE = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1")
-MAIN_AGENT_MODEL = os.getenv("AGENT_MAIN_MODEL", "deepseek-v4-flash")
-TOOL_LIBRARY_MODEL = os.getenv("TOOL_LIBRARY_MODEL", "deepseek-v4-flash")
+DASHSCOPE_API_BASE = os.getenv("DASHSCOPE_API_BASE", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+MAIN_AGENT_MODEL = os.getenv("AGENT_MAIN_MODEL", "qwen-plus")
+TOOL_LIBRARY_MODEL = os.getenv("TOOL_LIBRARY_MODEL", "qwen-plus")
+
+
+def _dashscope_api_key() -> str | None:
+    return (
+        os.getenv("DASHSCOPE_API_KEY")
+        or os.getenv("ALIYUN_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+    )
 
 
 def _resolve_model_name(model_name: str) -> str:
@@ -53,6 +62,9 @@ class LLMService:
         if model_name.startswith("deepseek-"):
             api_key = os.getenv("DEEPSEEK_API_KEY")
             url = DEEPSEEK_API_BASE
+        elif model_name.startswith("qwen-") or model_name.startswith("qwq-"):
+            api_key = _dashscope_api_key()
+            url = os.getenv("DASHSCOPE_API_BASE", DASHSCOPE_API_BASE)
         elif model_name == "chatglm":
             model_name = "glm-4-flash"
             url = "https://open.bigmodel.cn/api/paas/v4/"

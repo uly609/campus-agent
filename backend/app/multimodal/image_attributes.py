@@ -62,7 +62,13 @@ async def extract_image_attributes(image_url: str, router: ProviderRouter | None
         "用于失物、二手、活动、拼车、学习和生活分享等场景；所有描述性字段使用简体中文。",
     )
     if isinstance(result.content, dict):
-        return normalize_image_attributes(dict(result.content))
+        attributes = normalize_image_attributes(dict(result.content))
+        attributes["_analysis"] = {
+            "provider": result.provider,
+            "model": result.model,
+            "degraded": result.degraded,
+        }
+        return attributes
     return {}
 
 

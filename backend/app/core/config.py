@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "campusflow-password"
+    dashscope_api_key: Optional[str] = None
+    aliyun_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
     local_primary_chat_url: Optional[str] = None
     local_backup_chat_url: Optional[str] = None
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     cloud_fallback_embedding_url: Optional[str] = None
     local_primary_embedding_model: str = "bge-m3"
     local_backup_embedding_model: str = "bge-m3"
-    cloud_fallback_embedding_model: str = "text-embedding-v3"
+    cloud_fallback_embedding_model: str = "text-embedding-v4"
     local_primary_vlm_url: Optional[str] = None
     local_backup_vlm_url: Optional[str] = None
     cloud_fallback_vlm_url: Optional[str] = None
@@ -57,6 +59,11 @@ class Settings(BaseSettings):
     memory_enabled: bool = True
     data_dir: str = "data/generated"
     prompt_version: str = "campusflow-agent-v1"
+
+    @property
+    def bailian_api_key(self) -> str | None:
+        """Prefer the canonical Bailian key while retaining legacy aliases."""
+        return self.dashscope_api_key or self.aliyun_api_key or self.openai_api_key
 
 
 @lru_cache

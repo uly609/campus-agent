@@ -55,7 +55,8 @@ def test_platform_management_flows() -> None:
     llm_status = client.get("/api/llm/config-status/")
     assert llm_status.status_code == 200
     assert llm_status.json()["data"]["env_file"] == ".env"
-    assert llm_status.json()["data"]["providers"][0]["env"] == "DEEPSEEK_API_KEY"
+    assert llm_status.json()["data"]["providers"][0]["env"] == "DASHSCOPE_API_KEY"
+    assert set(llm_status.json()["data"]["roles"]) == {"chat", "embedding", "vision"}
     session = client.post(
         "/api/v1/sessions", json={"user_id": "platform-user", "title": "校园咨询"}
     )

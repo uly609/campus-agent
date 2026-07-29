@@ -20,7 +20,7 @@ class RetrievalReranker:
         settings = get_settings()
         configured_url = settings.rerank_url or settings.cloud_fallback_chat_url
         self.url = self._rerank_endpoint(configured_url) if configured_url else None
-        self.api_key = settings.rerank_api_key or settings.openai_api_key
+        self.api_key = settings.rerank_api_key or settings.bailian_api_key
         self.model = settings.rerank_model
         self.min_score = settings.rerank_min_score
         self.timeout = settings.provider_timeout_seconds

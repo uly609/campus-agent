@@ -16,18 +16,22 @@ Each role supports `local_primary`, `local_backup`, and `cloud_fallback` through
 
 ```bash
 cp .env.example .env
-# Example local OpenAI-compatible server
-LOCAL_PRIMARY_CHAT_URL=http://host.docker.internal:11434
-LOCAL_PRIMARY_CHAT_MODEL=qwen2.5:7b
-LOCAL_PRIMARY_EMBEDDING_URL=http://host.docker.internal:11434
-LOCAL_PRIMARY_EMBEDDING_MODEL=bge-m3
-LOCAL_PRIMARY_VLM_URL=http://host.docker.internal:11434
-LOCAL_PRIMARY_VLM_MODEL=qwen2.5-vl:7b
+# Unified DashScope/Bailian setup for XiaoLin chat, retrieval, reranking, and post-image understanding
+DASHSCOPE_API_KEY=...
+DASHSCOPE_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+AGENT_MAIN_MODEL=qwen-plus
+TOOL_LIBRARY_MODEL=qwen-plus
+CLOUD_FALLBACK_CHAT_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+CLOUD_FALLBACK_CHAT_MODEL=qwen-plus
+CLOUD_FALLBACK_EMBEDDING_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+CLOUD_FALLBACK_EMBEDDING_MODEL=text-embedding-v4
+CLOUD_FALLBACK_VLM_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+CLOUD_FALLBACK_VLM_MODEL=qwen-vl-plus
 ```
 
-For DashScope-compatible cloud fallback, set the relevant `CLOUD_FALLBACK_*_URL` to `https://dashscope.aliyuncs.com/compatible-mode/v1`, select the model, and provide `OPENAI_API_KEY` or `VLM_API_KEY`. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+The single `DASHSCOPE_API_KEY` powers XiaoLin chat, RAG embeddings, reranking, and the Post Assistant's `qwen-vl-plus` image analysis. `OPENAI_API_KEY`, `VLM_API_KEY`, and `RERANK_API_KEY` remain optional compatibility overrides. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
 
-To enable external candidate reranking, set `RERANK_MODEL=qwen3-rerank`; the endpoint and key can be supplied through `RERANK_URL` and `RERANK_API_KEY`, or derived from the DashScope chat endpoint and `OPENAI_API_KEY`. Without them, retrieval reports `reranker_not_configured` and uses its lexical fallback.
+To enable external candidate reranking, set `RERANK_MODEL=qwen3-rerank`; the endpoint and key can be supplied through `RERANK_URL` and `RERANK_API_KEY`, or derived from the DashScope chat endpoint and `DASHSCOPE_API_KEY`. Without them, retrieval reports `reranker_not_configured` and uses its lexical fallback.
 
 Providers can also be added from the **模型** page. Runtime keys are encrypted at rest using `CAMPUSFLOW_PROVIDER_ENCRYPTION_SECRET`, never returned to the browser, and checked through the non-generating `/models` compatibility endpoint.
 

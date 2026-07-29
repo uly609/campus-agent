@@ -483,3 +483,11 @@ make smoke
 - [x] Require Agent answers to distinguish verified official, live external, demo, and model-generated results.
 - [x] Display source-mode badges on normal answers, Agent answers, and individual task results.
 - [x] Rebuild the corpus and services, complete regression and browser QA, and create a local commit.
+
+## M36 - Unified Bailian Model Runtime
+
+- [x] Add DashScope/Bailian-compatible `qwen-*` model support to XiaoLin's direct LLM service.
+- [x] Make the XiaoLin configuration status and frontend warning prefer Bailian credentials over the old DeepSeek-only path.
+- [x] Configure the project default examples for `qwen-plus`, `text-embedding-v4`, `qwen-vl-plus`, and `qwen3-rerank`.
+- [x] Route chat, embedding, reranking, and VLM through one `DASHSCOPE_API_KEY`, with explicit real/degraded vision metadata.
+- [x] Rebuild API/Web, verify AI Assistant and Post Assistant routing, run regression validation, and create a local commit.

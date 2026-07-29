@@ -329,3 +329,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Migrated the live RAG corpus without deleting sessions, memories, or posts: it now contains 40 explicit demo records and 3 verified official sources. No user-uploaded knowledge documents existed, so no custom document was overwritten.
 - Browser QA verified both critical paths on port 5173. Agent timetable results display `演示数据` and `回答使用演示数据，不代表你的真实校务信息`; normal-mode `学校图书馆在哪` is blocked before model invocation and returns no fabricated location. The page reported no console errors.
 - Final validation passed with Ruff, Mypy (113 source files), 101 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-382a460e32`, smoke, and all eight Compose services healthy.
+
+## 2026-07-29 M36 Notes
+
+- Unified XiaoLin normal chat, Agent planning and generation, RAG embeddings, Qwen reranking, and Post Assistant image understanding behind one `DASHSCOPE_API_KEY`. Legacy provider variables remain optional compatibility overrides and are no longer required in the recommended configuration.
+- Verified live Bailian calls for `qwen-plus`, `text-embedding-v4`, and `qwen-vl-plus`. The real Post Assistant endpoint identified the project image through `qwen-vl-plus` and returned `degraded=false`; normal XiaoLin chat streamed a model-generated self-introduction.
+- Added image-analysis provenance to draft responses and the Vue draft status, so users can distinguish real Bailian vision from the explicit offline demo adapter.
+- Fixed cached real-provider results being incorrectly labeled degraded. Consecutive live image requests now remain `degraded=false`, including the cache-hit path.
+- Isolated deterministic test and evaluation runs from the configured external reranker while preserving real reranking in the running application.
+- Final validation passed after rebuilding API/Web: Ruff, Mypy (113 source files), 104 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-15c25f6947`, smoke, and eight healthy Compose services.

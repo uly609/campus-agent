@@ -21,6 +21,7 @@ class ProviderRouter:
         settings = get_settings()
         registry = ProviderRegistry()
         self.cache = ExactMatchCache()
+        bailian_api_key = settings.bailian_api_key
         common = {"timeout_seconds": settings.provider_timeout_seconds, "max_retries": settings.provider_max_retries}
         self.chat_providers = self._configured(
             OpenAICompatibleChatProvider,
@@ -28,7 +29,7 @@ class ProviderRouter:
                 *registry.runtime_specs("chat"),
                 ("local_primary", settings.local_primary_chat_model, settings.local_primary_chat_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_chat_model, settings.local_backup_chat_url, settings.local_backup_api_key),
-                ("cloud_fallback", settings.cloud_fallback_chat_model, settings.cloud_fallback_chat_url, settings.openai_api_key),
+                ("cloud_fallback", settings.cloud_fallback_chat_model, settings.cloud_fallback_chat_url, bailian_api_key),
             ],
             FakeChatProvider("fake_fallback"),
             common,
@@ -39,7 +40,7 @@ class ProviderRouter:
                 *registry.runtime_specs("embedding"),
                 ("local_primary", settings.local_primary_embedding_model, settings.local_primary_embedding_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_embedding_model, settings.local_backup_embedding_url, settings.local_backup_api_key),
-                ("cloud_fallback", settings.cloud_fallback_embedding_model, settings.cloud_fallback_embedding_url, settings.openai_api_key),
+                ("cloud_fallback", settings.cloud_fallback_embedding_model, settings.cloud_fallback_embedding_url, bailian_api_key),
             ],
             FakeEmbeddingProvider("fake_fallback"),
             common,
@@ -50,7 +51,7 @@ class ProviderRouter:
                 *registry.runtime_specs("vlm"),
                 ("local_primary", settings.local_primary_vlm_model, settings.local_primary_vlm_url, settings.local_primary_api_key),
                 ("local_backup", settings.local_backup_vlm_model, settings.local_backup_vlm_url, settings.local_backup_api_key),
-                ("cloud_fallback", settings.cloud_fallback_vlm_model, settings.cloud_fallback_vlm_url, settings.vlm_api_key or settings.openai_api_key),
+                ("cloud_fallback", settings.cloud_fallback_vlm_model, settings.cloud_fallback_vlm_url, settings.vlm_api_key or bailian_api_key),
             ],
             FakeVLMProvider("fake_fallback"),
             common,
@@ -108,7 +109,16 @@ class ProviderRouter:
             cached = self.cache.get(cache_key)
             if cached is not None:
                 CACHE_HITS.labels(role=role).inc()
-                return ProviderResult(role, provider.name, provider.model, cached, True, 0, cache_hit=True)
+                degraded = bool(getattr(provider, "is_fake", False))
+                return ProviderResult(
+                    role,
+                    provider.name,
+                    provider.model,
+                    cached,
+                    degraded,
+                    0,
+                    cache_hit=True,
+                )
             start = time.perf_counter()
             try:
                 content = await call(provider)

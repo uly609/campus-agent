@@ -11,4 +11,8 @@ async def test_image_attributes_feed_query_expansion() -> None:
     query = enhance_query_with_image("帮我找", attrs)
     assert "校园卡" in query
     assert "蓝色" in query
-
+    assert attrs["_analysis"] == {
+        "provider": "fake_fallback",
+        "model": "fake-qwen2.5-vl",
+        "degraded": True,
+    }
