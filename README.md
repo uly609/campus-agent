@@ -65,7 +65,7 @@ make smoke
 ## Demo Script
 
 1. Open the web UI and refresh the post feed.
-2. Ask `图书馆今天几点关门？` in AI Assistant and inspect citations plus node trace.
+2. Open **AI 学问**, ask `帮我规划一场下沙校区200人讲座`, and inspect the XiaoLin task plan, selected Skills, execution results, relevance decision, answer, and citations.
 3. Run smart search with `南门 捡到 校园卡`; results show BM25/vector/graph/RRF explanations.
 4. Generate a post draft with optional synthetic image `synthetic-card-library-blue.png`, edit it up to five rounds, confirm it, click **发布帖子**, and verify it appears in the post feed.
 5. Ask the assistant `记住我喜欢图书馆靠窗座位`, open Memory Management, and delete the memory.
@@ -98,6 +98,10 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 
 `make seed` creates 300 Chinese campus posts and 40 official campus documents under `data/generated`. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
 
+
+## ZJSU XiaoLin chat workbench
+
+The **AI 学问** page is the primary XiaoLin-style Agent surface; the separate reference application is not required. Each completed response shows the validated task plan, selected allowlisted tools, per-tool success/result count/latency, the relevance decision, the grounded answer, and clickable citations. The profile and campus fixtures are localized to Zhejiang Gongshang University. Only user-provided profile facts are used; unknown advisor, dormitory, contact, and student-id fields remain explicitly unconfigured.
 
 ## Dynamic Skills and official web fallback
 

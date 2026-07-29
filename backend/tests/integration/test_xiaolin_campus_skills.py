@@ -34,7 +34,7 @@ def test_profile_skill_does_not_expose_sensitive_fields() -> None:
 
 
 def test_venue_skill_filters_by_capacity_and_reservation_is_only_a_draft() -> None:
-    evidence = venue_evidence({"query": "找东湖校区能坐200人的讲座场地，要投影"})
+    evidence = venue_evidence({"query": "找下沙校区能坐200人的讲座场地，要投影"})
     draft = reservation_draft({"query": "生成预约单：2026-06-03下午200人讲座"})
 
     assert evidence
@@ -56,7 +56,7 @@ def test_notice_skill_handles_natural_latest_scholarship_query() -> None:
         ("我周二上什么课", "query_course_schedule"),
         ("查最新奖学金通知", "query_campus_notices"),
         ("找一个200人的报告厅", "query_campus_venues"),
-        ("东湖校区今天会下雨吗", "query_campus_weather"),
+        ("下沙校区今天会下雨吗", "query_campus_weather"),
         ("我的导师是谁", "get_student_profile"),
     ],
 )
@@ -67,7 +67,7 @@ def test_planner_routes_each_campus_intent_to_a_distinct_tool(query: str, tool: 
 
 
 def test_complex_activity_plan_fans_out_to_multiple_tools() -> None:
-    plan = StructuredPlanner().fallback_plan("帮我规划一场东湖校区200人讲座", "demo-user")
+    plan = StructuredPlanner().fallback_plan("帮我规划一场下沙校区200人讲座", "demo-user")
 
     assert [call.tool_name for call in plan.tool_calls] == [
         "query_course_schedule",
@@ -94,12 +94,34 @@ async def test_weather_mcp_exposes_campus_weather_tool() -> None:
 
 
 @pytest.mark.asyncio
+async def test_course_chat_exposes_planner_tool_and_judge_trace() -> None:
+    response = await handle_chat(
+        ChatRequest(
+            session_id="xiaolin-trace-session",
+            user_id="demo-user",
+            message="查一下我周二的课表",
+        )
+    )
+
+    plan = next(item for item in response.trace if item.get("event") == "intent_planned")
+    tool = next(item for item in response.trace if item.get("event") == "tool_called")
+    judge = next(item for item in response.trace if item.get("event") == "relevance_judged")
+    assert plan["steps"][0]["tool"] == "query_course_schedule"
+    assert tool["tool"] == "query_course_schedule"
+    assert tool["success"] is True
+    assert tool["result_count"] >= 1
+    assert "latency_ms" in tool
+    assert judge["evidence_count"] >= 1
+    assert response.citations
+
+
+@pytest.mark.asyncio
 async def test_venue_reservation_chat_returns_unpublished_confirmation_draft() -> None:
     response = await handle_chat(
         ChatRequest(
             session_id="venue-draft-session",
             user_id="demo-user",
-            message="生成预约单：2026-06-04 14:00-17:00，东湖校区200人讲座场地",
+            message="生成预约单：2026-06-04 14:00-17:00，下沙校区200人讲座场地",
         )
     )
 

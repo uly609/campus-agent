@@ -28,7 +28,7 @@ import {
 
 const views = [
   { id: "feed", label: "帖子", icon: LayoutList },
-  { id: "chat", label: "AI 助手", icon: MessageSquareText },
+  { id: "chat", label: "AI 学问", icon: MessageSquareText },
   { id: "search", label: "智能搜索", icon: Search },
   { id: "draft", label: "发帖助手", icon: Sparkles },
   { id: "campus", label: "校园技能", icon: CalendarDays },
@@ -169,6 +169,8 @@ async function sendChat() {
       text: chatResult.value.answer.answer,
       citations: chatResult.value.citations,
       degraded_mode: chatResult.value.degraded_mode,
+      trace: chatResult.value.trace,
+      intent: chatResult.value.intent,
     });
     await loadSessions();
     await scrollChatToBottom();
@@ -515,6 +517,32 @@ async function openCitation(citation) {
   await openSourceDetail({ source_id: citation.source_id, title: citation.title, official: false });
 }
 
+function toolLabel(value) {
+  return ({
+    search_campus_docs: "校园知识检索",
+    search_posts: "社区帖子检索",
+    search_lost_and_found: "多模态失物检索",
+    get_campus_service_info: "校园服务查询",
+    create_post_draft: "发帖草稿生成",
+    load_user_memories: "长期记忆召回",
+    search_official_web: "学校官网检索",
+    query_course_schedule: "个人课表",
+    query_campus_notices: "校园通知",
+    query_campus_venues: "场地协调",
+    query_campus_weather: "实时天气",
+    get_student_profile: "学生画像",
+    create_venue_reservation_draft: "场地预约草稿",
+  })[value] || value;
+}
+
+function agentProcess(trace = []) {
+  const plan = trace.find((item) => item.event === "intent_planned");
+  const tools = trace.filter((item) => item.event === "tool_called");
+  const judge = [...trace].reverse().find((item) => item.event === "relevance_judged");
+  const replans = trace.filter((item) => item.event === "replan");
+  return { plan, tools, judge, replans };
+}
+
 function readableTrace(trace) {
   const event = trace?.event || trace?.node || "执行";
   return ({
@@ -599,19 +627,36 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <Trash2 :size="14" @click.stop="deleteSession(session.session_id)" />
           </button>
         </div>
+        <div class="agent-profile-bar">
+          <span class="agent-avatar"><Bot :size="20" /></span>
+          <div><strong>浙商小林</strong><small>浙江工商大学校园 Agent · 任务规划、工具调用与有依据回答</small></div>
+          <div class="agent-badges"><span>Planner</span><span>Skills</span><span>RAG</span></div>
+        </div>
         <div ref="chatSurface" class="chat-surface">
-          <div v-if="!chatMessages.length && busy !== 'chat'" class="empty-state"><span><Bot :size="26" /></span><h2>问我一个校园问题</h2><p>可以继续追问，回答会标注信息来源。</p></div>
+          <div v-if="!chatMessages.length && busy !== 'chat'" class="empty-state"><span><Bot :size="26" /></span><h2>问浙商小林一个校园问题</h2><p>我会先规划任务，再调用课表、通知、场地、天气或校园知识工具。</p></div>
           <div v-if="chatMessages.length" class="chat-thread">
             <article v-for="(message, index) in chatMessages" :key="`${index}-${message.role}`" :class="['chat-message', message.role]">
-              <div v-if="message.role === 'assistant'" class="answer-label"><Sparkles :size="17" /> CampusFlow</div>
+              <div v-if="message.role === 'assistant'" class="answer-label"><Sparkles :size="17" /> 浙商小林</div>
+              <div v-if="message.role === 'assistant' && message.trace?.length" class="agent-workbench">
+                <header><span><Activity :size="16" />Agent 执行过程</span><small>{{ intentLabel(message.intent) }}</small></header>
+                <div v-if="agentProcess(message.trace).plan" class="workbench-step">
+                  <span class="step-index">1</span><div><strong>任务规划</strong><p>{{ agentProcess(message.trace).plan.steps.map((step) => toolLabel(step.tool)).join(" → ") || "直接回答" }}</p></div>
+                </div>
+                <div v-for="(tool, toolIndex) in agentProcess(message.trace).tools" :key="`${tool.tool}-${toolIndex}`" class="workbench-step">
+                  <span class="step-index">{{ toolIndex + 2 }}</span><div><strong>{{ toolLabel(tool.tool) }}</strong><p>{{ tool.success ? `执行成功 · 返回 ${tool.result_count} 项 · ${tool.latency_ms} ms` : `执行失败 · ${tool.error || "工具不可用"}` }}</p></div><span :class="['step-state', { failed: !tool.success }]">{{ tool.success ? "成功" : "失败" }}</span>
+                </div>
+                <div v-if="agentProcess(message.trace).judge" class="workbench-step">
+                  <span class="step-index">{{ agentProcess(message.trace).tools.length + 2 }}</span><div><strong>证据相关性判断</strong><p>相关度 {{ Math.round(agentProcess(message.trace).judge.score * 100) }}% · 证据覆盖 {{ Math.round(agentProcess(message.trace).judge.coverage * 100) }}%<template v-if="agentProcess(message.trace).replans.length"> · 已重规划 {{ agentProcess(message.trace).replans.length }} 次</template></p></div><span :class="['step-state', { failed: !agentProcess(message.trace).judge.sufficient }]">{{ agentProcess(message.trace).judge.sufficient ? "充分" : "不足" }}</span>
+                </div>
+              </div>
               <p>{{ message.text }}</p>
               <div v-if="message.citations?.length" class="sources"><h3>信息来源</h3><button v-for="(citation, citationIndex) in uniqueCitations(message.citations)" :key="citation.source_id" class="source" type="button" @click="openCitation(citation)"><span>{{ citationIndex + 1 }}</span><div><strong>{{ citation.title }}</strong><small>{{ citation.source_id }}</small><q v-if="citation.quoted_span">{{ citation.quoted_span }}</q></div></button></div>
               <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
             </article>
           </div>
-          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>正在检索校园知识…</span></div>
+          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>浙商小林正在规划任务并调用校园工具…</span></div>
         </div>
-        <form class="composer" @submit.prevent="sendChat"><input v-model="chatInput" aria-label="校园问题" maxlength="2000" /><button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button></form>
+        <form class="composer" @submit.prevent="sendChat"><input v-model="chatInput" aria-label="校园问题" maxlength="2000" placeholder="例如：查一下我周二的课表" /><button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button></form>
       </section>
 
       <section v-else-if="activeView === 'search'" class="view">
@@ -657,10 +702,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <div class="post-grid campus-skill-grid">
           <button class="post-card skill-action" type="button" @click="runCampusPrompt('查一下我周二的课表')"><span class="result-icon"><CalendarDays :size="20" /></span><h3>个人课表</h3><p>按日期、课程、教师或校区查询演示课表。</p></button>
           <button class="post-card skill-action" type="button" @click="runCampusPrompt('查最新奖学金通知')"><span class="result-icon"><BookOpen :size="20" /></span><h3>校园通知</h3><p>检索结构化公告、发布部门与时间。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('找东湖校区能坐200人的讲座场地，要投影')"><span class="result-icon"><Search :size="20" /></span><h3>场地协调</h3><p>筛选容量、设备和时段冲突。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('东湖校区未来3天天气怎么样')"><span class="result-icon"><Activity :size="20" /></span><h3>实时天气</h3><p>通过 Open-Meteo 适配器获取外部实时信息。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('找下沙校区能坐200人的讲座场地，要投影')"><span class="result-icon"><Search :size="20" /></span><h3>场地协调</h3><p>筛选容量、设备和时段冲突。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('下沙校区未来3天天气怎么样')"><span class="result-icon"><Activity :size="20" /></span><h3>实时天气</h3><p>通过 Open-Meteo 适配器获取外部实时信息。</p></button>
           <button class="post-card skill-action" type="button" @click="runCampusPrompt('我的导师是谁')"><span class="result-icon"><Bot :size="20" /></span><h3>学生画像</h3><p>只读取演示画像的非敏感字段。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('帮我规划一场东湖校区200人讲座')"><span class="result-icon"><Sparkles :size="20" /></span><h3>活动统筹</h3><p>一次规划课表、场地、天气与通知多个工具。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('帮我规划一场下沙校区200人讲座')"><span class="result-icon"><Sparkles :size="20" /></span><h3>活动统筹</h3><p>一次规划课表、场地、天气与通知多个工具。</p></button>
         </div>
         <div v-if="campusCapabilities" class="run-meta"><span>{{ campusCapabilities.skills.length }} 项可用技能</span><small>业务数据为合成演示；天气为外部实时数据；预约必须人工确认</small></div>
       </section>

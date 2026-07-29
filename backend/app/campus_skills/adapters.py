@@ -35,7 +35,7 @@ def _course_params(payload: dict[str, object]) -> dict[str, Any]:
     for name in ("数据结构", "计算机导论", "操作系统", "高等数学", "大学英语", "体育"):
         if name in query:
             params.setdefault("course_name", name)
-    for campus in ("东湖校区", "衣锦校区"):
+    for campus in ("下沙校区", "教工路校区"):
         if campus in query:
             params.setdefault("campus", campus)
     return params
@@ -89,7 +89,7 @@ def _venue_params(payload: dict[str, object]) -> dict[str, Any]:
     capacity = re.search(r"(\d{2,4})\s*人", query)
     if capacity:
         params.setdefault("attendee_count", int(capacity.group(1)))
-    for campus in ("东湖校区", "衣锦校区"):
+    for campus in ("下沙校区", "教工路校区"):
         if campus in query:
             params.setdefault("campus", campus)
     for event_type in ("讲座", "会议", "培训", "沙龙", "活动", "考试"):
@@ -153,7 +153,7 @@ def reservation_draft(payload: dict[str, object]) -> dict[str, Any]:
 
 async def weather_evidence(payload: dict[str, object]) -> tuple[list[Evidence], str | None]:
     query = _query(payload)
-    locations = ("东湖校区", "衣锦校区", "临安", "杭州")
+    locations = ("下沙校区", "教工路校区", "浙江工商大学", "杭州")
     location = next((item for item in locations if item in query), "杭州")
     days_match = re.search(r"(\d)\s*天", query)
     days = int(days_match.group(1)) if days_match else int(str(payload.get("days", 1)))

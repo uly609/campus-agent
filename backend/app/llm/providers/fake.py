@@ -16,7 +16,7 @@ class FakeChatProvider:
         if self.should_fail:
             raise ProviderRecoverableError("simulated connection failure")
         if "寒暄" in prompt or "你好" in prompt:
-            return "你好，我是 CampusFlow AI，可以帮你查校园信息、找帖子或起草匿名帖。"
+            return "你好，我是浙商小林，可以帮你规划校园事务、查询校园信息、检索社区帖子或起草校园帖。"
         return "根据已检索证据，我将给出带引用的校园回答。"
 
 

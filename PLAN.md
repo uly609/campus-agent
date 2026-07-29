@@ -428,3 +428,12 @@ make smoke
 - [x] Add campus capability APIs and a clickable Vue campus-skills demonstration page.
 - [x] Add regression coverage for natural-language routing, notice filtering, venue conflicts, MCP registration, and safe profile fields.
 - [x] Complete full Compose, test, eval, E2E, smoke, functional UI, documentation, commit, and push validation.
+
+## M30 - ZJSU XiaoLin Chat Workbench
+
+- [x] Replace the CampusFlow AI Assistant surface with the Zhejiang Gongshang XiaoLin chat workbench.
+- [x] Expose validated Planner steps, tool selections, execution outcomes, and relevance decisions in each answer.
+- [x] Localize campus, profile, course, venue, and weather demonstration data without inventing unknown personal fields.
+- [x] Keep all calls behind the existing ToolRegistry, grounding policy, citations, and two-replan cap.
+- [x] Add regression coverage for the complete planner-tool-judge trace and XiaoLin frontend surface.
+- [x] Rebuild all eight services and pass seed, lint, typecheck, test, eval, E2E, and smoke validation.

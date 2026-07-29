@@ -262,3 +262,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Final validation passed after a full Compose rebuild: all eight services remained healthy; `make seed`, `make lint`, `make typecheck`, `make test` (92 passed), `make eval` (`eval-08f82f61ba`), `make e2e` (3 backend flows plus frontend tests), and `make smoke` passed.
 - The computed offline report remains intentionally honest: 76.25% intent accuracy, 72.22% Hit@8, 66.07% nDCG@8, 71.43% answer-fact recall, 50% citation precision, 88.89% refusal F1, and 60% replan F1. No score is hardcoded or presented as production quality.
 - The migrated boundary is explicit: the implemented XiaoLin course, notice, venue, weather, profile, and MCP capabilities were adapted with author permission. README-only future features and unrelated Hello Agents projects were not represented as migrated code.
+
+## 2026-07-29 M30 Notes
+
+- Replaced the original AI Assistant presentation with the in-project **浙商小林** workbench on `http://localhost:5173`; the previous standalone 3001/8001 reference containers are no longer required and were stopped.
+- The chat response now exposes the structured Planner result, allowlisted tool calls with arguments/result counts/latency, the Relevance Judge decision, grounded answer, and citations in one continuous conversation.
+- Localized the authorized campus Skill fixtures to Zhejiang Gongshang University and removed former-school markers. The synthetic profile keeps only user-provided identity facts and marks unknown advisor, dormitory, contact, and student-id data as unconfigured.
+- Real functional QA for `帮我规划一场下沙校区200人讲座` invoked course, venue, Open-Meteo weather, and notice tools, then returned three grounded citations. A runtime trace-field mismatch found by this check was fixed and covered by integration tests.
+- Final validation passed after `docker compose up --build -d`: all eight services healthy; seed, Ruff, frontend lint, Mypy (97 source files), 93 unit/integration tests, offline eval `eval-11d8387334`, 3 E2E tests, frontend build/tests, and smoke all passed.
+- The runtime is currently explicit degraded mode for Chat, Embedding, and VLM unless credentials are configured; external weather remains real. No evaluation score is hardcoded.

@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-08f82f61ba",
-  "created_at": "2026-07-28T12:09:20.130254+00:00",
+  "run_id": "eval-11d8387334",
+  "created_at": "2026-07-29T03:27:51.802937+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -46,8 +46,8 @@
     "tool_success_rate": 0.9206349206349206,
     "corrective_rag_success_rate": 0.7142857142857143,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 212.83487499931653,
-    "p95_latency_ms": 298.7599579992093,
+    "p50_latency_ms": 100.12522950273706,
+    "p95_latency_ms": 145.4352500004461,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -813,8 +813,8 @@
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-counseling-10",
           "doc-counseling-31",
+          "doc-counseling-10",
           "doc-delivery-09",
           "doc-delivery-30",
           "doc-internship-39"
@@ -908,9 +908,9 @@
           "doc-canteen-37",
           "post-seed-025",
           "post-seed-217",
-          "post-seed-089",
           "post-seed-281",
-          "post-seed-153"
+          "post-seed-153",
+          "post-seed-089"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -1004,11 +1004,11 @@
           "doc-delivery-09",
           "doc-delivery-30",
           "post-seed-037",
-          "post-seed-165",
           "post-seed-101",
+          "post-seed-165",
           "post-seed-229",
           "post-seed-001",
-          "post-seed-193"
+          "post-seed-129"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1201,8 +1201,8 @@
           "doc-library-hours-23",
           "doc-library-hours-24",
           "post-seed-143",
-          "post-seed-043",
-          "post-seed-015"
+          "post-seed-015",
+          "post-seed-107"
         ],
         "qrels": {
           "post-demo-09": 3
@@ -1345,7 +1345,7 @@
         "id": "qa-06",
         "difficulty": "conflict",
         "question": "补退选什么时候截止，课程容量听群里的还是系统里的？",
-        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为东湖校区信息楼A A101。 [1]",
+        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为下沙校区信息楼A A101。 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,
@@ -1387,7 +1387,7 @@
         "id": "qa-08",
         "difficulty": "multi_fact",
         "question": "怎么查个人课表，临时换教室以哪里为准？",
-        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为东湖校区信息楼A A101。 [1]",
+        "answer": "校园业务数据（演示）：计算机导论（CS101）由张建国授课，周一 08:00-09:40，地点为下沙校区信息楼A A101。 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,

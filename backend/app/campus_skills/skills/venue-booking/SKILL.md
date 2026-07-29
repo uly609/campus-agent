@@ -12,7 +12,7 @@ Use this skill when the user asks to find, compare, or reserve campus venues for
 The caller may provide these optional filters:
 
 - `action`: `query` for venue search, `reserve` for mock reservation. Defaults to `query`.
-- `campus`: campus preference, such as `东湖校区` or `衣锦校区`.
+- `campus`: campus preference, such as `下沙校区` or `教工路校区`.
 - `capacity_min` or `attendee_count`: minimum venue capacity or expected audience size.
 - `date`: target date in `YYYY-MM-DD`.
 - `period` or `time_range`: target time range, such as `15:30-17:30`.

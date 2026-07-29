@@ -11,10 +11,9 @@ from urllib.request import urlopen
 KNOWN_LOCATIONS: Dict[str, Dict[str, Any]] = {
     "杭州": {"name": "杭州", "latitude": 30.2741, "longitude": 120.1551},
     "杭州市": {"name": "杭州", "latitude": 30.2741, "longitude": 120.1551},
-    "临安": {"name": "杭州临安", "latitude": 30.2344, "longitude": 119.7247},
-    "东湖校区": {"name": "浙江农林大学东湖校区", "latitude": 30.2572, "longitude": 119.7319},
-    "衣锦校区": {"name": "浙江农林大学衣锦校区", "latitude": 30.2366, "longitude": 119.7182},
-    "浙江农林大学": {"name": "浙江农林大学", "latitude": 30.2572, "longitude": 119.7319},
+    "下沙校区": {"name": "浙江工商大学下沙校区", "latitude": 30.315, "longitude": 120.389},
+    "教工路校区": {"name": "浙江工商大学教工路校区", "latitude": 30.289, "longitude": 120.137},
+    "浙江工商大学": {"name": "浙江工商大学下沙校区", "latitude": 30.315, "longitude": 120.389},
 }
 
 WEATHER_CODES: Dict[int, str] = {

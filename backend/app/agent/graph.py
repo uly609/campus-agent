@@ -256,6 +256,15 @@ class CampusFlowGraph:
         state["intent_confidence"] = plan.confidence
         state["plan"] = plan.to_steps()
         state["current_step"] = 0
+        state["trace"].append(
+            {
+                "event": "intent_planned",
+                "intent": plan.intent.value,
+                "confidence": plan.confidence,
+                "source": plan.source,
+                "steps": state["plan"],
+            }
+        )
 
     async def tool_executor_node(self, state: AgentState) -> None:
         evidence: list[dict[str, object]] = []
@@ -264,7 +273,20 @@ class CampusFlowGraph:
             args = dict(step.get("args", {}))
             result = await self.registry.call(tool, args)
             state["tool_results"].append(result.model_dump())
-            state["trace"].append({"event": "tool_called", "tool": tool, "success": result.success})
+            result_count = (
+                len(result.data) if isinstance(result.data, list) else (1 if result.data else 0)
+            )
+            state["trace"].append(
+                {
+                    "event": "tool_called",
+                    "tool": tool,
+                    "arguments": args,
+                    "success": result.success,
+                    "result_count": result_count,
+                    "latency_ms": result.latency_ms,
+                    "error": result.error_message,
+                }
+            )
             if result.success and isinstance(result.data, list):
                 for item in result.data:
                     if isinstance(item, dict) and "evidence_id" in item:
@@ -306,6 +328,15 @@ class CampusFlowGraph:
         result = judge_relevance(state["resolved_query"], evidence)
         state["relevance_score"] = float(result["score"])
         state["evidence_coverage"] = float(result["coverage"])
+        state["trace"].append(
+            {
+                "event": "relevance_judged",
+                "score": state["relevance_score"],
+                "coverage": state["evidence_coverage"],
+                "evidence_count": len(evidence),
+                "sufficient": bool(result["relevant"]),
+            }
+        )
 
     async def replan_node(self, state: AgentState) -> None:
         state["replan_count"] = min(state.get("replan_count", 0) + 1, state.get("max_replans", 2))
@@ -349,7 +380,7 @@ class CampusFlowGraph:
             state["citations"] = []
             return
         if state.get("intent") == Intent.GREETING.value:
-            result = await self.provider_router.chat("寒暄：向用户介绍 CampusFlow AI。")
+            result = await self.provider_router.chat("寒暄：以“浙商小林”的身份介绍自己是浙江工商大学校园 Agent，并简要说明任务规划、校园查询、帖子检索和发帖辅助能力。")
             state["final_answer"] = str(result.content)
             state["citations"] = []
             if result.degraded and "fake_chat_provider" not in state["degraded_mode"]:
