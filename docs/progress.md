@@ -311,3 +311,10 @@ External model credentials are optional for local demo and test runs. When absen
 - Fixed both live and historical process rendering so a successful raw `task_result` is normalized to `status: success`; the verified venue conversation now shows `完成` and `返回 3 条结果` instead of the incorrect failure badge.
 - Responsive browser QA passed at the active 710px viewport and desktop sizing: the header actions, history drawer, process details, messages, composer, mode control, and fixed navigation remain usable without overlap.
 - Final validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-4c47729f46`, smoke, and all eight Compose services healthy.
+
+## 2026-07-29 M34 Notes
+
+- Renamed the user-facing campus assistant to **浙小商助手** across the Vue interface, XiaoLin response prompts, greeting synthesis, and degraded local provider response.
+- Replaced the former character portrait with an original green campus-AI avatar combining a conversation symbol, graduation cap, and small golden accent.
+- Updated the browser title, rebuilt API/Web, and verified the header and empty-state avatar in the running 5173 page with no console errors.
+- Validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-9a1a3df130`, smoke, and all eight Compose services healthy.

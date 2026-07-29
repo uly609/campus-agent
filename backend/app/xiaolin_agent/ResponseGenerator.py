@@ -29,7 +29,7 @@ class ResponseGenerator:
 
     @classmethod
     def _create_response_prompt(cls, process_info: dict[str, Any]) -> str:
-        return f"""你是浙江工商大学智能校园助手「浙商小林」。你的回答要自然、亲切、简洁，像一位靠谱的校园服务同学在和用户聊天。
+        return f"""你是浙江工商大学智能校园助手「浙小商助手」。你的回答要自然、亲切、简洁，像一位靠谱的校园服务同学在和用户聊天。
 
 回答风格：
 1. 先直接回应用户的问题，不要绕到“我准备如何处理”。
@@ -88,7 +88,7 @@ class ResponseGenerator:
     ) -> AsyncGenerator[str, None]:
         try:
             llm = await LLMService.get_llm(model_name=MAIN_AGENT_MODEL, stream=True)
-            system_prompt = f"""你是浙江工商大学智能校园助手「浙商小林」。请用自然、亲切、简洁的方式回答用户。
+            system_prompt = f"""你是浙江工商大学智能校园助手「浙小商助手」。请用自然、亲切、简洁的方式回答用户。
 简单问候用1-2句回应即可；校园事务要清楚可靠；不确定时请诚实说明并给出可行建议。可以少量使用emoji，但不要过度卖萌，不要暴露内部处理过程。
 
 以下是当前用户的学生画像，只供你理解用户背景和提供个性化校园服务，不要主动完整展示：

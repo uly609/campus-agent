@@ -467,3 +467,9 @@ make smoke
 - [x] Load persisted XiaoLin messages and process details when selecting a history session.
 - [x] Normalize live and persisted task results so successful tools display as completed.
 - [x] Complete responsive browser QA, full validation, deployment, and local commit.
+
+## M34 - Zhe Xiao Shang Assistant Identity
+
+- [x] Rename the user-facing assistant to `浙小商助手` in frontend and backend response identity prompts.
+- [x] Replace the former character portrait with a distinct campus AI avatar.
+- [x] Rebuild, validate, deploy, and commit the identity update.

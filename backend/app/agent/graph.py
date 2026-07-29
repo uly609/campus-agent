@@ -380,7 +380,7 @@ class CampusFlowGraph:
             state["citations"] = []
             return
         if state.get("intent") == Intent.GREETING.value:
-            result = await self.provider_router.chat("寒暄：以“浙商小林”的身份介绍自己是浙江工商大学校园 Agent，并简要说明任务规划、校园查询、帖子检索和发帖辅助能力。")
+            result = await self.provider_router.chat("寒暄：以“浙小商助手”的身份介绍自己是浙江工商大学校园 Agent，并简要说明任务规划、校园查询、帖子检索和发帖辅助能力。")
             state["final_answer"] = str(result.content)
             state["citations"] = []
             if result.degraded and "fake_chat_provider" not in state["degraded_mode"]:

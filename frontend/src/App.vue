@@ -213,7 +213,7 @@ async function streamXiaolinChat(message, messageIndex, isAgent = false) {
       is_agent: isAgent,
     }),
   });
-  if (!response.ok || !response.body) throw new Error("小林 Agent 流式连接失败");
+  if (!response.ok || !response.body) throw new Error("浙小商助手 Agent 流式连接失败");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -826,8 +826,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <div class="xiaolin-chat-card">
           <header class="xiaolin-chat-header">
             <div class="xiaolin-identity">
-              <img src="/xiaolin-avatar.png" alt="浙商小林头像" />
-              <div><h1>浙商小林</h1><small>浙江工商大学校园 AI 助手</small></div>
+              <img src="/xiaolin-avatar.png" alt="浙小商助手头像" />
+              <div><h1>浙小商助手</h1><small>浙江工商大学校园 AI 助手</small></div>
             </div>
             <div class="xiaolin-header-actions">
               <button type="button" title="查看 Tool 与 Skill" aria-label="查看 Tool 与 Skill" @click="switchView('campus')"><Wrench :size="21" /></button>

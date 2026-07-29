@@ -17,7 +17,7 @@ if (!app.includes("publishDraft") || !app.includes("发布帖子")) {
 if (!app.includes("chatMessages") || !app.includes("新对话")) {
   throw new Error("chat must preserve and present a continuous conversation");
 }
-for (const text of ["浙商小林", "浙江工商大学校园 AI 助手", "Agent 执行过程", "任务计划", "处理步骤"]) {
+for (const text of ["浙小商助手", "浙江工商大学校园 AI 助手", "Agent 执行过程", "任务计划", "处理步骤"]) {
   if (!app.includes(text)) throw new Error(`missing xiaolin workbench ${text}`);
 }
 if (!app.includes("agentProcess") || !app.includes("toolLabel")) {
