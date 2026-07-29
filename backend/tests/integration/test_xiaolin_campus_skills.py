@@ -19,6 +19,7 @@ from app.domain.schemas import ChatRequest
 from app.services.chat_service import handle_chat
 from app.services.xiaolin_service import stream_xiaolin_events
 from app.services.repository import JsonRepository
+from app.xiaolin_agent.ResponseGenerator import ResponseGenerator
 from app.xiaolin_agent.services.chat_history_manager import ChatHistoryManager
 from app.xiaolin_agent.services.llm_service import LLMService
 
@@ -245,3 +246,58 @@ async def test_xiaolin_normal_mode_uses_original_simple_stream(
 
     assert all(event.get("type") is None for event in events)
     assert "下沙校区" in "".join(str(event["content"]) for event in events)
+
+
+@pytest.mark.asyncio
+async def test_xiaolin_chat_images_are_analyzed_without_persisting_base64(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    model_messages: list[str] = []
+
+    async def fake_analyze_chat_image(image_url: str) -> dict[str, object]:
+        assert image_url.startswith("data:image/png;base64,")
+        return {
+            "summary": "绿色校园助手图标",
+            "category": "图标",
+            "color": "绿色",
+            "_analysis": {
+                "provider": "cloud_fallback",
+                "model": "qwen-vl-plus",
+                "degraded": False,
+            },
+        }
+
+    async def fake_simple_response(cls, message: str, chat_history=None):
+        model_messages.append(message)
+        yield "图片里是绿色校园助手图标。"
+
+    monkeypatch.setattr(
+        "app.services.xiaolin_service.analyze_chat_image",
+        fake_analyze_chat_image,
+    )
+    monkeypatch.setattr(
+        ResponseGenerator,
+        "create_simple_streaming_response",
+        classmethod(fake_simple_response),
+    )
+    monkeypatch.setattr(ChatHistoryManager, "repo", JsonRepository(tmp_path))
+
+    events = [
+        event
+        async for event in stream_xiaolin_events(
+            ChatRequest(
+                session_id="xiaolin-image-session",
+                user_id="demo-user",
+                message="这张图里有什么？",
+                image_urls=["data:image/png;base64,dGVzdA=="],
+            )
+        )
+    ]
+
+    analysis = next(event for event in events if event.get("subtype") == "image_analysis")
+    assert analysis["content"][0]["_analysis"]["model"] == "qwen-vl-plus"
+    assert "绿色校园助手图标" in model_messages[0]
+    history = await ChatHistoryManager.get_chat_history("xiaolin-image-session")
+    assert "[已附带 1 张图片]" in history[0]["content"]
+    assert "dGVzdA==" not in history[0]["content"]

@@ -93,6 +93,21 @@ class ChatRequest(BaseModel):
     image_urls: list[str] = Field(default_factory=list, max_length=4)
     is_agent: bool = False
 
+    @field_validator("image_urls")
+    @classmethod
+    def validate_image_urls(cls, values: list[str]) -> list[str]:
+        allowed_data_prefixes = (
+            "data:image/jpeg;base64,",
+            "data:image/png;base64,",
+            "data:image/webp;base64,",
+        )
+        for value in values:
+            if len(value) > 3_000_000:
+                raise ValueError("each chat image must be at most 3 MB")
+            if not value.startswith(("https://", *allowed_data_prefixes)):
+                raise ValueError("chat images must use HTTPS or supported image data URLs")
+        return values
+
 
 class ChatResponse(BaseModel):
     request_id: str

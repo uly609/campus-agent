@@ -61,6 +61,7 @@ const posts = ref([]);
 const chatInput = ref("");
 const chatResult = ref(null);
 const chatMessages = ref([]);
+const chatImages = ref([]);
 const xiaolinAgentEnabled = ref(false);
 const chatHistoryOpen = ref(false);
 const chatSurface = ref(null);
@@ -187,7 +188,9 @@ function normalizeXiaolinTaskResults(results = {}) {
 function applyXiaolinEvent(messageIndex, event) {
   const target = chatMessages.value[messageIndex];
   if (!target) return;
-  if (event.type === "step") {
+  if (event.type === "data" && event.subtype === "image_analysis") {
+    target.imageAnalyses = event.content || [];
+  } else if (event.type === "step") {
     target.processInfo.steps.push(String(event.content || ""));
   } else if (event.type === "data" && event.subtype === "task_plan") {
     target.processInfo.taskPlan = event.content || [];
@@ -202,7 +205,7 @@ function applyXiaolinEvent(messageIndex, event) {
   }
 }
 
-async function streamXiaolinChat(message, messageIndex, isAgent = false) {
+async function streamXiaolinChat(message, imageUrls, messageIndex, isAgent = false) {
   const response = await fetch("/api/v1/chat/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -210,6 +213,7 @@ async function streamXiaolinChat(message, messageIndex, isAgent = false) {
       session_id: activeSessionId.value,
       user_id: "demo-user",
       message,
+      image_urls: imageUrls,
       is_agent: isAgent,
     }),
   });
@@ -235,10 +239,12 @@ async function streamXiaolinChat(message, messageIndex, isAgent = false) {
 }
 
 async function sendChat() {
-  if (!chatInput.value.trim()) return;
-  const message = chatInput.value.trim();
-  chatMessages.value.push({ role: "user", text: message });
+  if (!chatInput.value.trim() && !chatImages.value.length) return;
+  const message = chatInput.value.trim() || "请描述并分析这些图片。";
+  const imageUrls = chatImages.value.map((item) => item.url);
+  chatMessages.value.push({ role: "user", text: message, images: imageUrls });
   chatInput.value = "";
+  chatImages.value = [];
   busy.value = "chat";
   notice.value = null;
   await scrollChatToBottom();
@@ -250,8 +256,9 @@ async function sendChat() {
       processInfo: xiaolinAgentEnabled.value ? createXiaolinProcessInfo() : null,
       processing: true,
       citations: [],
+      imageAnalyses: [],
     });
-    await streamXiaolinChat(message, assistantIndex, xiaolinAgentEnabled.value);
+    await streamXiaolinChat(message, imageUrls, assistantIndex, xiaolinAgentEnabled.value);
     await loadSessions();
     await scrollChatToBottom();
   } catch (error) {
@@ -281,6 +288,15 @@ function resizeChatInput(event) {
 async function selectChatFile(event) {
   const file = event.target.files?.[0];
   if (!file) return;
+  if (file.type.startsWith("image/")) {
+    if (chatImages.value.length >= 4) {
+      notice.value = { type: "error", text: "一次最多添加 4 张图片" };
+    } else {
+      chatImages.value.push({ name: file.name, url: await resizeImage(file) });
+    }
+    event.target.value = "";
+    return;
+  }
   if (file.size > 100_000) {
     notice.value = { type: "error", text: "文本附件不能超过 100 KB" };
     event.target.value = "";
@@ -289,6 +305,10 @@ async function selectChatFile(event) {
   const content = await file.text();
   chatInput.value = `${chatInput.value.trim()}\n\n附件 ${file.name}：\n${content}`.trim();
   event.target.value = "";
+}
+
+function removeChatImage(index) {
+  chatImages.value.splice(index, 1);
 }
 
 async function scrollChatToBottom() {
@@ -916,7 +936,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                 </div>
                 <div v-if="message.role === 'assistant' && !message.processInfo" class="answer-origin model">模型直接回答 · 未检索校园资料</div>
                 <div v-if="message.role === 'assistant' && message.processInfo && xiaolinMessageDataMode(message)" :class="['answer-origin', xiaolinMessageDataMode(message).tone]">{{ xiaolinMessageDataMode(message).label }}</div>
+                <div v-if="message.role === 'assistant' && message.imageAnalyses?.length" :class="['answer-origin', message.imageAnalyses.some((item) => item._analysis?.degraded) ? 'demo' : 'live']">{{ message.imageAnalyses.some((item) => item._analysis?.degraded) ? '演示识图' : `百炼识图 ${message.imageAnalyses[0]._analysis.model}` }}</div>
                 <div class="message-content">
+                  <div v-if="message.images?.length" class="chat-message-images"><img v-for="(imageUrl, imageIndex) in message.images" :key="imageIndex" :src="imageUrl" alt="用户上传图片" /></div>
                   <div v-for="block in messageBlocks(message.text)" :key="block.key" :class="['message-block', block.type, `level-${block.level || 0}`]">
                     <span v-if="block.marker" class="message-marker">{{ block.marker }}</span>
                     <span class="message-block-text"><template v-for="(part, partIndex) in block.parts" :key="partIndex"><strong v-if="part.type === 'strong'">{{ part.text }}</strong><code v-else-if="part.type === 'code'">{{ part.text }}</code><template v-else>{{ part.text }}</template></template></span>
@@ -928,12 +950,13 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <div v-if="busy === 'chat' && !chatMessages.at(-1)?.text" class="xiaolin-thinking"><LoaderCircle class="spin" :size="20" /><span>{{ xiaolinAgentEnabled ? '正在规划并执行任务…' : '正在回答…' }}</span></div>
           </div>
 
-          <form class="composer xiaolin-composer" @submit.prevent="sendChat">
+          <form :class="['composer', 'xiaolin-composer', { 'has-attachments': chatImages.length }]" @submit.prevent="sendChat">
+            <div v-if="chatImages.length" class="chat-attachment-strip"><div v-for="(image, imageIndex) in chatImages" :key="image.name + imageIndex"><img :src="image.url" :alt="image.name" /><button type="button" title="移除图片" aria-label="移除图片" @click="removeChatImage(imageIndex)"><X :size="14" /></button></div></div>
             <textarea v-model="chatInput" aria-label="校园问题" maxlength="2000" rows="2" placeholder="输入消息…" @input="resizeChatInput" @keydown="handleChatKeydown"></textarea>
             <div class="xiaolin-composer-actions">
-              <label class="xiaolin-upload-button" title="添加文本附件" aria-label="添加文本附件"><Upload :size="20" /><input type="file" accept=".txt,.md,.markdown,text/plain,text/markdown" @change="selectChatFile" /></label>
+              <label class="xiaolin-upload-button" title="添加图片或文本附件" aria-label="添加图片或文本附件"><Upload :size="20" /><input type="file" accept="image/jpeg,image/png,image/webp,.txt,.md,.markdown,text/plain,text/markdown" @change="selectChatFile" /></label>
               <button type="button" :class="['xiaolin-agent-toggle', { active: xiaolinAgentEnabled }]" :aria-pressed="xiaolinAgentEnabled" title="切换 Agent 模式" @click="xiaolinAgentEnabled = !xiaolinAgentEnabled"><Bot :size="17" />Agent</button>
-              <button class="xiaolin-send-button" title="发送" aria-label="发送" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="21" /></button>
+              <button class="xiaolin-send-button" title="发送" aria-label="发送" :disabled="busy === 'chat' || (!chatInput.trim() && !chatImages.length)"><Send :size="21" /></button>
             </div>
           </form>
         </div>

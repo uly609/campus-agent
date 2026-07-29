@@ -54,6 +54,7 @@ class FakeVLMProvider:
         category = "校园卡" if "card" in lowered else "失物"
         color = "蓝色" if "blue" in lowered or "card" in lowered else "黑色"
         return {
+            "summary": "用于离线测试的合成校园物品图片",
             "category": category,
             "color": color,
             "brand": "",

@@ -490,4 +490,5 @@ make smoke
 - [x] Make the XiaoLin configuration status and frontend warning prefer Bailian credentials over the old DeepSeek-only path.
 - [x] Configure the project default examples for `qwen-plus`, `text-embedding-v4`, `qwen-vl-plus`, and `qwen3-rerank`.
 - [x] Route chat, embedding, reranking, and VLM through one `DASHSCOPE_API_KEY`, with explicit real/degraded vision metadata.
+- [x] Add up to four image attachments to XiaoLin normal and Agent chat through `qwen-vl-plus`, without persisting image data in history.
 - [x] Rebuild API/Web, verify AI Assistant and Post Assistant routing, run regression validation, and create a local commit.

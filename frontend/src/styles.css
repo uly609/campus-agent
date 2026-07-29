@@ -123,6 +123,8 @@ main { min-width: 0; padding: 0 34px 42px; }
 .xiaolin-chat-card .chat-message.user { margin-left: auto; padding: 18px 22px; border-radius: 8px; background: #19191c; color: #fff; font-size: 17px; line-height: 1.7; }
 .xiaolin-chat-card .chat-message.assistant { width: 100%; max-width: 100%; font-size: 16px; }
 .message-content { display: grid; gap: 10px; }
+.chat-message-images { display: grid; grid-template-columns: repeat(2, minmax(0, 150px)); gap: 8px; }
+.chat-message-images img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border: 1px solid rgba(255, 255, 255, .16); border-radius: 6px; }
 .message-block { display: flex; align-items: flex-start; gap: 9px; line-height: 1.85; }
 .message-block.heading { margin-top: 3px; font-weight: 800; color: #202623; }
 .message-block.heading.level-1 { font-size: 21px; }.message-block.heading.level-2 { font-size: 19px; }.message-block.heading.level-3 { font-size: 17px; }
@@ -146,6 +148,11 @@ main { min-width: 0; padding: 0 34px 42px; }
 .xiaolin-chat-card .xiaolin-task small { font-size: 11px; }
 .xiaolin-thinking { width: min(1120px, 100%); margin: 15px auto 0; display: flex; align-items: center; gap: 9px; color: #707773; font-size: 13px; }
 .xiaolin-chat-card > .xiaolin-composer { position: relative; display: block; min-height: 116px; margin: 0 16px 16px; padding: 0; border: 1px solid #d9dddb; border-radius: 28px; background: #fff; box-shadow: 0 3px 10px rgba(24, 31, 28, .09); }
+.chat-attachment-strip { padding: 12px 16px 0; display: flex; gap: 8px; overflow-x: auto; }
+.chat-attachment-strip > div { position: relative; width: 72px; height: 54px; flex: 0 0 auto; }
+.chat-attachment-strip img { width: 100%; height: 100%; object-fit: cover; border: 1px solid #d5dcda; border-radius: 6px; }
+.chat-attachment-strip button { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid #d7dcda; border-radius: 50%; background: #fff; color: #4c5752; box-shadow: 0 2px 5px rgba(24, 31, 28, .14); }
+.xiaolin-chat-card > .xiaolin-composer.has-attachments textarea { min-height: 90px; }
 .xiaolin-chat-card > .xiaolin-composer textarea { width: 100%; min-height: 114px; max-height: 200px; padding: 17px 68px 60px 20px; resize: none; border: 0; border-radius: 28px; color: #272c2a; font-size: 16px; line-height: 1.55; }
 .xiaolin-chat-card > .xiaolin-composer textarea::placeholder { color: #959b98; }
 .xiaolin-chat-card > .xiaolin-composer textarea:focus { box-shadow: inset 0 0 0 2px rgba(83, 195, 108, .17); }

@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import Claim, PostCreate
+from app.domain.schemas import ChatRequest, Claim, PostCreate
 
 
 def test_post_schema_validates_boundaries() -> None:
@@ -18,3 +18,13 @@ def test_claim_requires_evidence() -> None:
     with pytest.raises(ValidationError):
         Claim(claim_id="c1", text="图书馆十点关门", evidence_ids=[])
 
+
+def test_chat_images_require_safe_supported_urls() -> None:
+    request = ChatRequest(
+        message="看看图片",
+        image_urls=["data:image/png;base64,dGVzdA=="],
+    )
+    assert len(request.image_urls) == 1
+
+    with pytest.raises(ValidationError):
+        ChatRequest(message="看看图片", image_urls=["http://private.example/image.png"])

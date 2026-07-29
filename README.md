@@ -29,7 +29,7 @@ CLOUD_FALLBACK_VLM_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 CLOUD_FALLBACK_VLM_MODEL=qwen-vl-plus
 ```
 
-The single `DASHSCOPE_API_KEY` powers XiaoLin chat, RAG embeddings, reranking, and the Post Assistant's `qwen-vl-plus` image analysis. `OPENAI_API_KEY`, `VLM_API_KEY`, and `RERANK_API_KEY` remain optional compatibility overrides. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+The single `DASHSCOPE_API_KEY` powers XiaoLin chat, RAG embeddings, reranking, and `qwen-vl-plus` image analysis in both AI Assistant chat and the Post Assistant. XiaoLin accepts up to four JPEG, PNG, or WebP images in normal or Agent mode; only a safe visual summary is sent to the text workflow, and image data is not persisted in chat history. `OPENAI_API_KEY`, `VLM_API_KEY`, and `RERANK_API_KEY` remain optional compatibility overrides. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
 
 To enable external candidate reranking, set `RERANK_MODEL=qwen3-rerank`; the endpoint and key can be supplied through `RERANK_URL` and `RERANK_API_KEY`, or derived from the DashScope chat endpoint and `DASHSCOPE_API_KEY`. Without them, retrieval reports `reranker_not_configured` and uses its lexical fallback.
 

@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-15c25f6947",
-  "created_at": "2026-07-29T07:14:48.034912+00:00",
+  "run_id": "eval-6e5f4d8dc9",
+  "created_at": "2026-07-29T07:30:27.266724+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -46,8 +46,8 @@
     "tool_success_rate": 0.9322033898305084,
     "corrective_rag_success_rate": 0.8333333333333334,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 115.11452100239694,
-    "p95_latency_ms": 195.3716659991187,
+    "p50_latency_ms": 140.75954150030157,
+    "p95_latency_ms": 232.02604199468624,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -815,9 +815,9 @@
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
           "doc-counseling-31",
+          "doc-delivery-30",
           "doc-counseling-10",
-          "doc-delivery-09",
-          "doc-delivery-30"
+          "doc-delivery-09"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -906,11 +906,11 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
-          "post-seed-217",
+          "post-seed-025",
           "post-seed-153",
           "post-seed-089",
-          "post-seed-025",
-          "post-seed-281"
+          "post-seed-281",
+          "post-seed-217"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -998,11 +998,11 @@
           "doc-delivery-09",
           "doc-delivery-30",
           "post-seed-037",
+          "post-seed-229",
           "post-seed-101",
           "post-seed-165",
-          "post-seed-229",
           "post-seed-065",
-          "post-seed-129"
+          "post-seed-193"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1196,8 +1196,8 @@
           "doc-library-hours-22",
           "doc-library-hours-23",
           "doc-library-hours-24",
-          "post-seed-143",
-          "post-seed-015"
+          "post-seed-043",
+          "post-seed-143"
         ],
         "qrels": {
           "post-demo-09": 3
