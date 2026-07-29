@@ -50,6 +50,8 @@ Required endpoints:
 - `POST /api/v1/posts`
 - `GET /api/v1/posts`
 - `GET /api/v1/posts/{post_id}`
+- `GET /api/v1/posts/{post_id}/comments`
+- `POST /api/v1/posts/{post_id}/comments`
 - `POST /api/v1/posts/search`
 - `POST /api/v1/posts/draft`
 - `POST /api/v1/posts/draft/{draft_id}/feedback`
@@ -63,7 +65,7 @@ Required endpoints:
 
 ## Frontend
 
-Vue 3 demo pages: post feed, AI assistant with citations and traces, multimodal search, HITL post drafting, memory management, eval reports, and execution traces.
+Vue 3 demo pages: post feed with persistent anonymous comments, AI assistant with citations and traces, multimodal search, HITL post drafting, memory management, eval reports, and execution traces.
 
 ## Evaluation
 
@@ -72,4 +74,3 @@ Datasets include 80 intent cases, 18 retrieval cases, and 14 QA cases. Metrics a
 ## Infrastructure
 
 Docker Compose runs api, web, postgres, redis, neo4j, prometheus, grafana, and alertmanager. Missing model credentials put only model providers into explicit degraded fake mode.
-

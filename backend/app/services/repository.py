@@ -9,7 +9,7 @@ from typing import Any
 from app.core.config import get_settings
 from app.domain.enums import PostCategory
 from app.domain.platform_schemas import IngestionJob, KnowledgeDocument, StoredProviderProfile, UserSession
-from app.domain.schemas import MemoryRecord, Post, PostCreate
+from app.domain.schemas import MemoryRecord, Post, PostComment, PostCommentCreate, PostCreate
 
 
 def now_iso() -> str:
@@ -21,6 +21,7 @@ class JsonRepository:
         self.base = Path(base_dir or get_settings().data_dir)
         self.base.mkdir(parents=True, exist_ok=True)
         self.posts_path = self.base / "runtime_posts.json"
+        self.comments_path = self.base / "runtime_comments.json"
         self.docs_path = self.base / "runtime_docs.json"
         self.memories_path = self.base / "runtime_memories.json"
         self.traces_path = self.base / "runtime_traces.json"
@@ -53,6 +54,35 @@ class JsonRepository:
 
     def find_post(self, post_id: str) -> Post | None:
         return next((post for post in self.load_posts() if post.post_id == post_id), None)
+
+    def load_comments(self, post_id: str) -> list[PostComment]:
+        rows = self._read_json(self.comments_path, [])
+        return [
+            PostComment.model_validate(row)
+            for row in rows
+            if row.get("post_id") == post_id
+        ]
+
+    def count_comments(self, post_id: str) -> int:
+        return len(self.load_comments(post_id))
+
+    def create_comment(
+        self,
+        post_id: str,
+        payload: PostCommentCreate,
+        author_alias: str = "匿名同学",
+    ) -> PostComment:
+        comment = PostComment(
+            **payload.model_dump(),
+            comment_id=f"comment-{uuid.uuid4().hex[:10]}",
+            post_id=post_id,
+            author_alias=author_alias,
+            created_at=now_iso(),
+        )
+        rows = self._read_json(self.comments_path, [])
+        rows.append(comment.model_dump(mode="json"))
+        self._write_json(self.comments_path, rows[-5000:])
+        return comment
 
     def load_documents(self) -> list[dict[str, str]]:
         return self._read_json(self.docs_path, [])

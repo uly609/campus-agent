@@ -492,3 +492,11 @@ make smoke
 - [x] Route chat, embedding, reranking, and VLM through one `DASHSCOPE_API_KEY`, with explicit real/degraded vision metadata.
 - [x] Add up to four image attachments to XiaoLin normal and Agent chat through `qwen-vl-plus`, without persisting image data in history.
 - [x] Rebuild API/Web, verify AI Assistant and Post Assistant routing, run regression validation, and create a local commit.
+
+## M37 - Persistent Post Comments
+
+- [x] Make every feed post open a focused detail view.
+- [x] Add persistent anonymous comment creation and listing APIs.
+- [x] Return and synchronize comment counts in the feed and detail view.
+- [x] Validate blank and oversized comments at the typed API boundary.
+- [x] Add unit, E2E, frontend, and running-service regression coverage.

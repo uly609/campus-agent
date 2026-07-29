@@ -33,6 +33,26 @@ class Post(PostCreate):
     post_id: str
     author_alias: str
     created_at: str
+    comment_count: int = Field(default=0, ge=0)
+
+
+class PostCommentCreate(BaseModel):
+    body: str = Field(min_length=1, max_length=600)
+
+    @field_validator("body")
+    @classmethod
+    def normalize_body(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("comment body cannot be blank")
+        return normalized
+
+
+class PostComment(PostCommentCreate):
+    comment_id: str
+    post_id: str
+    author_alias: str
+    created_at: str
 
 
 class Evidence(BaseModel):

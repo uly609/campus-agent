@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import Post, PostCreate, SearchRequest
+from app.domain.schemas import Post, PostComment, PostCommentCreate, PostCreate, SearchRequest
 from app.memory.producer import publish_memory_event
 from app.multimodal.image_attributes import enhance_query_with_image, extract_image_attributes
 from app.retrieval.ingestion import build_corpus
@@ -45,7 +45,10 @@ def create_post(payload: PostCreate) -> Post:
 
 @router.get("/posts", response_model=list[Post])
 def list_posts() -> list[Post]:
-    return repo.load_posts()[:80]
+    return [
+        post.model_copy(update={"comment_count": repo.count_comments(post.post_id)})
+        for post in repo.load_posts()[:80]
+    ]
 
 
 @router.get("/posts/{post_id}", response_model=Post)
@@ -53,7 +56,21 @@ def get_post(post_id: str) -> Post:
     post = repo.find_post(post_id)
     if not post:
         raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
-    return post
+    return post.model_copy(update={"comment_count": repo.count_comments(post_id)})
+
+
+@router.get("/posts/{post_id}/comments", response_model=list[PostComment])
+def list_comments(post_id: str) -> list[PostComment]:
+    if not repo.find_post(post_id):
+        raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
+    return repo.load_comments(post_id)
+
+
+@router.post("/posts/{post_id}/comments", response_model=PostComment, status_code=201)
+def create_comment(post_id: str, payload: PostCommentCreate) -> PostComment:
+    if not repo.find_post(post_id):
+        raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
+    return repo.create_comment(post_id, payload)
 
 
 @router.post("/posts/search")

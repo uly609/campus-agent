@@ -16,6 +16,7 @@ import {
   LoaderCircle,
   KeyRound,
   MemoryStick,
+  MessageCircle,
   MessageSquareText,
   Plus,
   RefreshCw,
@@ -58,6 +59,9 @@ const activeView = ref("feed");
 const busy = ref("");
 const notice = ref(null);
 const posts = ref([]);
+const selectedPost = ref(null);
+const postComments = ref([]);
+const commentInput = ref("");
 const chatInput = ref("");
 const chatResult = ref(null);
 const chatMessages = ref([]);
@@ -167,6 +171,43 @@ async function runCampusPrompt(prompt) {
 
 async function loadPosts() {
   await run("posts", async () => { posts.value = (await api("/api/v1/posts")).slice(0, 12); });
+}
+
+async function openPost(post) {
+  selectedPost.value = post;
+  postComments.value = [];
+  commentInput.value = "";
+  await run(`post-${post.post_id}`, async () => {
+    const [detail, comments] = await Promise.all([
+      api(`/api/v1/posts/${encodeURIComponent(post.post_id)}`),
+      api(`/api/v1/posts/${encodeURIComponent(post.post_id)}/comments`),
+    ]);
+    selectedPost.value = detail;
+    postComments.value = comments;
+  });
+}
+
+function closePost() {
+  selectedPost.value = null;
+  postComments.value = [];
+  commentInput.value = "";
+}
+
+async function submitComment() {
+  const body = commentInput.value.trim();
+  if (!selectedPost.value || !body) return;
+  const postId = selectedPost.value.post_id;
+  await run(`comment-${postId}`, async () => {
+    const comment = await api(`/api/v1/posts/${encodeURIComponent(postId)}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    });
+    postComments.value.push(comment);
+    commentInput.value = "";
+    selectedPost.value.comment_count = postComments.value.length;
+    const feedPost = posts.value.find((post) => post.post_id === postId);
+    if (feedPost) feedPost.comment_count = postComments.value.length;
+  }, "评论已发布");
 }
 
 function createXiaolinProcessInfo() {
@@ -404,6 +445,7 @@ function closeSourceDetail() {
 }
 
 function handleGlobalKeydown(event) {
+  if (event.key === "Escape" && selectedPost.value) closePost();
   if (event.key === "Escape" && selectedResult.value) closeSourceDetail();
   if (event.key === "Escape" && chatHistoryOpen.value) chatHistoryOpen.value = false;
 }
@@ -872,11 +914,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       <section v-if="activeView === 'feed'" class="view">
         <div class="section-head"><div><h2>匿名校园动态</h2><p>最新发布的问答、活动与失物招领</p></div><button class="icon-button" title="刷新帖子" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
         <div class="post-grid">
-          <article v-for="post in posts" :key="post.post_id" class="post-card">
+          <button v-for="post in posts" :key="post.post_id" type="button" class="post-card post-card-button" @click="openPost(post)">
             <div class="post-meta"><span>{{ categoryLabel(post.category) }}</span><time>{{ post.created_at.slice(0, 10) }}</time></div>
             <h3>{{ post.title }}</h3><p>{{ post.body }}</p>
-            <footer><span>{{ post.author_alias }}</span><span>{{ post.location || '校园' }}</span></footer>
-          </article>
+            <footer><span>{{ post.author_alias }}</span><span class="comment-count"><MessageCircle :size="14" />{{ post.comment_count || 0 }}</span></footer>
+          </button>
         </div>
       </section>
 
@@ -1100,6 +1142,35 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         </div>
       </section>
     </main>
+
+    <div v-if="selectedPost" class="modal-backdrop" @click.self="closePost">
+      <section class="source-modal post-detail-modal" role="dialog" aria-modal="true" aria-labelledby="post-detail-title">
+        <header>
+          <div><span>{{ categoryLabel(selectedPost.category) }}</span><h2 id="post-detail-title">{{ selectedPost.title }}</h2></div>
+          <button type="button" class="icon-button" title="关闭帖子" aria-label="关闭帖子" @click="closePost"><X :size="19" /></button>
+        </header>
+        <div v-if="busy === `post-${selectedPost.post_id}`" class="source-loading"><LoaderCircle class="spin" :size="24" /><span>正在读取帖子…</span></div>
+        <template v-else>
+          <div class="source-meta"><span>{{ selectedPost.author_alias }}</span><span v-if="selectedPost.location">{{ selectedPost.location }}</span><time>{{ selectedPost.created_at.slice(0, 10) }}</time></div>
+          <p class="source-body">{{ selectedPost.body }}</p>
+          <div v-if="selectedPost.tags?.length" class="source-tags"><span v-for="tag in selectedPost.tags" :key="tag">{{ tag }}</span></div>
+          <section class="comment-section">
+            <header><div><strong>评论</strong><span>{{ postComments.length }}</span></div></header>
+            <div v-if="postComments.length" class="comment-list">
+              <article v-for="comment in postComments" :key="comment.comment_id">
+                <div><strong>{{ comment.author_alias }}</strong><time>{{ comment.created_at.slice(0, 16).replace('T', ' ') }}</time></div>
+                <p>{{ comment.body }}</p>
+              </article>
+            </div>
+            <div v-else class="comment-empty"><MessageCircle :size="22" /><span>还没有评论，来聊两句</span></div>
+            <form class="comment-composer" @submit.prevent="submitComment">
+              <textarea v-model="commentInput" maxlength="600" placeholder="友善交流，分享你的看法…" aria-label="评论内容"></textarea>
+              <div><small>{{ commentInput.length }} / 600</small><button class="primary icon-text" type="submit" :disabled="busy === `comment-${selectedPost.post_id}` || !commentInput.trim()"><Send :size="16" />发布</button></div>
+            </form>
+          </section>
+        </template>
+      </section>
+    </div>
 
     <div v-if="selectedResult" class="modal-backdrop" @click.self="closeSourceDetail">
       <section class="source-modal" role="dialog" aria-modal="true" aria-labelledby="source-detail-title">

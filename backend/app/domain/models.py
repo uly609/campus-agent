@@ -18,6 +18,7 @@ class PostModel(Base):
     author_alias: Mapped[str] = mapped_column(String(40), nullable=False)
     created_at: Mapped[str] = mapped_column(String(40), nullable=False)
     images: Mapped[list["PostImageModel"]] = relationship(back_populates="post")
+    comments: Mapped[list["PostCommentModel"]] = relationship(back_populates="post")
 
 
 class PostImageModel(Base):
@@ -29,6 +30,17 @@ class PostImageModel(Base):
     alt_text: Mapped[str] = mapped_column(String(300), default="")
     attributes: Mapped[dict[str, str]] = mapped_column(JSON, default=dict)
     post: Mapped[PostModel] = relationship(back_populates="images")
+
+
+class PostCommentModel(Base):
+    __tablename__ = "post_comments"
+
+    comment_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    post_id: Mapped[str] = mapped_column(ForeignKey("posts.post_id"), nullable=False, index=True)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    author_alias: Mapped[str] = mapped_column(String(40), nullable=False)
+    created_at: Mapped[str] = mapped_column(String(40), nullable=False)
+    post: Mapped[PostModel] = relationship(back_populates="comments")
 
 
 class UserSessionModel(Base):
@@ -74,4 +86,3 @@ class TraceModel(Base):
     latency_ms: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(24))
     payload: Mapped[dict[str, str | int | float | bool]] = mapped_column(JSON, default=dict)
-

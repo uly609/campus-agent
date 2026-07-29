@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import ChatRequest, Claim, PostCreate
+from app.domain.schemas import ChatRequest, Claim, PostCommentCreate, PostCreate
 
 
 def test_post_schema_validates_boundaries() -> None:
@@ -12,6 +12,12 @@ def test_post_schema_validates_boundaries() -> None:
     assert post.category == PostCategory.QA
     with pytest.raises(ValidationError):
         PostCreate(title="短", body="", category=PostCategory.QA)
+
+
+def test_comment_schema_trims_and_rejects_blank_content() -> None:
+    assert PostCommentCreate(body="  想了解具体时间  ").body == "想了解具体时间"
+    with pytest.raises(ValidationError):
+        PostCommentCreate(body="   ")
 
 
 def test_claim_requires_evidence() -> None:

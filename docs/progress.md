@@ -40,6 +40,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M28 | Complete | Model-driven Planner, Skill catalog, corrective official-web retrieval, semantic memory recall, verbatim citations, 81 tests, frontend build, and honest eval passed | Pending |
 | M29 | Complete | Authorized XiaoLin campus Skills, FastMCP weather, clickable Vue demos, 92 tests, honest eval, 3 E2E flows, smoke, and 8 healthy services | Pending |
 | M30 | Complete | XiaoLin Planner/Selector/Executor chat workbench, streamed task trace, planning-style grounded answers, 94 tests, eval, E2E, smoke, and 8 healthy services | Pending |
+| M37 | Complete | Persistent anonymous post comments, synchronized counts, frontend checks, focused backend tests, browser QA, and healthy rebuilt API/Web services | Pending |
 
 ## 2026-07-29 M30 Notes
 
@@ -340,3 +341,10 @@ External model credentials are optional for local demo and test runs. When absen
 - Fixed cached real-provider results being incorrectly labeled degraded. Consecutive live image requests now remain `degraded=false`, including the cache-hit path.
 - Isolated deterministic test and evaluation runs from the configured external reranker while preserving real reranking in the running application.
 - Final validation passed after rebuilding API/Web: Ruff, Mypy (113 source files), 106 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-6e5f4d8dc9`, smoke, and eight healthy Compose services.
+
+## 2026-07-29 M37 Notes
+
+- Added a complete post-detail and anonymous-comment workflow to the campus feed. Clicking any post opens its full content, current comments, and a 600-character comment composer.
+- Added typed comment listing and creation APIs, persistent JSON storage, post-level comment counts, and a relational model for future database-backed persistence.
+- Kept verification data isolated from the live feed so automated comments do not pollute the user's existing campus posts.
+- Validation passed with Ruff, Mypy (113 source files), 107 unit/integration tests, 3 E2E flows, frontend lint/build/tests, offline eval `eval-74c66feb68`, smoke, browser QA, and healthy rebuilt API/Web services.

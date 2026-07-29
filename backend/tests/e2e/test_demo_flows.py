@@ -34,6 +34,15 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     assert published.status_code == 200
     assert published.json()["draft"]["published"] is True
     assert client.get(f"/api/v1/posts/{published.json()['post']['post_id']}").status_code == 200
+    post_id = published.json()["post"]["post_id"]
+    comment = client.post(
+        f"/api/v1/posts/{post_id}/comments",
+        json={"body": "请问需要提前报名吗？"},
+    )
+    assert comment.status_code == 201
+    assert comment.json()["body"] == "请问需要提前报名吗？"
+    assert client.get(f"/api/v1/posts/{post_id}/comments").json()[0]["comment_id"] == comment.json()["comment_id"]
+    assert client.get(f"/api/v1/posts/{post_id}").json()["comment_count"] == 1
     repeated = client.post(
         f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
     )
