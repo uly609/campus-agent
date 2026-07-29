@@ -59,7 +59,7 @@ const posts = ref([]);
 const chatInput = ref("图书馆今天几点关门？");
 const chatResult = ref(null);
 const chatMessages = ref([]);
-const xiaolinAgentEnabled = ref(true);
+const xiaolinAgentEnabled = ref(false);
 const chatSurface = ref(null);
 const searchInput = ref("南门捡到蓝色校园卡");
 const searchResults = ref([]);
@@ -187,7 +187,7 @@ function applyXiaolinEvent(messageIndex, event) {
   }
 }
 
-async function streamXiaolinChat(message, messageIndex, isAgent = true) {
+async function streamXiaolinChat(message, messageIndex, isAgent = false) {
   const response = await fetch("/api/v1/chat/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -247,6 +247,13 @@ async function sendChat() {
     const last = chatMessages.value.at(-1);
     if (last?.role === "assistant") last.processing = false;
     busy.value = "";
+  }
+}
+
+function handleChatKeydown(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendChat();
   }
 }
 
@@ -605,6 +612,13 @@ function toolLabel(value) {
     query_campus_weather: "实时天气",
     get_student_profile: "学生画像",
     create_venue_reservation_draft: "场地预约草稿",
+    campus_knowledge: "校园知识检索",
+    community_search: "社区帖子检索",
+    course_schedule: "个人课表",
+    campus_notice: "校园通知",
+    venue_coordination: "场地协调",
+    campus_weather: "实时天气",
+    student_profile: "学生画像",
   })[value] || value;
 }
 
@@ -726,10 +740,6 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             <span>{{ session.title }}</span>
             <Trash2 :size="14" @click.stop="deleteSession(session.session_id)" />
           </button>
-          <div class="agent-mode-control" aria-label="问答模式">
-            <button type="button" :class="{ active: !xiaolinAgentEnabled }" @click="xiaolinAgentEnabled = false">普通</button>
-            <button type="button" :class="{ active: xiaolinAgentEnabled }" @click="xiaolinAgentEnabled = true"><Bot :size="14" />Agent</button>
-          </div>
         </div>
         <div class="agent-profile-bar">
           <span class="agent-avatar"><Bot :size="20" /></span>
@@ -779,12 +789,18 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
               <div v-if="message.degraded_mode?.length" class="mode-warning"><CircleAlert :size="17" />当前使用演示模型，结果仅供界面体验。</div>
             </article>
           </div>
-          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>浙商小林正在规划任务并调用校园工具…</span></div>
+          <div v-if="busy === 'chat'" class="loading-state"><LoaderCircle class="spin" :size="25" /><span>{{ xiaolinAgentEnabled ? '浙商小林正在规划任务并调用校园工具…' : '浙商小林正在回答…' }}</span></div>
         </div>
         <form class="composer xiaolin-composer" @submit.prevent="sendChat">
-          <input v-model="chatInput" aria-label="校园问题" maxlength="2000" placeholder="例如：帮我规划一场下沙校区 200 人讲座" />
-          <button class="icon-button" type="button" title="查看 Tool 与 Skill" @click="switchView('campus')"><Wrench :size="18" /></button>
-          <button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button>
+          <textarea v-model="chatInput" aria-label="校园问题" maxlength="2000" rows="2" placeholder="例如：帮我规划一场下沙校区 200 人讲座" @keydown="handleChatKeydown"></textarea>
+          <div class="xiaolin-composer-actions">
+            <button class="icon-button" type="button" title="查看 Tool 与 Skill" aria-label="查看 Tool 与 Skill" @click="switchView('campus')"><Wrench :size="18" /></button>
+            <div class="agent-mode-control composer-mode-control" aria-label="问答模式">
+              <button type="button" :class="{ active: !xiaolinAgentEnabled }" :aria-pressed="!xiaolinAgentEnabled" @click="xiaolinAgentEnabled = false">普通</button>
+              <button type="button" :class="{ active: xiaolinAgentEnabled }" :aria-pressed="xiaolinAgentEnabled" @click="xiaolinAgentEnabled = true"><Bot :size="14" />Agent</button>
+            </div>
+            <button class="primary icon-text" :disabled="busy === 'chat' || !chatInput.trim()"><Send :size="18" />发送</button>
+          </div>
         </form>
       </section>
 

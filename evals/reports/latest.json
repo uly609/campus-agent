@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-7742b6d99b",
-  "created_at": "2026-07-29T04:52:25.785763+00:00",
+  "run_id": "eval-b41554b123",
+  "created_at": "2026-07-29T05:26:51.109537+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -46,8 +46,8 @@
     "tool_success_rate": 0.9206349206349206,
     "corrective_rag_success_rate": 0.7142857142857143,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 100.10156200223719,
-    "p95_latency_ms": 172.495541999524,
+    "p50_latency_ms": 94.84300000258372,
+    "p95_latency_ms": 132.8312499972526,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -813,11 +813,11 @@
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-counseling-31",
           "doc-counseling-10",
-          "doc-delivery-30",
+          "doc-counseling-31",
           "doc-delivery-09",
-          "doc-internship-13"
+          "doc-delivery-30",
+          "doc-internship-39"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -907,10 +907,10 @@
           "doc-canteen-05",
           "doc-canteen-37",
           "post-seed-089",
-          "post-seed-025",
           "post-seed-153",
-          "post-seed-281",
-          "post-seed-217"
+          "post-seed-025",
+          "post-seed-217",
+          "post-seed-281"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -1003,12 +1003,12 @@
         "returned_source_ids": [
           "doc-delivery-09",
           "doc-delivery-30",
+          "post-seed-165",
           "post-seed-037",
           "post-seed-101",
-          "post-seed-165",
           "post-seed-229",
-          "post-seed-001",
-          "post-seed-257"
+          "post-seed-129",
+          "post-seed-065"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1029,7 +1029,7 @@
           "post-demo-02",
           "doc-delivery-09",
           "doc-delivery-30",
-          "post-317079d1aa",
+          "post-acf30e9e98",
           "post-demo-00"
         ],
         "qrels": {
@@ -1201,9 +1201,9 @@
           "doc-library-hours-22",
           "doc-library-hours-23",
           "doc-library-hours-24",
-          "post-seed-057",
+          "post-seed-121",
           "post-seed-143",
-          "post-seed-121"
+          "post-seed-057"
         ],
         "qrels": {
           "post-demo-09": 3

@@ -292,3 +292,13 @@ External model credentials are optional for local demo and test runs. When absen
 - Added upstream-compatible `GET /api/llm/config-status/` and a visible AI Assistant warning. Browser QA on `http://localhost:5173` confirmed the warning, Agent/normal controls, no console errors, and the final built assets.
 - Controlled-model integration coverage verifies model-produced task planning, original `venue-booking` Skill selection, task execution events, streamed final response chunks, normal-mode streaming, and persisted history.
 - Final validation passed: Ruff, Mypy (113 source files), 95 unit/integration tests, offline eval `eval-7742b6d99b`, 3 E2E tests, frontend lint/typecheck/build/tests, smoke, and healthy rebuilt API/Web services. One concurrent E2E run collided on shared draft fixtures; the required sequential E2E rerun passed 3/3.
+
+## 2026-07-29 M32 Notes
+
+- Restored the two original XiaoLin chat paths in the visible composer: normal mode directly streams an LLM answer, while Agent mode runs task planning, tool selection, execution, and response generation.
+- New page loads now default to normal mode, matching the upstream project. The mode switch remains visible beside the composer controls on desktop and mobile.
+- Restored Enter-to-send and Shift+Enter-for-newline behavior from the upstream XiaoLin input component. Agent-only loading copy and process cards no longer imply that normal requests use tools.
+- Real two-mode API verification exposed a migration defect where Skill group names such as `venue_coordination` were advertised as executable tools. XiaoLin now receives the actual registry tool names, accepts legacy aliases defensively, flattens nested model parameters, and reports unknown tools as structured failures.
+- XiaoLin's chat prompt now receives only non-identifying campus context and explicitly forbids guessing or addressing the user by an unverified name.
+- Final real-model verification confirmed that normal mode emitted answer chunks without process events, while Agent mode emitted task planning, exact tool selection, successful `query_campus_venues` execution with three results, and a result-based final answer. Browser QA confirmed the composer control in both states above the mobile navigation.
+- Validation passed with Ruff, Mypy (113 source files), 98 unit/integration tests, 3 E2E tests, frontend lint/typecheck/build/tests, offline eval `eval-b41554b123`, smoke, and all eight Compose services healthy.

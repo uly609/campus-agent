@@ -27,18 +27,22 @@ class _RegistryServer:
     name = "campusflow-registry"
 
     async def list_tools(self) -> list[Tool]:
-        catalog = default_skill_registry().planner_catalog()
         tools: list[Tool] = []
-        for item in catalog:
-            raw_schema = item.get("input_schema", {})
-            input_schema = dict(raw_schema) if isinstance(raw_schema, dict) else {}
-            tools.append(
-                Tool(
-                    name=str(item["name"]),
-                    description=str(item["description"]),
-                    input_schema=input_schema,
+        for skill in default_skill_registry().skills:
+            for tool_name in skill.tools:
+                tools.append(
+                    Tool(
+                        name=tool_name,
+                        description=f"{skill.description} Skill: {skill.name}.",
+                        input_schema={
+                            "type": "object",
+                            "properties": {
+                                "query": {"type": "string"},
+                                "params": {"type": "object"},
+                            },
+                        },
+                    )
                 )
-            )
         return tools
 
     async def execute_tool(self, tool_name: str, params: dict[str, Any]) -> Any:

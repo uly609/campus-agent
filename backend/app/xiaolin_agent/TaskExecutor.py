@@ -14,6 +14,19 @@ logger = logging.getLogger(__name__)
 class TaskExecutor:
     """Execute a task using the tool selected by XiaoLin."""
 
+    _TOOL_ALIASES = {
+        "campus_knowledge": "search_campus_docs",
+        "community_search": "search_posts",
+        "post_creation": "create_post_draft",
+        "memory_management": "load_user_memories",
+        "evaluation": "get_eval_report",
+        "course_schedule": "query_course_schedule",
+        "campus_notice": "query_campus_notices",
+        "venue_coordination": "query_campus_venues",
+        "campus_weather": "query_campus_weather",
+        "student_profile": "get_student_profile",
+    }
+
     @classmethod
     async def execute_task(
         cls,
@@ -22,10 +35,16 @@ class TaskExecutor:
         task_results: dict[int, Any],
     ) -> Any:
         task_id = int(task.get("id", 0))
-        tool_name = str(tool_selection.get("tool", "unknown_tool"))
+        selected_tool_name = str(tool_selection.get("tool", "unknown_tool"))
+        tool_name = cls._TOOL_ALIASES.get(selected_tool_name, selected_tool_name)
         logger.info("开始执行任务 %s，使用工具 %s", task_id, tool_name)
         try:
             params = dict(tool_selection.get("params", {}))
+            nested_params = params.pop("params", None)
+            if isinstance(nested_params, dict):
+                params = {**params, **nested_params}
+            if tool_name == "create_post_draft" and "intent" not in params:
+                params["intent"] = params.get("query") or task.get("input") or task.get("task") or ""
             for param_key, param_value in params.items():
                 if isinstance(param_value, str) and "{" in param_value:
                     placeholders = re.findall(r"\{TASK_\d+_RESULT(?:\.\w+)*\}", param_value)
@@ -62,7 +81,10 @@ class TaskExecutor:
             api_result = await CampusToolHub.call_api(tool_name, params)
             if "error" not in api_result:
                 return api_result
-            return f"No server found with tool: {tool_name}"
+            return {
+                "error": f"No server found with tool: {tool_name}",
+                "tool": selected_tool_name,
+            }
         except Exception as exc:
             logger.error("任务 %s 执行错误: %s", task_id, exc, exc_info=True)
             return {

@@ -23,6 +23,15 @@ for (const text of ["浙商小林", "浙江工商大学校园 Agent", "Agent 执
 if (!app.includes("agentProcess") || !app.includes("toolLabel")) {
   throw new Error("xiaolin chat must map planner and tool traces");
 }
+if (!app.includes("const xiaolinAgentEnabled = ref(false)")) {
+  throw new Error("xiaolin chat must default to upstream normal mode");
+}
+if (!app.includes("is_agent: isAgent") || !app.includes("processInfo: xiaolinAgentEnabled.value ?")) {
+  throw new Error("normal and Agent modes must use different chat flows");
+}
+if (!app.includes("composer-mode-control") || !app.includes('@keydown="handleChatKeydown"')) {
+  throw new Error("xiaolin composer must expose mode switching and upstream keyboard behavior");
+}
 if (!app.includes("uniqueCitations")) throw new Error("chat citations must be de-duplicated for display");
 if (!app.includes("runCampusPrompt") || !app.includes("活动统筹") || !app.includes("200人的讲座场地")) {
   throw new Error("campus skills need executable demo actions");

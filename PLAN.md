@@ -448,3 +448,13 @@ make smoke
 - [x] Expose the upstream-compatible LLM configuration status and refuse to fabricate model answers when `DEEPSEEK_API_KEY` is absent.
 - [x] Validate model-driven planning/tool selection/streaming with a controlled test model, then verify the no-key runtime and browser warning on port 5173.
 - [x] Pass Ruff, Mypy, 95 unit/integration tests, 3 E2E tests, frontend lint/build/tests, eval, smoke, and healthy Compose startup.
+
+## M32 - XiaoLin Normal And Agent Mode Parity
+
+- [x] Restore XiaoLin's normal-mode default instead of enabling Agent for every new page load.
+- [x] Move the normal/Agent control into the message composer so it remains visible on desktop and mobile.
+- [x] Send `is_agent: false` for direct model chat and `is_agent: true` only after the user selects Agent.
+- [x] Show planning and tool-execution progress only for Agent requests.
+- [x] Expose executable tool names to XiaoLin and retain compatibility aliases for former Skill group names.
+- [x] Remove unverified personal names and identifiers from XiaoLin's chat prompt.
+- [x] Rebuild the web service and verify both modes in the browser.

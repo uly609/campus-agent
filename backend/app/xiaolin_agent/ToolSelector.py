@@ -49,6 +49,7 @@ class ToolSelector:
 5. 如果必要参数在用户请求中不清楚，使用合理的默认值并在reason中说明
 6. 如果任务非常一般，可以选择general_assistant工具
 7. 如果任务依赖于其他任务的结果，可以使用占位符格式：{{TASK_X_RESULT}}，其中X是任务ID
+8. tool 必须逐字使用“可用工具及其能力”中列出的 Tool 或工具名称，不得自行创造名称，也不得把 Skill 分组名当作工具名
 """
 
     @classmethod
