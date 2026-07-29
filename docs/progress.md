@@ -42,6 +42,7 @@ The workspace was empty at start. The starter pack instructions were read from `
 | M30 | Complete | XiaoLin Planner/Selector/Executor chat workbench, streamed task trace, planning-style grounded answers, 94 tests, eval, E2E, smoke, and 8 healthy services | Pending |
 | M37 | Complete | Persistent anonymous post comments, synchronized counts, frontend checks, focused backend tests, browser QA, and healthy rebuilt API/Web services | Pending |
 | M38 | Complete | Compact community feed, direct-voice imported posts, 18-post runtime migration, regression coverage, and responsive browser QA | Pending |
+| M39 | Complete | Feed-integrated semantic search, true post-only retrieval, offset pagination, load-more interaction, E2E, and browser QA | Pending |
 
 ## 2026-07-29 M30 Notes
 
@@ -356,3 +357,11 @@ External model credentials are optional for local demo and test runs. When absen
 - Removed the third-person `匿名摘要：有同学...` presentation from all 18 imported community posts. Their bodies now speak directly while remaining anonymized.
 - Preserved provenance honestly through a `社区转帖` tag instead of presenting imported content as native CampusFlow authorship. Usernames, contact details, source images, and other sensitive fields remain excluded.
 - Browser QA at the active 710px viewport measured a 140px first row, 12 visible feed records, no horizontal overflow, and no console errors.
+
+## 2026-07-29 M39 Notes
+
+- Removed the separate intelligent-search destination and placed semantic search directly above the community feed, matching the user's browse-then-search workflow.
+- Removed the frontend 12-post slice and backend 80-post cap. The feed now requests 20 posts at a time with validated offset/limit parameters and appends subsequent pages without duplicates.
+- Tightened the search boundary from all non-official chunks to `source_type=post`, so demo knowledge documents cannot appear as community search results.
+- Search results open the same full post detail and persistent comment workflow used by ordinary feed rows.
+- Validation passed with Ruff, Mypy (113 source files), 3 isolated E2E flows, frontend lint/build/tests, and targeted pagination and source-type assertions. Browser QA confirmed 20 initial rows, 40 after loading more, eight post-only search results, comment-detail navigation, no duplicate search tab, no horizontal overflow, and no console errors.

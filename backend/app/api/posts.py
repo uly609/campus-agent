@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from app.domain.enums import PostCategory
@@ -44,10 +44,13 @@ def create_post(payload: PostCreate) -> Post:
 
 
 @router.get("/posts", response_model=list[Post])
-def list_posts() -> list[Post]:
+def list_posts(
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=50),
+) -> list[Post]:
     return [
         post.model_copy(update={"comment_count": repo.count_comments(post.post_id)})
-        for post in repo.load_posts()[:80]
+        for post in repo.load_posts()[offset : offset + limit]
     ]
 
 
@@ -79,7 +82,7 @@ async def search_posts(payload: SearchRequest) -> dict[str, Any]:
     if payload.image_attributes:
         query = enhance_query_with_image(query, payload.image_attributes)
     service = RetrievalService(build_corpus(repo.load_posts(), repo.load_documents()))
-    results = await service.search(query, payload.top_k)
+    results = await service.search(query, payload.top_k, source_type="post")
     return {"query": query, "results": [item.model_dump() for item in results]}
 
 

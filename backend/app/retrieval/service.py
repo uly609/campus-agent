@@ -94,7 +94,7 @@ class RetrievalService:
         if source_type == "official":
             candidate_rows = [row for row in candidate_rows if row[2][0].official]
         elif source_type == "post":
-            candidate_rows = [row for row in candidate_rows if not row[2][0].official]
+            candidate_rows = [row for row in candidate_rows if row[2][0].source_type == "post"]
         community_ranked = await self.reranker.rerank(
             query,
             [payload[0] for _, _, payload in candidate_rows],

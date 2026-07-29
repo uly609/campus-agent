@@ -9,10 +9,17 @@ from scripts.seed import main as seed_main
 def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     seed_main()
     client = TestClient(app)
+    first_page = client.get("/api/v1/posts?offset=0&limit=5").json()
+    second_page = client.get("/api/v1/posts?offset=5&limit=5").json()
+    assert len(first_page) == len(second_page) == 5
+    assert {post["post_id"] for post in first_page}.isdisjoint(
+        {post["post_id"] for post in second_page}
+    )
     chat = client.post("/api/v1/chat", json={"message": "图书馆今天几点关门？"}).json()
     assert chat["citations"]
     search = client.post("/api/v1/posts/search", json={"query": "南门 校园卡", "top_k": 5}).json()
     assert search["results"]
+    assert all(result["source_type"] == "post" for result in search["results"])
     detail = client.get(f"/api/v1/sources/{search['results'][0]['source_id']}")
     assert detail.status_code == 200
     assert detail.json()["body"]

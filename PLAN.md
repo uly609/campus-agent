@@ -508,3 +508,12 @@ make smoke
 - [x] Replace third-person imported summaries with direct post-style wording.
 - [x] Keep a visible community-repost marker while removing imported usernames and contact details.
 - [x] Migrate the 18 existing imported posts and complete responsive browser QA.
+
+## M39 - Integrated Feed Search And Pagination
+
+- [x] Move semantic post search into the top of the community feed.
+- [x] Remove the duplicate standalone intelligent-search navigation page.
+- [x] Restrict community search results to actual post chunks.
+- [x] Replace the 12/80 hard limits with offset-and-limit API pagination.
+- [x] Load 20 posts initially and append further pages without duplicates.
+- [x] Keep search results connected to the same post-detail and comment workflow.

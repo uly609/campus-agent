@@ -33,7 +33,6 @@ import {
 const views = [
   { id: "feed", label: "帖子", icon: LayoutList },
   { id: "chat", label: "AI 学问", icon: MessageSquareText },
-  { id: "search", label: "智能搜索", icon: Search },
   { id: "draft", label: "发帖助手", icon: Sparkles },
   { id: "campus", label: "校园技能", icon: CalendarDays },
   { id: "knowledge", label: "知识库", icon: BookOpen },
@@ -59,6 +58,7 @@ const activeView = ref("feed");
 const busy = ref("");
 const notice = ref(null);
 const posts = ref([]);
+const postHasMore = ref(true);
 const selectedPost = ref(null);
 const postComments = ref([]);
 const commentInput = ref("");
@@ -69,8 +69,9 @@ const chatImages = ref([]);
 const xiaolinAgentEnabled = ref(false);
 const chatHistoryOpen = ref(false);
 const chatSurface = ref(null);
-const searchInput = ref("南门捡到蓝色校园卡");
+const searchInput = ref("");
 const searchResults = ref([]);
+const searchSubmitted = ref(false);
 const selectedResult = ref(null);
 const sourceDetail = ref(null);
 const draftIntent = ref("发布周五晚七点的学院迎新活动，地点在大学生活动中心");
@@ -169,8 +170,14 @@ async function runCampusPrompt(prompt) {
   await sendChat();
 }
 
-async function loadPosts() {
-  await run("posts", async () => { posts.value = (await api("/api/v1/posts")).slice(0, 12); });
+async function loadPosts(reset = true) {
+  const offset = reset ? 0 : posts.value.length;
+  const limit = 20;
+  await run("posts", async () => {
+    const page = await api(`/api/v1/posts?offset=${offset}&limit=${limit}`);
+    posts.value = reset ? page : [...posts.value, ...page];
+    postHasMore.value = page.length === limit;
+  });
 }
 
 async function openPost(post) {
@@ -427,8 +434,20 @@ async function runSearch() {
       body: JSON.stringify({ query: searchInput.value.trim(), top_k: 8 }),
     });
     searchResults.value = data.results;
+    searchSubmitted.value = true;
     closeSourceDetail();
   });
+}
+
+function handleSearchInput() {
+  searchSubmitted.value = false;
+  searchResults.value = [];
+}
+
+function clearSearch() {
+  searchInput.value = "";
+  searchResults.value = [];
+  searchSubmitted.value = false;
 }
 
 async function openSourceDetail(item) {
@@ -913,6 +932,25 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
       <section v-if="activeView === 'feed'" class="view feed-view">
         <div class="section-head"><div><h2>匿名校园动态</h2><p>最新发布的问答、活动与失物招领</p></div><button class="icon-button" title="刷新帖子" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
+        <form class="feed-searchbar" role="search" @submit.prevent="runSearch">
+          <Search :size="19" />
+          <input v-model="searchInput" aria-label="搜索校园帖子" placeholder="搜索失物、活动、二手和校园问答" @input="handleSearchInput" />
+          <button v-if="searchInput" type="button" class="feed-search-clear" title="清空搜索" aria-label="清空搜索" @click="clearSearch"><X :size="17" /></button>
+          <button type="submit" class="feed-search-submit" title="搜索帖子" aria-label="搜索帖子" :disabled="busy === 'search' || !searchInput.trim()"><Search :size="18" /></button>
+        </form>
+        <div v-if="busy === 'search'" class="feed-search-state"><LoaderCircle class="spin" :size="20" /><span>正在搜索校园帖子…</span></div>
+        <div v-else-if="searchSubmitted && searchResults.length" class="feed-search-results">
+          <header><strong>搜索结果</strong><span>{{ searchResults.length }} 条相关帖子</span></header>
+          <div class="result-list">
+            <button v-for="item in searchResults" :key="item.evidence_id" type="button" class="result-row" :aria-label="`查看${item.title}详情`" @click="openPost({ post_id: item.source_id, title: item.title })">
+              <span class="result-icon"><MessageCircle :size="20" /></span>
+              <span class="result-content"><span class="result-title"><strong>{{ item.title }}</strong><span>帖子</span></span><span class="result-excerpt">{{ item.excerpt }}</span><small>{{ retrievalLabel(item) }}</small></span>
+              <ChevronRight :size="19" />
+            </button>
+          </div>
+        </div>
+        <div v-else-if="searchSubmitted" class="empty-state compact"><Search :size="25" /><h2>没有找到相关帖子</h2><p>换个关键词再试试</p></div>
+        <template v-else>
         <div class="post-grid">
           <button v-for="post in posts" :key="post.post_id" type="button" class="feed-post-card" @click="openPost(post)">
             <span class="post-avatar" aria-hidden="true">{{ post.author_alias?.includes('外部') ? '社' : '匿' }}</span>
@@ -933,6 +971,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             </span>
           </button>
         </div>
+        <button v-if="postHasMore" type="button" class="load-more-posts" :disabled="busy === 'posts'" @click="loadPosts(false)"><LoaderCircle v-if="busy === 'posts'" class="spin" :size="17" /><ChevronRight v-else :size="17" />加载更多帖子</button>
+        <div v-else-if="posts.length" class="feed-end">已经到底了</div>
+        </template>
       </section>
 
       <section v-else-if="activeView === 'chat'" class="view chat-view">
@@ -1027,19 +1068,6 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
             </div>
           </aside>
         </div>
-      </section>
-
-      <section v-else-if="activeView === 'search'" class="view">
-        <form class="searchbar" @submit.prevent="runSearch"><Search :size="20" /><input v-model="searchInput" aria-label="搜索校园内容" /><button class="primary" :disabled="busy === 'search'">搜索</button></form>
-        <div v-if="busy === 'search'" class="loading-state"><LoaderCircle class="spin" :size="24" /><span>正在融合检索结果…</span></div>
-        <div v-else-if="searchResults.length" class="result-list">
-          <button v-for="item in searchResults" :key="item.evidence_id" type="button" class="result-row" :aria-label="`查看${item.title}详情`" @click="openSourceDetail(item)">
-            <span class="result-icon"><FileImage :size="20" /></span>
-            <span class="result-content"><span class="result-title"><strong>{{ item.title }}</strong><span>{{ item.official ? '官方' : '帖子' }}</span></span><span class="result-excerpt">{{ item.excerpt }}</span><small>{{ retrievalLabel(item) }}</small></span>
-            <ChevronRight :size="19" />
-          </button>
-        </div>
-        <div v-else class="empty-state compact"><Search :size="26" /><h2>搜索校园内容</h2></div>
       </section>
 
       <section v-else-if="activeView === 'draft'" class="view draft-layout">

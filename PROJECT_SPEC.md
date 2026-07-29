@@ -48,7 +48,7 @@ Required endpoints:
 - `POST /api/v1/chat`
 - `GET /api/v1/chat/{session_id}/events`
 - `POST /api/v1/posts`
-- `GET /api/v1/posts`
+- `GET /api/v1/posts?offset={offset}&limit={limit}`
 - `GET /api/v1/posts/{post_id}`
 - `GET /api/v1/posts/{post_id}/comments`
 - `POST /api/v1/posts/{post_id}/comments`
@@ -65,7 +65,7 @@ Required endpoints:
 
 ## Frontend
 
-Vue 3 demo pages: post feed with persistent anonymous comments, AI assistant with citations and traces, multimodal search, HITL post drafting, memory management, eval reports, and execution traces.
+Vue 3 demo pages: paginated post feed with integrated semantic search and persistent anonymous comments, AI assistant with citations and traces, HITL post drafting, memory management, eval reports, and execution traces.
 
 ## Evaluation
 
