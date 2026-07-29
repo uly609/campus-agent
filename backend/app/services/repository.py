@@ -29,6 +29,8 @@ class JsonRepository:
         self.jobs_path = self.base / "runtime_ingestion_jobs.json"
         self.providers_path = self.base / "runtime_providers.json"
         self.sessions_path = self.base / "runtime_sessions.json"
+        self.xiaolin_messages_path = self.base / "runtime_xiaolin_messages.json"
+        self.xiaolin_process_path = self.base / "runtime_xiaolin_process.json"
 
     def load_posts(self) -> list[Post]:
         rows = self._read_json(self.posts_path, [])
@@ -115,7 +117,41 @@ class JsonRepository:
         rows = self.load_sessions()
         kept = [row for row in rows if not (row.user_id == user_id and row.session_id == session_id)]
         self._write_json(self.sessions_path, [row.model_dump(mode="json") for row in kept])
+        if len(kept) != len(rows):
+            self.delete_xiaolin_session(session_id)
         return len(kept) != len(rows)
+
+    def load_xiaolin_messages(self, session_id: str) -> list[dict[str, Any]]:
+        rows = self._read_json(self.xiaolin_messages_path, [])
+        return [row for row in rows if row.get("session_id") == session_id]
+
+    def save_xiaolin_message(self, message: dict[str, Any]) -> dict[str, Any]:
+        rows = self._read_json(self.xiaolin_messages_path, [])
+        rows.append(message)
+        self._write_json(self.xiaolin_messages_path, rows[-2000:])
+        return message
+
+    def load_xiaolin_process(self, session_id: str) -> list[dict[str, Any]]:
+        rows = self._read_json(self.xiaolin_process_path, [])
+        return [row for row in rows if row.get("session_id") == session_id]
+
+    def save_xiaolin_process(self, process: dict[str, Any]) -> dict[str, Any]:
+        rows = self._read_json(self.xiaolin_process_path, [])
+        rows.append(process)
+        self._write_json(self.xiaolin_process_path, rows[-1000:])
+        return process
+
+    def delete_xiaolin_session(self, session_id: str) -> None:
+        messages = self._read_json(self.xiaolin_messages_path, [])
+        self._write_json(
+            self.xiaolin_messages_path,
+            [row for row in messages if row.get("session_id") != session_id],
+        )
+        process_rows = self._read_json(self.xiaolin_process_path, [])
+        self._write_json(
+            self.xiaolin_process_path,
+            [row for row in process_rows if row.get("session_id") != session_id],
+        )
 
     def append_trace(self, trace: dict[str, Any]) -> None:
         traces = self._read_json(self.traces_path, [])

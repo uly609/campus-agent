@@ -437,3 +437,14 @@ make smoke
 - [x] Keep all calls behind the existing ToolRegistry, grounding policy, citations, and two-replan cap.
 - [x] Add regression coverage for the complete planner-tool-judge trace and XiaoLin frontend surface.
 - [x] Rebuild all eight services and pass seed, lint, typecheck, test, eval, E2E, and smoke validation.
+
+## M31 - Upstream-Faithful XiaoLin Chat Backend
+
+- [x] Supersede the M30 chat implementation that reused CampusFlow planning, grounding, and fake-answer fallbacks.
+- [x] Port XiaoLin's `LLMService`, `TaskPlanner`, `ToolSelector`, `TaskExecutor`, `LLMController`, `ResponseGenerator`, built-in tool hub, local Skill registry, and streaming lifecycle.
+- [x] Keep XiaoLin's original `/api/v1/chat/` SSE protocol for both normal and Agent modes.
+- [x] Persist real user/assistant history and per-message process information for later conversation turns.
+- [x] Localize only the assistant, school, campus, and synthetic campus-service data to Zhejiang Gongshang University.
+- [x] Expose the upstream-compatible LLM configuration status and refuse to fabricate model answers when `DEEPSEEK_API_KEY` is absent.
+- [x] Validate model-driven planning/tool selection/streaming with a controlled test model, then verify the no-key runtime and browser warning on port 5173.
+- [x] Pass Ruff, Mypy, 95 unit/integration tests, 3 E2E tests, frontend lint/build/tests, eval, smoke, and healthy Compose startup.

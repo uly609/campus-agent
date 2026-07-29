@@ -43,3 +43,13 @@ def delete_session(session_id: str, user_id: str = "demo-user") -> dict[str, obj
         raise HTTPException(status_code=404, detail={"code": "SESSION_NOT_FOUND"})
     clear_conversation_context(user_id, session_id)
     return {"deleted": True, "session_id": session_id}
+
+
+@router.get("/{session_id}/messages")
+def list_session_messages(session_id: str) -> list[dict[str, object]]:
+    return repo.load_xiaolin_messages(session_id)
+
+
+@router.get("/{session_id}/process-info")
+def list_session_process(session_id: str) -> list[dict[str, object]]:
+    return repo.load_xiaolin_process(session_id)

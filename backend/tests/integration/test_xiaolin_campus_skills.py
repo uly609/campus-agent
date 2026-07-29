@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from types import SimpleNamespace
+
 import pytest
 
 from app.agent.planner.planner import StructuredPlanner
@@ -15,6 +18,53 @@ from scripts.weather_mcp_server import mcp
 from app.domain.schemas import ChatRequest
 from app.services.chat_service import handle_chat
 from app.services.xiaolin_service import stream_xiaolin_events
+from app.services.repository import JsonRepository
+from app.xiaolin_agent.services.chat_history_manager import ChatHistoryManager
+from app.xiaolin_agent.services.llm_service import LLMService
+
+
+class FakeXiaolinLLM:
+    async def ainvoke(self, messages):
+        prompt = "\n".join(str(item.get("content", "")) for item in messages)
+        if "中央规划器" in prompt:
+            return SimpleNamespace(
+                content=json.dumps(
+                    {
+                        "tasks": [
+                            {
+                                "id": 1,
+                                "task": "查询下沙校区讲座场地",
+                                "input": "找下沙校区能坐200人的讲座场地，要投影",
+                                "depends_on": [],
+                            }
+                        ]
+                    },
+                    ensure_ascii=False,
+                )
+            )
+        if "工具选择器" in prompt:
+            return SimpleNamespace(
+                content=json.dumps(
+                    {
+                        "tool_selections": [
+                            {
+                                "task_id": 1,
+                                "tool": "venue-booking",
+                                "params": {
+                                    "query": "找下沙校区能坐200人的讲座场地，要投影"
+                                },
+                                "reason": "使用小林场地 skill",
+                            }
+                        ]
+                    },
+                    ensure_ascii=False,
+                )
+            )
+        return SimpleNamespace(content="下沙校区讲座场地")
+
+    async def astream(self, messages):
+        yield SimpleNamespace(content="下沙校区有符合条件的讲座场地，")
+        yield SimpleNamespace(content="可继续确认日期和时段。")
 
 
 def test_course_skill_uses_safe_demo_profile_to_filter_tuesday_schedule() -> None:
@@ -138,7 +188,15 @@ async def test_venue_reservation_chat_returns_unpublished_confirmation_draft() -
 
 
 @pytest.mark.asyncio
-async def test_xiaolin_stream_emits_full_planner_tool_answer_flow() -> None:
+async def test_xiaolin_stream_emits_full_planner_tool_answer_flow(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    async def fake_get_llm(cls, model_name="", stream=False, temperature=0.7):
+        return FakeXiaolinLLM()
+
+    monkeypatch.setattr(LLMService, "get_llm", classmethod(fake_get_llm))
+    monkeypatch.setattr(ChatHistoryManager, "repo", JsonRepository(tmp_path))
     request = ChatRequest(
         session_id="xiaolin-stream-session",
         user_id="demo-user",
@@ -150,7 +208,39 @@ async def test_xiaolin_stream_emits_full_planner_tool_answer_flow() -> None:
     assert any(event.get("subtype") == "task_plan" for event in events)
     assert any(event.get("subtype") == "tool_selections" for event in events)
     assert any(event.get("subtype") == "task_result" for event in events)
+    selections = next(
+        event["content"] for event in events if event.get("subtype") == "tool_selections"
+    )
+    assert selections[1]["tool"] == "venue-booking"
     answer = "".join(
         str(event.get("content", "")) for event in events if event.get("type") is None
     )
     assert "下沙校区" in answer
+    history = await ChatHistoryManager.get_chat_history("xiaolin-stream-session")
+    assert [item["role"] for item in history] == ["user", "assistant"]
+
+
+@pytest.mark.asyncio
+async def test_xiaolin_normal_mode_uses_original_simple_stream(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    async def fake_get_llm(cls, model_name="", stream=False, temperature=0.7):
+        return FakeXiaolinLLM()
+
+    monkeypatch.setattr(LLMService, "get_llm", classmethod(fake_get_llm))
+    monkeypatch.setattr(ChatHistoryManager, "repo", JsonRepository(tmp_path))
+    events = [
+        event
+        async for event in stream_xiaolin_events(
+            ChatRequest(
+                session_id="xiaolin-normal-session",
+                user_id="demo-user",
+                message="你好",
+                is_agent=False,
+            )
+        )
+    ]
+
+    assert all(event.get("type") is None for event in events)
+    assert "下沙校区" in "".join(str(event["content"]) for event in events)

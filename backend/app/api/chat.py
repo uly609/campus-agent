@@ -43,13 +43,15 @@ def _save_session(request: ChatRequest) -> None:
 
 
 @router.post("/chat", response_model=None)
-@router.post("/chat/", response_model=None)
 async def chat(request: ChatRequest):
-    if request.is_agent:
-        return chat_stream(request)
     response = await handle_chat(request)
     _save_session(request)
     return response
+
+
+@router.post("/chat/", response_model=None)
+def xiaolin_chat(request: ChatRequest) -> StreamingResponse:
+    return chat_stream(request)
 
 
 @router.post("/chat/stream")
@@ -62,7 +64,6 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
             error = {"type": "error", "content": str(exc)}
             yield f"data: {json.dumps(error, ensure_ascii=False)}\n\n"
 
-    _save_session(request)
     return StreamingResponse(
         event_stream(),
         media_type="text/event-stream",

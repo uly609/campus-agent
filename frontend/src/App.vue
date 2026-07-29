@@ -76,6 +76,7 @@ const memories = ref([]);
 const evalReport = ref(null);
 const traces = ref([]);
 const campusCapabilities = ref(null);
+const llmConfigStatus = ref(null);
 const knowledgeDocuments = ref([]);
 const ingestionJobs = ref([]);
 const knowledgeForm = ref({ source_id: "", title: "", body: "", official: true });
@@ -145,6 +146,15 @@ async function loadCampusCapabilities() {
   await run("campus", async () => { campusCapabilities.value = await api("/api/v1/campus/capabilities"); });
 }
 
+async function loadXiaolinConfigStatus() {
+  try {
+    const response = await api("/api/llm/config-status/");
+    llmConfigStatus.value = response.data;
+  } catch {
+    llmConfigStatus.value = null;
+  }
+}
+
 async function runCampusPrompt(prompt) {
   chatInput.value = prompt;
   activeView.value = "chat";
@@ -177,7 +187,7 @@ function applyXiaolinEvent(messageIndex, event) {
   }
 }
 
-async function streamXiaolinChat(message, messageIndex) {
+async function streamXiaolinChat(message, messageIndex, isAgent = true) {
   const response = await fetch("/api/v1/chat/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -185,7 +195,7 @@ async function streamXiaolinChat(message, messageIndex) {
       session_id: activeSessionId.value,
       user_id: "demo-user",
       message,
-      is_agent: true,
+      is_agent: isAgent,
     }),
   });
   if (!response.ok || !response.body) throw new Error("小林 Agent 流式连接失败");
@@ -218,35 +228,15 @@ async function sendChat() {
   notice.value = null;
   await scrollChatToBottom();
   try {
-    if (xiaolinAgentEnabled.value) {
-      const assistantIndex = chatMessages.value.length;
-      chatMessages.value.push({
-        role: "assistant",
-        text: "",
-        processInfo: createXiaolinProcessInfo(),
-        processing: true,
-        citations: [],
-      });
-      await streamXiaolinChat(message, assistantIndex);
-    } else {
-      chatResult.value = await api("/api/v1/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          session_id: activeSessionId.value,
-          user_id: "demo-user",
-          message,
-          is_agent: false,
-        }),
-      });
-      chatMessages.value.push({
-        role: "assistant",
-        text: chatResult.value.answer.answer,
-        citations: chatResult.value.citations,
-        degraded_mode: chatResult.value.degraded_mode,
-        trace: chatResult.value.trace,
-        intent: chatResult.value.intent,
-      });
-    }
+    const assistantIndex = chatMessages.value.length;
+    chatMessages.value.push({
+      role: "assistant",
+      text: "",
+      processInfo: xiaolinAgentEnabled.value ? createXiaolinProcessInfo() : null,
+      processing: true,
+      citations: [],
+    });
+    await streamXiaolinChat(message, assistantIndex, xiaolinAgentEnabled.value);
     await loadSessions();
     await scrollChatToBottom();
   } catch (error) {
@@ -684,7 +674,7 @@ function modelVersionLabel(value) {
 
 onMounted(async () => {
   window.addEventListener("keydown", handleGlobalKeydown);
-  await Promise.all([loadPosts(), loadSessions()]);
+  await Promise.all([loadPosts(), loadSessions(), loadXiaolinConfigStatus()]);
 });
 onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown));
 </script>
@@ -745,6 +735,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
           <span class="agent-avatar"><Bot :size="20" /></span>
           <div><strong>浙商小林</strong><small>浙江工商大学校园 Agent · 任务规划、工具调用与有依据回答</small></div>
           <div class="agent-badges"><span>Planner</span><span>Skills</span><span>RAG</span></div>
+        </div>
+        <div v-if="llmConfigStatus && !llmConfigStatus.configured" class="xiaolin-config-warning">
+          <CircleAlert :size="17" />
+          <div><strong>请先配置 LLM</strong><span>在 {{ llmConfigStatus.env_file }} 中设置 DEEPSEEK_API_KEY，然后重启 API 服务。</span></div>
         </div>
         <div ref="chatSurface" class="chat-surface">
           <div v-if="!chatMessages.length && busy !== 'chat'" class="empty-state"><span><Bot :size="26" /></span><h2>问浙商小林一个校园问题</h2><p>我会先规划任务，再调用课表、通知、场地、天气或校园知识工具。</p></div>

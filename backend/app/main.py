@@ -6,7 +6,19 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import campus_skills, chat, evals, health, ingest, memory, posts, providers, search, sessions
+from app.api import (
+    campus_skills,
+    chat,
+    evals,
+    health,
+    ingest,
+    memory,
+    posts,
+    providers,
+    search,
+    sessions,
+    xiaolin_demo,
+)
 from app.core.logging import configure_logging
 from app.observability.metrics import REQUEST_LATENCY, REQUESTS, metrics_response
 from app.security.rate_limit import RateLimiter
@@ -63,6 +75,7 @@ app.include_router(evals.router)
 app.include_router(search.router)
 app.include_router(providers.router)
 app.include_router(sessions.router)
+app.include_router(xiaolin_demo.router)
 
 
 @app.get("/metrics")

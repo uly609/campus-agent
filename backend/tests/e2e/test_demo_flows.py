@@ -52,6 +52,10 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
 
 def test_platform_management_flows() -> None:
     client = TestClient(app)
+    llm_status = client.get("/api/llm/config-status/")
+    assert llm_status.status_code == 200
+    assert llm_status.json()["data"]["env_file"] == ".env"
+    assert llm_status.json()["data"]["providers"][0]["env"] == "DEEPSEEK_API_KEY"
     session = client.post(
         "/api/v1/sessions", json={"user_id": "platform-user", "title": "校园咨询"}
     )

@@ -281,3 +281,14 @@ External model credentials are optional for local demo and test runs. When absen
 - Real functional QA for `帮我规划一场下沙校区200人讲座` invoked course, venue, Open-Meteo weather, and notice tools, then returned three grounded citations. A runtime trace-field mismatch found by this check was fixed and covered by integration tests.
 - Final validation passed after `docker compose up --build -d`: all eight services healthy; seed, Ruff, frontend lint, Mypy (97 source files), 93 unit/integration tests, offline eval `eval-11d8387334`, 3 E2E tests, frontend build/tests, and smoke all passed.
 - The runtime is currently explicit degraded mode for Chat, Embedding, and VLM unless credentials are configured; external weather remains real. No evaluation score is hardcoded.
+
+## 2026-07-29 M31 Notes
+
+- The user correctly identified that M30 only copied XiaoLin's event names and presentation while retaining CampusFlow's planner, provider router, allowlisted tool execution, grounding/refusal policy, and deterministic fake answers. M31 supersedes that chat backend.
+- Ported the upstream XiaoLin chat chain: cached LangChain `ChatOpenAI` service, model-driven `TaskPlanner`, model-driven `ToolSelector`, dependency-aware `TaskExecutor`, `LLMController`, `ResponseGenerator`, `CampusToolHub`, local Skill boundary, and original SSE lifecycle. Localization is limited to Zhejiang Gongshang University names and campus fixtures.
+- Both normal and Agent modes on `POST /api/v1/chat/` now use XiaoLin. The old CampusFlow `POST /api/v1/chat` remains isolated for non-chat platform regression coverage and is no longer called by the AI Assistant page.
+- Added persistent XiaoLin user/assistant message history and process-info storage plus read APIs. Verified that the runtime session stores both sides of a conversation and feeds recent history into subsequent model calls.
+- Removed XiaoLin chat dependencies on `ProviderRouter`, `StructuredPlanner`, memory-as-chat-history, CampusFlow evidence refusal, PII answer rewriting, and fake fixed-answer synthesis. Missing `DEEPSEEK_API_KEY` now follows upstream behavior and produces an explicit generation error instead of invented campus facts.
+- Added upstream-compatible `GET /api/llm/config-status/` and a visible AI Assistant warning. Browser QA on `http://localhost:5173` confirmed the warning, Agent/normal controls, no console errors, and the final built assets.
+- Controlled-model integration coverage verifies model-produced task planning, original `venue-booking` Skill selection, task execution events, streamed final response chunks, normal-mode streaming, and persisted history.
+- Final validation passed: Ruff, Mypy (113 source files), 95 unit/integration tests, offline eval `eval-7742b6d99b`, 3 E2E tests, frontend lint/typecheck/build/tests, smoke, and healthy rebuilt API/Web services. One concurrent E2E run collided on shared draft fixtures; the required sequential E2E rerun passed 3/3.
