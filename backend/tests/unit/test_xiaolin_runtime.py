@@ -19,12 +19,26 @@ async def test_server_manager_exposes_executable_tools_instead_of_skill_groups()
     assert "search_campus_docs" in names
     assert "search_official_web" not in names
     assert "query_campus_venues" in names
+    assert "campus_weather" in names
+    assert "query_campus_weather" not in names
     assert "campus_knowledge" not in names
     assert "venue_coordination" not in names
 
 
 def test_xiaolin_routes_direct_web_selection_through_local_first_retrieval() -> None:
     assert TaskExecutor._TOOL_ALIASES["search_official_web"] == "search_campus_docs"
+
+
+def test_weather_params_normalize_campus_alias_and_tomorrow_range() -> None:
+    params = TaskExecutor._normalize_weather_params(
+        {
+            "task": "查询杭州下沙校区明日天气",
+            "input": "浙江工商大学下沙校区明天会下雨吗",
+        },
+        {"location": "杭州下沙校区", "days": 1},
+    )
+
+    assert params == {"location": "下沙校区", "days": 2}
 
 
 @pytest.mark.asyncio

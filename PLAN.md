@@ -526,3 +526,12 @@ make smoke
 - [x] Reuse the unified `DASHSCOPE_API_KEY` and return explicit official-source metadata and URLs.
 - [x] Refuse to fabricate a campus fact when neither local RAG nor official web search returns evidence.
 - [x] Validate the real `校长是谁` Agent flow, regression tests, and the running API service.
+
+## M41 - Runtime FastMCP Weather Integration
+
+- [x] Register the XiaoLin runtime as an MCP client for the `campusflow-weather` FastMCP stdio server.
+- [x] Discover the real `campus_weather` tool and remove the duplicate in-process weather tool from XiaoLin's advertised catalog.
+- [x] Execute weather requests through MCP `list_tools` and `call_tool`, with normalized location and forecast-day parameters.
+- [x] Preserve the internal Open-Meteo adapter only as an explicit MCP failure fallback.
+- [x] Record MCP server, transport, live-data mode, and degraded state in task results and the chat process UI.
+- [x] Validate stdio process cleanup, real Open-Meteo execution, backend integration tests, and frontend checks.

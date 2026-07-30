@@ -374,3 +374,14 @@ External model credentials are optional for local demo and test runs. When absen
 - Removed direct official-web selection from XiaoLin's advertised tool list and defensively remapped legacy direct selections through `search_campus_docs`, so the local-first order is enforced by code rather than model preference.
 - Real validation for `校长是谁` produced a local miss, an `official_web_fallback` result with five school-domain sources, and an Agent response identifying 王永贵 from official-site search evidence.
 - Ruff, frontend lint/build, Mypy across 113 source files, and all 111 unit/integration tests passed. The API image was rebuilt and the running service became healthy on port 8000.
+
+## 2026-07-30 M41 Notes
+
+- Replaced XiaoLin's in-process weather path with a real MCP client connection to the existing `campusflow-weather` FastMCP stdio server. Tool discovery now uses MCP `list_tools`; execution uses MCP `call_tool`.
+- Removed `query_campus_weather` from XiaoLin's advertised in-process registry so the model can only select the real `campus_weather` MCP tool for weather tasks. The internal adapter remains available solely for explicit failure fallback.
+- Added bounded parameter normalization for campus names and one-to-seven forecast days. Results record `mcp_server`, `mcp_transport`, `data_mode`, and fallback degradation metadata.
+- Fixed stdio child-process imports by passing the API environment to the MCP server and verified clean startup, discovery, execution, and shutdown.
+- A real stdio MCP request returned live Open-Meteo data for Zhejiang Gongshang University's Xiasha campus with `campusflow-weather` and `stdio` provenance. The chat process UI now displays the MCP server and transport.
+- Fixed two live-check edge cases by canonicalizing model-produced campus aliases to the exact Xiasha/Jiaogong Road coordinates and forcing a two-day Open-Meteo window for “明天/明日” queries. The final Agent answer used the July 31 forecast instead of today's row.
+- Browser QA confirmed a visible `MCP: campusflow-weather · stdio` task marker, live-data badge, correct weather answer, and no console errors on port 5173.
+- Ruff, frontend lint/typecheck/build/tests, Mypy across 113 source files, all 113 unit/integration tests, 3 E2E flows, offline eval `eval-eb76b40ec6`, and smoke validation passed. API and Web were rebuilt and deployed healthy.

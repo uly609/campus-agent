@@ -22,6 +22,7 @@ from app.services.repository import JsonRepository
 from app.xiaolin_agent.ResponseGenerator import ResponseGenerator
 from app.xiaolin_agent.services.chat_history_manager import ChatHistoryManager
 from app.xiaolin_agent.services.llm_service import LLMService
+from app.xiaolin_agent.services.server_manager import ServerManager
 
 
 class FakeXiaolinLLM:
@@ -144,6 +145,22 @@ async def test_weather_mcp_exposes_campus_weather_tool() -> None:
     tools = await mcp.list_tools()
 
     assert any(tool.name == "campus_weather" for tool in tools)
+
+
+@pytest.mark.asyncio
+async def test_xiaolin_executes_weather_through_fastmcp_stdio() -> None:
+    manager = await ServerManager.get_instance()
+
+    result = await manager.execute_tool(
+        "campusflow-weather",
+        "campus_weather",
+        {"location": "下沙校区", "days": 1},
+    )
+
+    assert result["source"] == "Open-Meteo"
+    assert result["mcp_server"] == "campusflow-weather"
+    assert result["mcp_transport"] == "stdio"
+    assert result["data_mode"] == "live_external"
 
 
 @pytest.mark.asyncio

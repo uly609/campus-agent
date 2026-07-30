@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-6e5f4d8dc9",
-  "created_at": "2026-07-29T07:30:27.266724+00:00",
+  "run_id": "eval-eb76b40ec6",
+  "created_at": "2026-07-30T06:19:20.593856+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -32,22 +32,22 @@
     "retrieval_ndcg_at_8": 0.6402066119047684,
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
-    "qa_answer_fact_recall": 0.7142857142857143,
-    "qa_context_relevance": 0.14150793650793653,
-    "qa_citation_precision": 0.5,
-    "qa_citation_faithfulness": 1.0,
+    "qa_answer_fact_recall": 0.7857142857142857,
+    "qa_context_relevance": 0.23333333333333334,
+    "qa_citation_precision": 0.6,
+    "qa_citation_faithfulness": 0.9,
     "qa_forbidden_content_rate": 0.0,
-    "refusal_precision": 1.0,
+    "refusal_precision": 0.8,
     "refusal_recall": 1.0,
-    "refusal_f1": 1.0,
-    "replan_precision": 0.5,
+    "refusal_f1": 0.888888888888889,
+    "replan_precision": 0.42857142857142855,
     "replan_recall": 1.0,
-    "replan_f1": 0.6666666666666666,
-    "tool_success_rate": 0.9322033898305084,
-    "corrective_rag_success_rate": 0.8333333333333334,
+    "replan_f1": 0.6,
+    "tool_success_rate": 1.0,
+    "corrective_rag_success_rate": 0.8571428571428571,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 140.75954150030157,
-    "p95_latency_ms": 232.02604199468624,
+    "p50_latency_ms": 128.97954149957513,
+    "p95_latency_ms": 23483.333968993975,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -128,16 +128,16 @@
     },
     "qa": {
       "refusal": {
-        "accuracy": 1.0,
-        "precision": 1.0,
+        "accuracy": 0.9285714285714286,
+        "precision": 0.8,
         "recall": 1.0,
-        "f1": 1.0
+        "f1": 0.888888888888889
       },
       "replan": {
-        "accuracy": 0.7857142857142857,
-        "precision": 0.5,
+        "accuracy": 0.7142857142857143,
+        "precision": 0.42857142857142855,
         "recall": 1.0,
-        "f1": 0.6666666666666666
+        "f1": 0.6
       }
     }
   },
@@ -814,10 +814,10 @@
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
-          "doc-counseling-31",
-          "doc-delivery-30",
           "doc-counseling-10",
-          "doc-delivery-09"
+          "doc-counseling-31",
+          "doc-delivery-09",
+          "doc-delivery-30"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -907,10 +907,10 @@
           "doc-canteen-05",
           "doc-canteen-37",
           "post-seed-025",
-          "post-seed-153",
+          "post-seed-217",
           "post-seed-089",
           "post-seed-281",
-          "post-seed-217"
+          "post-seed-153"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -998,10 +998,10 @@
           "doc-delivery-09",
           "doc-delivery-30",
           "post-seed-037",
-          "post-seed-229",
           "post-seed-101",
           "post-seed-165",
-          "post-seed-065",
+          "post-seed-229",
+          "post-seed-001",
           "post-seed-193"
         ],
         "qrels": {
@@ -1196,8 +1196,8 @@
           "doc-library-hours-22",
           "doc-library-hours-23",
           "doc-library-hours-24",
-          "post-seed-043",
-          "post-seed-143"
+          "post-seed-143",
+          "post-seed-043"
         ],
         "qrels": {
           "post-demo-09": 3
@@ -1218,7 +1218,7 @@
         "question": "普通周图书馆最晚几点关门，闭馆前多久停止入馆？",
         "answer": "官方信息：演示资料，非浙江工商大学官方发布：图书馆周一至周日 8:00-22:30 开放，考试周延长到 23:30。闭馆前 15 分钟停止入馆。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.2,
+        "context_relevance": 0.25,
         "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1237,21 +1237,19 @@
         "id": "qa-01",
         "difficulty": "multi_fact",
         "question": "宿舍突然漏水，应该在哪里报修，紧急电话是多少？",
-        "answer": "官方信息：浙江工商大学后勤服务中心网站提供餐饮、公寓、校园卡、物业、商贸和校车等服务入口。页面列出的24小时服务热线为0571-[REDACTED_ID]（下沙）和0571-[REDACTED_ID]（教工路），维修报修热线为0571-[REDACTED_ID]。电话和服务安排可 [1]",
+        "answer": "证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,
-        "citation_faithfulness": 1.0,
+        "citation_faithfulness": 0.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
-        "predicted_refusal": false,
+        "predicted_refusal": true,
         "expected_replan": false,
-        "predicted_replan": false,
-        "replan_count": 0,
-        "citation_source_ids": [
-          "zjsu-logistics-services-2026"
-        ],
-        "corrective_rag_triggered": false,
+        "predicted_replan": true,
+        "replan_count": 2,
+        "citation_source_ids": [],
+        "corrective_rag_triggered": true,
         "memory_recall_count": 0
       },
       {
@@ -1281,7 +1279,7 @@
         "question": "奖学金申请要哪些条件，材料交给谁？",
         "answer": "官方信息：演示资料，非浙江工商大学官方发布：奖学金申请需要成绩排名、志愿服务记录和学院公示，材料由辅导员统一收取。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.14285714285714285,
+        "context_relevance": 0.3333333333333333,
         "citation_precision": 0.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1302,7 +1300,7 @@
         "question": "夜间校医院还能看诊吗？如果去合作医院要保留什么？",
         "answer": "官方信息：演示资料，非浙江工商大学官方发布：校医院工作日 8:30-17:00 开诊；夜间急诊请前往合作医院并保留票据。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.25,
+        "context_relevance": 0.5,
         "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1365,7 +1363,7 @@
         "question": "期末考试迟到 31 分钟还能进考场吗，需要带什么？",
         "answer": "官方信息：演示资料，非浙江工商大学官方发布：期末考试安排由教务处统一发布；学生须携带校园卡和身份证明，开考 30 分钟后不得进入考场。 本条仅用于功能演示。 [1]",
         "answer_fact_recall": 1.0,
-        "context_relevance": 0.1,
+        "context_relevance": 0.5,
         "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
@@ -1405,10 +1403,10 @@
         "id": "qa-09",
         "difficulty": "post_fact",
         "question": "图书馆门口发现的蓝色校园卡被送到哪里了？",
-        "answer": "官方信息：演示资料，非浙江工商大学官方发布：一卡通丢失后应先在校园卡中心或自助机挂失，补办地点在学生服务中心一楼。 本条仅用于功能演示。 [1]",
-        "answer_fact_recall": 0.0,
-        "context_relevance": 0.05555555555555555,
-        "citation_precision": 0.0,
+        "answer": "社区信息，可能过时：图书馆门口发现蓝色校园卡\n在图书馆门口长椅发现一张蓝色校园卡，已交到一楼服务台。失主请携带有效证件前往领取。\n标签:失物招领,校园卡,蓝色 地点:图书馆 [1]",
+        "answer_fact_recall": 1.0,
+        "context_relevance": 0.08333333333333333,
+        "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
@@ -1417,7 +1415,7 @@
         "predicted_replan": true,
         "replan_count": 1,
         "citation_source_ids": [
-          "doc-card-loss-17"
+          "post-demo-09"
         ],
         "corrective_rag_triggered": true,
         "memory_recall_count": 0

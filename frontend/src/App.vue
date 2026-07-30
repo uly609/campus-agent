@@ -222,7 +222,8 @@ function createXiaolinProcessInfo() {
 }
 
 function normalizeXiaolinTaskResult(result) {
-  if (result?.status) return result;
+  if (result?.api_result !== undefined || result?.status === "skipped") return result;
+  if (result?.status === "error" && result?.error) return result;
   if (result?.error) return { status: "error", error: result.error };
   return { status: "success", api_result: result };
 }
@@ -791,6 +792,19 @@ function xiaolinResultSummary(message, taskId) {
   return "执行完成";
 }
 
+function xiaolinMcpLabel(message, taskId) {
+  const result = xiaolinTaskResult(message, taskId);
+  if (!result || result.status !== "success") return "";
+  const data = result.api_result?.data ?? result.api_result;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (row?.mcp_server && row?.mcp_transport) {
+    return `MCP：${row.mcp_server} · ${row.mcp_transport}`;
+  }
+  const metadata = row?.metadata || {};
+  if (metadata.mcp_degraded) return `MCP 降级：${metadata.mcp_server || "campusflow-weather"}`;
+  return "";
+}
+
 function xiaolinTaskDataMode(message, taskId) {
   const result = xiaolinTaskResult(message, taskId);
   if (!result || result.status !== "success") return null;
@@ -1025,6 +1039,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                       <article v-for="task in message.processInfo.taskPlan" :key="task.id" class="xiaolin-task">
                         <div class="xiaolin-task-head"><strong>{{ task.task }}</strong><div class="task-badges"><span v-if="xiaolinTaskDataMode(message, task.id)" :class="['data-origin', xiaolinTaskDataMode(message, task.id).tone]">{{ xiaolinTaskDataMode(message, task.id).label }}</span><span :class="['task-status', xiaolinTaskStatus(message, task.id)]">{{ xiaolinTaskStatus(message, task.id) }}</span></div></div>
                         <p v-if="xiaolinSelection(message, task.id)">使用工具：{{ toolLabel(xiaolinSelection(message, task.id).tool) }} · {{ xiaolinSelection(message, task.id).reason }}</p>
+                        <p v-if="xiaolinMcpLabel(message, task.id)" class="xiaolin-mcp-source">{{ xiaolinMcpLabel(message, task.id) }}</p>
                         <small>{{ xiaolinResultSummary(message, task.id) }}</small>
                       </article>
                     </div>
