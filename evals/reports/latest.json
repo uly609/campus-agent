@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-eb76b40ec6",
-  "created_at": "2026-07-30T06:19:20.593856+00:00",
+  "run_id": "eval-e124f080a2",
+  "created_at": "2026-07-30T06:51:08.135575+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -32,22 +32,22 @@
     "retrieval_ndcg_at_8": 0.6402066119047684,
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
-    "qa_answer_fact_recall": 0.7857142857142857,
-    "qa_context_relevance": 0.23333333333333334,
-    "qa_citation_precision": 0.6,
-    "qa_citation_faithfulness": 0.9,
+    "qa_answer_fact_recall": 0.7142857142857143,
+    "qa_context_relevance": 0.225,
+    "qa_citation_precision": 0.5,
+    "qa_citation_faithfulness": 1.0,
     "qa_forbidden_content_rate": 0.0,
-    "refusal_precision": 0.8,
+    "refusal_precision": 1.0,
     "refusal_recall": 1.0,
-    "refusal_f1": 0.888888888888889,
-    "replan_precision": 0.42857142857142855,
+    "refusal_f1": 1.0,
+    "replan_precision": 0.6,
     "replan_recall": 1.0,
-    "replan_f1": 0.6,
+    "replan_f1": 0.7499999999999999,
     "tool_success_rate": 1.0,
-    "corrective_rag_success_rate": 0.8571428571428571,
+    "corrective_rag_success_rate": 1.0,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 128.97954149957513,
-    "p95_latency_ms": 23483.333968993975,
+    "p50_latency_ms": 121.65327050024644,
+    "p95_latency_ms": 14462.681714998325,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -128,16 +128,16 @@
     },
     "qa": {
       "refusal": {
-        "accuracy": 0.9285714285714286,
-        "precision": 0.8,
+        "accuracy": 1.0,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.888888888888889
+        "f1": 1.0
       },
       "replan": {
-        "accuracy": 0.7142857142857143,
-        "precision": 0.42857142857142855,
+        "accuracy": 0.8571428571428571,
+        "precision": 0.6,
         "recall": 1.0,
-        "f1": 0.6
+        "f1": 0.7499999999999999
       }
     }
   },
@@ -814,10 +814,10 @@
           "doc-dorm-repair-01",
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
+          "doc-delivery-30",
           "doc-counseling-10",
           "doc-counseling-31",
-          "doc-delivery-09",
-          "doc-delivery-30"
+          "doc-delivery-09"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -906,10 +906,10 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
-          "post-seed-025",
-          "post-seed-217",
           "post-seed-089",
           "post-seed-281",
+          "post-seed-217",
+          "post-seed-025",
           "post-seed-153"
         ],
         "qrels": {
@@ -997,12 +997,12 @@
         "returned_source_ids": [
           "doc-delivery-09",
           "doc-delivery-30",
-          "post-seed-037",
           "post-seed-101",
+          "post-seed-037",
           "post-seed-165",
           "post-seed-229",
           "post-seed-001",
-          "post-seed-193"
+          "post-seed-065"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1237,19 +1237,21 @@
         "id": "qa-01",
         "difficulty": "multi_fact",
         "question": "宿舍突然漏水，应该在哪里报修，紧急电话是多少？",
-        "answer": "证据不足，我不能可靠回答这个校园事实问题。请换个问法或提供更多线索。",
+        "answer": "官方信息：根据目前提供的知识库内容，未包含浙江工商大学关于宿舍漏水报修渠道或紧急联系电话的官方信息。所给资料仅涉及校园食堂分布、营业情况、美食推荐，以及一则2022年关于自考学位论文电子稿上传的通知，均不涉及后勤维修或宿舍报修流程。\n\n因此，**依据 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,
-        "citation_faithfulness": 0.0,
+        "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
-        "predicted_refusal": true,
+        "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 2,
-        "citation_source_ids": [],
-        "corrective_rag_triggered": true,
+        "predicted_replan": false,
+        "replan_count": 0,
+        "citation_source_ids": [
+          "https://iee.zjgsu.edu.cn/?news/4578.html"
+        ],
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {
@@ -1403,21 +1405,21 @@
         "id": "qa-09",
         "difficulty": "post_fact",
         "question": "图书馆门口发现的蓝色校园卡被送到哪里了？",
-        "answer": "社区信息，可能过时：图书馆门口发现蓝色校园卡\n在图书馆门口长椅发现一张蓝色校园卡，已交到一楼服务台。失主请携带有效证件前往领取。\n标签:失物招领,校园卡,蓝色 地点:图书馆 [1]",
-        "answer_fact_recall": 1.0,
-        "context_relevance": 0.08333333333333333,
-        "citation_precision": 1.0,
+        "answer": "官方信息：根据提供的知识库信息，没有明确提及“图书馆门口发现的蓝色校园卡”应被送到哪里的具体指引。\n\n但结合校园卡相关服务信息，可参考以下官方处理途径：\n\n- 校园卡（含实体校友卡、学生/教工卡）遗失或拾获后，建议送至**师生之家校园卡窗口**或** [1]",
+        "answer_fact_recall": 0.0,
+        "context_relevance": 0.0,
+        "citation_precision": 0.0,
         "citation_faithfulness": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
         "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 1,
+        "predicted_replan": false,
+        "replan_count": 0,
         "citation_source_ids": [
-          "post-demo-09"
+          "https://lib.zjgsu.edu.cn/2019/0625/c1071a38459/page.htm"
         ],
-        "corrective_rag_triggered": true,
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {

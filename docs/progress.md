@@ -385,3 +385,11 @@ External model credentials are optional for local demo and test runs. When absen
 - Fixed two live-check edge cases by canonicalizing model-produced campus aliases to the exact Xiasha/Jiaogong Road coordinates and forcing a two-day Open-Meteo window for “明天/明日” queries. The final Agent answer used the July 31 forecast instead of today's row.
 - Browser QA confirmed a visible `MCP: campusflow-weather · stdio` task marker, live-data badge, correct weather answer, and no console errors on port 5173.
 - Ruff, frontend lint/typecheck/build/tests, Mypy across 113 source files, all 113 unit/integration tests, 3 E2E flows, offline eval `eval-eb76b40ec6`, and smoke validation passed. API and Web were rebuilt and deployed healthy.
+
+## 2026-07-30 M42 Notes
+
+- Reproduced the user's `计算机专业2024级辅导员叫什么名字` query. Planning and tool selection correctly chose campus knowledge, but Bailian returned related advisor-assessment pages and missed the college article at `/zh-hans/node/2660`.
+- Confirmed the college's Drupal site search returns direct excerpts for `2024级辅导员`, including two official pages that identify 沈一品 as the 2024-grade advisor.
+- Added a structured HTML parser and allowlisted college site-search path ahead of Bailian. The route triggers only for computer-college advisor queries, derives the grade-specific term from the question, rejects non-`zjgsu.edu.cn` URLs, and stores official excerpts without model rewriting.
+- Real Agent verification returned 沈一品 and cited the official computer-college 2024-grade student meeting page. No person name is hardcoded in the answer or retrieval adapter.
+- Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 113 source files, all 114 unit/integration tests, 3 E2E flows, offline eval `eval-e124f080a2`, and smoke validation. The rebuilt API is running with the new retrieval path.

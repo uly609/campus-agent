@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     official_web_bailian_url: str = (
         "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
     )
+    official_web_site_search_urls: str = (
+        "https://scie.zjgsu.edu.cn/zh-hans/search/node"
+    )
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
     provider_encryption_secret: str = Field(

@@ -535,3 +535,12 @@ make smoke
 - [x] Preserve the internal Open-Meteo adapter only as an explicit MCP failure fallback.
 - [x] Record MCP server, transport, live-data mode, and degraded state in task results and the chat process UI.
 - [x] Validate stdio process cleanup, real Open-Meteo execution, backend integration tests, and frontend checks.
+
+## M42 - Precise College Site Search
+
+- [x] Reproduce the missed 2024 computer-college advisor query through the real XiaoLin Agent.
+- [x] Identify the gap as Bailian web-index recall rather than planning, tool selection, or source allowlisting.
+- [x] Add an allowlisted Drupal site-search adapter for precise computer-college advisor queries.
+- [x] Extract grade-specific search terms and preserve direct official result excerpts and URLs.
+- [x] Keep Bailian official-web search as the fallback when the college site index has no result.
+- [x] Verify the Agent answers with the advisor name and cites the official college page.
