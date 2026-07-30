@@ -517,3 +517,12 @@ make smoke
 - [x] Replace the 12/80 hard limits with offset-and-limit API pagination.
 - [x] Load 20 posts initially and append further pages without duplicates.
 - [x] Keep search results connected to the same post-detail and comment workflow.
+
+## M40 - Local-First Official Web Fallback
+
+- [x] Keep XiaoLin Agent campus-fact retrieval local-RAG-first instead of letting the model choose the source order.
+- [x] Fall back to Bailian forced web search when local campus evidence is irrelevant or absent.
+- [x] Restrict fallback sources to Zhejiang Gongshang University `zjgsu.edu.cn` domains and reject other hosts.
+- [x] Reuse the unified `DASHSCOPE_API_KEY` and return explicit official-source metadata and URLs.
+- [x] Refuse to fabricate a campus fact when neither local RAG nor official web search returns evidence.
+- [x] Validate the real `校长是谁` Agent flow, regression tests, and the running API service.

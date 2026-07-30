@@ -47,7 +47,10 @@ class Settings(BaseSettings):
     rerank_min_score: float = 0.25
     official_web_search_url: Optional[str] = None
     official_web_search_api_key: Optional[str] = None
-    official_web_allowed_domains: str = ""
+    official_web_allowed_domains: str = "zjgsu.edu.cn"
+    official_web_bailian_url: str = (
+        "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
+    )
     provider_timeout_seconds: float = 8.0
     provider_max_retries: int = 2
     provider_encryption_secret: str = Field(

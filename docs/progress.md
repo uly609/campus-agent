@@ -365,3 +365,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Tightened the search boundary from all non-official chunks to `source_type=post`, so demo knowledge documents cannot appear as community search results.
 - Search results open the same full post detail and persistent comment workflow used by ordinary feed rows.
 - Validation passed with Ruff, Mypy (113 source files), 3 isolated E2E flows, frontend lint/build/tests, and targeted pagination and source-type assertions. Browser QA confirmed 20 initial rows, 40 after loading more, eight post-only search results, comment-detail navigation, no duplicate search tab, no horizontal overflow, and no console errors.
+
+## 2026-07-30 M40 Notes
+
+- Added a deterministic source policy for XiaoLin campus facts: the Agent enters through local RAG first, rejects irrelevant local rows, and then falls back to an allowlisted Zhejiang Gongshang University official-web search.
+- Reused the project's unified Bailian credential through DashScope native forced search with source output enabled and `zjgsu.edu.cn` assigned as the only accepted site. Every returned URL is independently checked against the allowlist.
+- Kept search summaries distinct from quoted website text through `excerpt_kind: search_summary`; answers must show source titles and URLs and may not describe the generated summary as official verbatim copy.
+- Removed direct official-web selection from XiaoLin's advertised tool list and defensively remapped legacy direct selections through `search_campus_docs`, so the local-first order is enforced by code rather than model preference.
+- Real validation for `校长是谁` produced a local miss, an `official_web_fallback` result with five school-domain sources, and an Agent response identifying 王永贵 from official-site search evidence.
+- Ruff, frontend lint/build, Mypy across 113 source files, and all 111 unit/integration tests passed. The API image was rebuilt and the running service became healthy on port 8000.

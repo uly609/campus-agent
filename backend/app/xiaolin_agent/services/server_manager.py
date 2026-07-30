@@ -30,6 +30,8 @@ class _RegistryServer:
         tools: list[Tool] = []
         for skill in default_skill_registry().skills:
             for tool_name in skill.tools:
+                if tool_name == "search_official_web":
+                    continue
                 tools.append(
                     Tool(
                         name=tool_name,

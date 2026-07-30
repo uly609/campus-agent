@@ -25,6 +25,8 @@ class TaskExecutor:
         "venue_coordination": "query_campus_venues",
         "campus_weather": "query_campus_weather",
         "student_profile": "get_student_profile",
+        # XiaoLin always enters campus facts through the local-first retrieval policy.
+        "search_official_web": "search_campus_docs",
     }
 
     @classmethod

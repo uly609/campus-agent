@@ -18,6 +18,7 @@ from app.domain.schemas import Evidence, PostCreate, ToolResult
 from app.multimodal.image_attributes import extract_image_attributes
 from app.multimodal.ocr import verify_demo_student_card as verify_card
 from app.retrieval.ingestion import build_corpus
+from app.retrieval.chunking import tokenize
 from app.retrieval.official_web import OfficialWebSearch
 from app.retrieval.service import RetrievalService
 from app.services.post_service import create_draft, draft_to_dict
@@ -47,6 +48,29 @@ class CampusTools:
     async def search_campus_docs(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", ""))
         evidence = [item for item in await (await self.retrieval()).search(query, source_type="official") if item.official]
+        local_evidence = [item for item in evidence if self._is_relevant_local_evidence(query, item)]
+        if not local_evidence and self._official_web.configured:
+            try:
+                web_evidence = await self._official_web.search(query)
+            except (httpx.HTTPError, ValueError, TypeError):
+                web_evidence = []
+            if web_evidence:
+                return ToolResult(
+                    tool_name="search_campus_docs",
+                    success=True,
+                    data=[item.model_dump() for item in web_evidence],
+                    error_code=None,
+                    error_message=None,
+                    latency_ms=0,
+                    provenance=[
+                        {
+                            "kind": "official_web_fallback",
+                            "allowlisted": True,
+                            "local_match": False,
+                        }
+                    ],
+                )
+        evidence = local_evidence
         modes = {str(item.metadata.get("data_mode", "unverified")) for item in evidence}
         return ToolResult(
             tool_name="search_campus_docs",
@@ -57,6 +81,31 @@ class CampusTools:
             latency_ms=0,
             provenance=[{"kind": "rag_corpus", "data_modes": sorted(modes)}],
         )
+
+    @staticmethod
+    def _is_relevant_local_evidence(query: str, evidence: Evidence) -> bool:
+        normalized_query = query
+        for generic_phrase in (
+            "浙江工商大学",
+            "浙商大",
+            "学校",
+            "校园",
+            "现任",
+            "信息",
+            "查询",
+            "官方",
+            "请问",
+        ):
+            normalized_query = normalized_query.replace(generic_phrase, "")
+        query_terms = {
+            token
+            for token in tokenize(normalized_query)
+            if len(token) >= 2 and token not in {"什么", "怎么", "哪里", "哪个", "是谁", "我们", "学校"}
+        }
+        if not query_terms:
+            return evidence.score >= 0.45
+        candidate_terms = set(tokenize(f"{evidence.title} {evidence.excerpt}"))
+        return bool(query_terms.intersection(candidate_terms)) and evidence.score >= 0.2
 
     async def search_posts(self, payload: dict[str, object]) -> ToolResult:
         query = str(payload.get("query", ""))
