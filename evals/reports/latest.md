@@ -1,4 +1,4 @@
-# Eval Report eval-e124f080a2
+# Eval Report eval-e19e742df4
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -23,6 +23,10 @@
 | qa_context_relevance | 0.2250 |
 | qa_citation_precision | 0.5000 |
 | qa_citation_faithfulness | 1.0000 |
+| qa_faithfulness | 1.0000 |
+| qa_answer_relevancy | 0.5184 |
+| qa_context_precision | 0.5500 |
+| qa_context_recall | 0.6000 |
 | qa_forbidden_content_rate | 0.0000 |
 | refusal_precision | 1.0000 |
 | refusal_recall | 1.0000 |
@@ -33,8 +37,8 @@
 | tool_success_rate | 1.0000 |
 | corrective_rag_success_rate | 1.0000 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 121.6533 |
-| p95_latency_ms | 14462.6817 |
+| p50_latency_ms | 122.5516 |
+| p95_latency_ms | 17119.1622 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases
@@ -78,3 +82,4 @@
 - Offline fake providers measure deterministic regression behavior, not production LLM quality.
 - The 112-case suite is a development benchmark and must not be presented as an external or human-blind benchmark.
 - Conversational quality still requires periodic human review and a held-out real-provider evaluation.
+- RAGAS-style metrics use a deterministic token-overlap approximation for offline regression, not an LLM judge.

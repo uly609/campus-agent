@@ -74,9 +74,10 @@ make smoke
 4. Generate a post draft with optional synthetic image `synthetic-card-library-blue.png`, edit it up to five rounds, confirm it, click **发布帖子**, and verify it appears in the post feed.
 5. Ask the assistant `记住我喜欢图书馆靠窗座位`, open Memory Management, and delete the memory.
 6. Run Eval Dashboard and inspect the computed metrics.
-7. Add a TXT or Markdown notice in Knowledge Base and wait for its task to become searchable.
+7. Add a TXT, Markdown, Excel, CSV, PDF, or image file in Knowledge Base; non-text files are parsed into editable chunks before indexing.
 8. Add or check a Chat, Embedding, or VLM route in Model Routing.
 9. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
+10. Open `POST /api/v1/files/parse` with a small Excel or PDF, then `POST /api/v1/agents/multi` with a campus question to see supervisor-worker orchestration.
 
 Long-term memory accepts explicit chat memories and eligible first-person facts or preferences from confirmed published posts. Generic post content is not memorized. Open **记忆** after publishing to consume the Redis Stream and inspect or delete the resulting record.
 
@@ -92,6 +93,9 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 - `GET|POST /api/v1/knowledge/documents`
 - `GET /api/v1/knowledge/jobs`
 - `POST /api/v1/knowledge/jobs/{job_id}/retry`
+- `POST /api/v1/files/parse`
+- `POST /api/v1/agents/multi`
+- `GET /api/v1/agents/multi/spec`
 - `GET|POST /api/v1/providers`
 - `POST /api/v1/providers/{provider_id}/check`
 - `GET|POST /api/v1/sessions`
@@ -114,3 +118,13 @@ The Agent exposes ten typed Skills backed by allowlisted tools: campus knowledge
 The XiaoLin Agent discovers and calls `campus_weather` through the `campusflow-weather` FastMCP stdio server. Run it independently with `python -m scripts.weather_mcp_server`. Results record the MCP server and transport; the internal `query_campus_weather` adapter is retained only as an explicit degraded fallback. Course, notice, venue, and profile fixtures are synthetic demonstration data; weather uses Open-Meteo and reports failure instead of fabricating live data.
 
 Corrective official-web search first uses configured official site indexes for precise organizational facts, then uses the unified Bailian credential with `OFFICIAL_WEB_ALLOWED_DOMAINS`, or a dedicated provider configured by `OFFICIAL_WEB_SEARCH_URL` and `OFFICIAL_WEB_SEARCH_API_KEY`. The computer-college adapter uses the college's Drupal site search for grade-advisor queries and preserves direct official excerpts instead of model summaries. When all external search paths are unavailable, CampusFlow reports the tool as unavailable and continues with local Hybrid RAG; it never reports fake external results. See `THIRD_PARTY_NOTICES.md` for reference-project attribution and reuse boundaries.
+
+## Document parsing and managed knowledge ingestion
+
+`POST /api/v1/files/parse` turns a single upload into typed, chunked text without touching a database. TXT and Markdown use paragraph-aware chunks; Excel and CSV become Markdown table chunks (60 rows per chunk); PDFs become per-page text plus extracted tables; PNG, JPEG, and WebP go through the Qwen-VL chat-image analysis path and record provider/model/degraded metadata. Files over 10MB or with an unlisted extension are rejected. With `ingest=true`, parsed chunks are joined into a managed knowledge document and enqueued through the Redis Streams ingestion pipeline; oversized bodies are truncated with an explicit marker. The Vue Knowledge Base calls this endpoint for non-text uploads and shows the parsed chunks as editable text before indexing.
+
+## Multi-agent orchestration and RAGAS-style evaluation
+
+`POST /api/v1/agents/multi` runs a LangGraph supervisor-workers graph over five workers: retrieval, multimodal parsing, post drafting, evaluation, and general answering. The supervisor routes by Chinese intent, publishes plan messages to a shared message hub, and workers write artifacts to a shared blackboard; `GET /api/v1/agents/multi/spec` returns the graph contract. Prompt-injection flags stop orchestration, and bounded worker/turn limits prevent runaway loops.
+
+The offline eval report adds RAGAS-style `qa_faithfulness`, `qa_answer_relevancy`, `qa_context_precision`, and `qa_context_recall` using deterministic token-overlap approximations, documented as regression metrics rather than an LLM judge.

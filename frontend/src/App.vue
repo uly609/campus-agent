@@ -110,8 +110,9 @@ const sourcePublicUrl = computed(() => {
 });
 
 async function api(path, options = {}) {
+  const isForm = options.body instanceof FormData;
   const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: { ...(isForm ? {} : { "Content-Type": "application/json" }), ...(options.headers || {}) },
     ...options,
   });
   if (!response.ok) {
@@ -593,12 +594,26 @@ async function loadKnowledge() {
 async function selectKnowledgeFile(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  if (!/\.(txt|md|markdown)$/i.test(file.name)) {
-    notice.value = { type: "error", text: "当前支持 TXT 和 Markdown 文档" };
+  if (!/\.(txt|md|markdown|xlsx|csv|pdf|png|jpe?g|webp)$/i.test(file.name)) {
+    notice.value = { type: "error", text: "支持 TXT、Markdown、Excel、CSV、PDF 和图片" };
     return;
   }
-  knowledgeForm.value.title ||= file.name.replace(/\.(txt|md|markdown)$/i, "");
+  knowledgeForm.value.title ||= file.name.replace(/\.[^.]+$/, "");
   knowledgeForm.value.source_id ||= `kb-${Date.now()}`;
+  if (/\.(xlsx|csv|pdf|png|jpe?g|webp)$/i.test(file.name)) {
+    let chunkCount = 0;
+    await run("knowledge-parse", async () => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const parsed = await api("/api/v1/files/parse", { method: "POST", body: formData });
+      chunkCount = (parsed.chunks || []).length;
+      knowledgeForm.value.body = (parsed.chunks || [])
+        .map((chunk) => `[${chunk.kind}] ${chunk.title}\n${chunk.text}`)
+        .join("\n\n---\n\n");
+    }, `已解析 ${chunkCount} 个片段，可编辑后提交索引`);
+    event.target.value = "";
+    return;
+  }
   knowledgeForm.value.body = await file.text();
   event.target.value = "";
 }
@@ -1126,7 +1141,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       <section v-else-if="activeView === 'knowledge'" class="view platform-layout">
         <div class="admin-panel">
           <div class="section-head"><div><h2>添加知识</h2><p>TXT 与 Markdown 将异步切分并写入混合检索</p></div></div>
-          <label class="upload-document"><input type="file" accept=".txt,.md,.markdown,text/plain,text/markdown" @change="selectKnowledgeFile" /><Upload :size="20" /><span>选择文档</span></label>
+          <label class="upload-document"><input type="file" accept=".txt,.md,.markdown,text/plain,text/markdown,.xlsx,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*" @change="selectKnowledgeFile" /><Upload :size="20" /><span>选择文档</span></label>
           <label class="field"><span>文档标题</span><input v-model="knowledgeForm.title" maxlength="160" placeholder="例如：图书馆开放时间" /></label>
           <label class="field"><span>来源编号</span><input v-model="knowledgeForm.source_id" maxlength="120" placeholder="留空自动生成" /></label>
           <label class="field"><span>正文内容</span><textarea v-model="knowledgeForm.body" maxlength="200000" placeholder="粘贴学校官方通知或知识内容"></textarea></label>

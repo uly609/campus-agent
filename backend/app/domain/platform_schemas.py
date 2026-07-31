@@ -43,6 +43,46 @@ class IngestionJob(BaseModel):
     updated_at: str
 
 
+class ParsedFileChunkOut(BaseModel):
+    chunk_id: str
+    kind: str
+    title: str
+    text: str
+    metadata: dict[str, str]
+
+
+class FileParseOut(BaseModel):
+    file_name: str
+    kind: str
+    chunks: list[ParsedFileChunkOut]
+    warnings: list[str]
+    source_id: Optional[str] = None
+    job_id: Optional[str] = None
+
+
+class FileUploadIn(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    data_url: str = Field(min_length=10, max_length=40_000_000)
+
+
+class MultiAgentRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=4000)
+    session_id: str = Field(default="multi-agent", min_length=1, max_length=120)
+    user_id: str = Field(default="local-user", min_length=1, max_length=120)
+    max_turns: int = Field(default=4, ge=1, le=6)
+    files: list[FileUploadIn] = Field(default_factory=list)
+
+
+class MultiAgentResponse(BaseModel):
+    request_id: str
+    final_answer: str
+    worker_results: list[dict[str, object]]
+    message_hub: list[dict[str, object]]
+    turn_count: int
+    trace: list[dict[str, object]]
+    degraded_mode: list[str]
+
+
 class ProviderProfileCreate(BaseModel):
     name: str = Field(min_length=2, max_length=80)
     role: ProviderRole

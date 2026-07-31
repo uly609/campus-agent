@@ -544,3 +544,28 @@ make smoke
 - [x] Extract grade-specific search terms and preserve direct official result excerpts and URLs.
 - [x] Keep Bailian official-web search as the fallback when the college site index has no result.
 - [x] Verify the Agent answers with the advisor name and cites the official college page.
+
+## M43 - Document Parsing, Multi-Agent Orchestration, And RAGAS-Style Eval
+
+- [x] Parse TXT/Markdown, Excel, CSV, PDF, and images through one typed file-parse API.
+- [x] Split spreadsheets into Markdown table chunks and PDF pages into text/table chunks.
+- [x] Route image files through the Qwen-VL chat-image analysis path with degraded-mode warnings.
+- [x] Optionally enqueue parsed content into managed knowledge ingestion with a bounded 200k body.
+- [x] Add a LangGraph supervisor-workers multi-agent graph with a shared message hub and artifacts.
+- [x] Route retrieval, multimodal, draft, eval, and general workers with prompt-injection and turn limits.
+- [x] Compute RAGAS-style faithfulness, answer relevancy, context precision, and context recall offline.
+- [x] Accept Excel/CSV/PDF/images in the Vue Knowledge Base with parsed chunk previews.
+- [x] Cover parsing, orchestration, and metrics with unit tests and run the complete validation suite.
+
+Validation:
+
+```bash
+docker compose up --build -d
+make seed
+make lint
+make typecheck
+make test
+make eval
+make e2e
+make smoke
+```

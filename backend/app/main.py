@@ -10,9 +10,11 @@ from app.api import (
     campus_skills,
     chat,
     evals,
+    files,
     health,
     ingest,
     memory,
+    multi_agent,
     posts,
     providers,
     search,
@@ -76,6 +78,8 @@ app.include_router(search.router)
 app.include_router(providers.router)
 app.include_router(sessions.router)
 app.include_router(xiaolin_demo.router)
+app.include_router(files.router)
+app.include_router(multi_agent.router)
 
 
 @app.get("/metrics")

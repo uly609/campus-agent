@@ -30,6 +30,13 @@ from eval_metrics import (
     retrieval_metrics,
     safe_div,
 )
+from ragas_metrics import (
+    answer_relevancy_score,
+    claim_support_rate,
+    context_precision_score,
+    context_recall_score,
+    extract_claims,
+)
 
 DATASET_DIR = ROOT / "evals" / "datasets"
 REPORT_DIR = ROOT / "evals" / "reports"
@@ -134,6 +141,11 @@ async def evaluate_qa(cases: list[dict[str, Any]]) -> tuple[dict[str, float], li
         context_relevance = safe_div(
             sum(str(item.get("source_id", "")) in expected_sources for item in evidence), len(evidence)
         )
+        evidence_texts = [str(item.get("excerpt", "")) for item in evidence]
+        qa_faithfulness = claim_support_rate(extract_claims(answer), evidence_texts)
+        qa_answer_relevancy = answer_relevancy_score(case["question"], answer)
+        qa_context_precision = context_precision_score(evidence, expected_sources)
+        qa_context_recall = context_recall_score(evidence, expected_sources)
         expected_refusal = bool(case["should_refuse"])
         predicted_refusal = is_refusal(answer, citations)
         expected_replan = bool(case["should_replan"])
@@ -154,6 +166,10 @@ async def evaluate_qa(cases: list[dict[str, Any]]) -> tuple[dict[str, float], li
                 "context_relevance": context_relevance,
                 "citation_precision": citation_precision,
                 "citation_faithfulness": citation_support_rate(answer, citations, evidence),
+                "qa_faithfulness": qa_faithfulness,
+                "qa_answer_relevancy": qa_answer_relevancy,
+                "qa_context_precision": qa_context_precision,
+                "qa_context_recall": qa_context_recall,
                 "forbidden_term_rate": forbidden_term_rate(answer, case.get("forbidden_terms", [])),
                 "expected_refusal": expected_refusal,
                 "predicted_refusal": predicted_refusal,
@@ -189,6 +205,10 @@ async def evaluate_qa(cases: list[dict[str, Any]]) -> tuple[dict[str, float], li
         "qa_context_relevance": statistics.fmean(item["context_relevance"] for item in answerable),
         "qa_citation_precision": statistics.fmean(item["citation_precision"] for item in answerable),
         "qa_citation_faithfulness": statistics.fmean(item["citation_faithfulness"] for item in answerable),
+        "qa_faithfulness": statistics.fmean(item["qa_faithfulness"] for item in answerable),
+        "qa_answer_relevancy": statistics.fmean(item["qa_answer_relevancy"] for item in answerable),
+        "qa_context_precision": statistics.fmean(item["qa_context_precision"] for item in answerable),
+        "qa_context_recall": statistics.fmean(item["qa_context_recall"] for item in answerable),
         "qa_forbidden_content_rate": statistics.fmean(item["forbidden_term_rate"] for item in results),
         "refusal_precision": refusal["precision"],
         "refusal_recall": refusal["recall"],
@@ -255,12 +275,13 @@ async def run() -> dict[str, Any]:
         "methodology": {
             "intent": "Accuracy plus macro precision, recall, and F1 over paraphrase, overlap, OOD, and adversarial cases.",
             "retrieval": "Human-authored exact graded qrels with Hit@8, Precision@8, Recall@8, MRR@8, MAP@8, nDCG@8, and hard-negative rate.",
-            "qa": "Reference fact groups, retrieved-context relevance, claim-evidence citation support, refusal F1, and replan F1.",
+            "qa": "Reference fact groups, retrieved-context relevance, claim-evidence citation support, refusal F1, replan F1, and RAGAS-style faithfulness, answer relevancy, context precision, and context recall.",
         },
         "limitations": [
             "Offline fake providers measure deterministic regression behavior, not production LLM quality.",
             "The 112-case suite is a development benchmark and must not be presented as an external or human-blind benchmark.",
             "Conversational quality still requires periodic human review and a held-out real-provider evaluation.",
+            "RAGAS-style metrics use a deterministic token-overlap approximation for offline regression, not an LLM judge.",
         ],
         "metrics": metrics,
         "details": {"intent": intent_detail, "qa": qa_detail},

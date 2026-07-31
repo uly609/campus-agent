@@ -393,3 +393,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Added a structured HTML parser and allowlisted college site-search path ahead of Bailian. The route triggers only for computer-college advisor queries, derives the grade-specific term from the question, rejects non-`zjgsu.edu.cn` URLs, and stores official excerpts without model rewriting.
 - Real Agent verification returned 沈一品 and cited the official computer-college 2024-grade student meeting page. No person name is hardcoded in the answer or retrieval adapter.
 - Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 113 source files, all 114 unit/integration tests, 3 E2E flows, offline eval `eval-e124f080a2`, and smoke validation. The rebuilt API is running with the new retrieval path.
+
+## 2026-08-01 M43 Notes
+
+- Added a typed multi-format file parse API `POST /api/v1/files/parse` covering TXT/Markdown, Excel, CSV, PDF, and images. Spreadsheets become Markdown table chunks (60 rows each), PDFs become per-page text/table chunks, and images go through the existing Qwen-VL chat-image analysis path with explicit degraded-mode warnings.
+- The endpoint supports optional `ingest=true` to enqueue parsed content into the managed knowledge pipeline; oversized concatenations are truncated with a visible marker instead of failing the 200k document body limit.
+- Added a LangGraph supervisor-workers multi-agent graph with retrieval, multimodal, draft, eval, and general workers sharing a message hub and artifacts. Deterministic Chinese intent routing, prompt-injection stop, and turn limits prevent loops; `GET/POST /api/v1/agents/multi/spec` expose the graph contract.
+- Added deterministic RAGAS-style offline metrics (faithfulness, answer relevancy, context precision, context recall) to the QA eval report, explicitly documented as token-overlap approximations rather than an LLM judge.
+- Knowledge Base uploads now accept Excel/CSV/PDF/images; non-text files are parsed and previewed as editable chunks before indexing.
+- Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 121 source files, all 133 unit/integration tests, 3 E2E flows, offline eval `eval-e19e742df4`, and smoke. All eight Compose services rebuilt and healthy; live checks returned a parsed Excel table, the multi-agent spec, and a cited multi-agent answer.
