@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import ChatRequest, Claim, PostCommentCreate, PostCreate
+from app.domain.schemas import ChatFileUpload, ChatRequest, Claim, PostCommentCreate, PostCreate
 
 
 def test_post_schema_validates_boundaries() -> None:
@@ -34,3 +34,26 @@ def test_chat_images_require_safe_supported_urls() -> None:
 
     with pytest.raises(ValidationError):
         ChatRequest(message="看看图片", image_urls=["http://private.example/image.png"])
+
+
+def test_chat_file_accepts_supported_base64_document() -> None:
+    request = ChatRequest(
+        message="分析课表",
+        files=[
+            ChatFileUpload(
+                name="课表.xlsx",
+                data_url="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,AA==",
+            )
+        ],
+        is_agent=True,
+    )
+
+    assert request.files[0].name == "课表.xlsx"
+
+
+def test_chat_file_rejects_unsupported_document() -> None:
+    with pytest.raises(ValidationError):
+        ChatRequest(
+            message="运行附件",
+            files=[ChatFileUpload(name="脚本.exe", data_url="data:application/octet-stream;base64,AA==")],
+        )

@@ -422,3 +422,12 @@ External model credentials are optional for local demo and test runs. When absen
 - Extended the Multi-Agent response contract with complexity, required workers, and completion state so routing and cost behavior are externally verifiable.
 - Added facet-aware evidence extraction to Campus Worker. For example, an opening-hours question now requires a retrieved concrete time; otherwise the system refuses instead of allowing the model to invent a campus fact.
 - Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 123 source files, 142 unit/integration tests, 3 E2E flows, offline eval `eval-7b65e73bc9`, and smoke.
+
+## 2026-08-02 M46 Notes
+
+- Extended the AI Assistant composer beyond image/text input to accept Excel, CSV, PDF, TXT, and Markdown documents. Selecting a document automatically uses Agent mode and displays a removable file card before sending.
+- Added typed chat-file boundaries with extension allowlisting, base64 validation, a 10MB per-file limit, a 20MB aggregate limit, and a matching 32MB Nginx request limit.
+- Routed chat documents into Multimodal Worker. Excel sheets become 60-row Markdown table chunks, CSV uses the same table path, and PDF text/tables become page chunks; attachment content remains untrusted data.
+- Generic document questions now run Multimodal Worker followed by General Worker, while campus-specific document questions reuse Campus Worker. Both downstream workers consume the shared parsed artifacts instead of raw binary data.
+- A live AI Assistant SSE request parsed a generated `课程统计.xlsx`, exposed the table chunk in the process trace, selected only Multimodal and General workers, and returned an answer constrained to the workbook's two course rows.
+- Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 123 source files, 146 unit/integration tests, 3 E2E flows, offline eval `eval-9a854452cb`, and smoke. API and Web were rebuilt and deployed healthy.

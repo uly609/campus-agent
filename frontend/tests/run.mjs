@@ -29,8 +29,14 @@ if (!app.includes("agentProcess") || !app.includes("toolLabel")) {
 if (!app.includes("const xiaolinAgentEnabled = ref(false)")) {
   throw new Error("xiaolin chat must default to upstream normal mode");
 }
-if (!app.includes("is_agent: isAgent") || !app.includes("processInfo: xiaolinAgentEnabled.value ?")) {
+if (!app.includes("is_agent: isAgent") || !app.includes("processInfo: useAgent ?")) {
   throw new Error("normal and Agent modes must use different chat flows");
+}
+for (const extension of [".xlsx", ".csv", ".pdf"]) {
+  if (!app.includes(extension)) throw new Error(`chat attachments must support ${extension}`);
+}
+if (!app.includes("files.map(({ name, dataUrl })") || !app.includes("chatFiles.value.push")) {
+  throw new Error("chat documents must be encoded and sent to the Agent backend");
 }
 if (!app.includes("xiaolin-agent-toggle") || !app.includes('@keydown="handleChatKeydown"')) {
   throw new Error("xiaolin composer must expose mode switching and upstream keyboard behavior");

@@ -29,7 +29,7 @@ CLOUD_FALLBACK_VLM_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 CLOUD_FALLBACK_VLM_MODEL=qwen-vl-plus
 ```
 
-The single `DASHSCOPE_API_KEY` powers XiaoLin chat, RAG embeddings, reranking, and `qwen-vl-plus` image analysis in both AI Assistant chat and the Post Assistant. XiaoLin accepts up to four JPEG, PNG, or WebP images in normal or Agent mode; only a safe visual summary is sent to the text workflow, and image data is not persisted in chat history. `OPENAI_API_KEY`, `VLM_API_KEY`, and `RERANK_API_KEY` remain optional compatibility overrides. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
+The single `DASHSCOPE_API_KEY` powers XiaoLin chat, RAG embeddings, reranking, and `qwen-vl-plus` image analysis in both AI Assistant chat and the Post Assistant. XiaoLin accepts up to four JPEG, PNG, or WebP images. Agent mode also accepts Excel, CSV, PDF, TXT, and Markdown documents, with a 10MB per-file and 20MB aggregate limit. Only safe visual summaries and parsed document chunks enter model context; raw attachments are not persisted in chat history. `OPENAI_API_KEY`, `VLM_API_KEY`, and `RERANK_API_KEY` remain optional compatibility overrides. Provider calls have bounded retries, timeouts, Redis exact-match caching, and explicit fake fallback traces.
 
 To enable external candidate reranking, set `RERANK_MODEL=qwen3-rerank`; the endpoint and key can be supplied through `RERANK_URL` and `RERANK_API_KEY`, or derived from the DashScope chat endpoint and `DASHSCOPE_API_KEY`. Without them, retrieval reports `reranker_not_configured` and uses its lexical fallback.
 
@@ -127,7 +127,7 @@ Corrective official-web search first uses configured official site indexes for p
 
 ## Document parsing and managed knowledge ingestion
 
-`POST /api/v1/files/parse` turns a single upload into typed, chunked text without touching a database. TXT and Markdown use paragraph-aware chunks; Excel and CSV become Markdown table chunks (60 rows per chunk); PDFs become per-page text plus extracted tables; PNG, JPEG, and WebP go through the Qwen-VL chat-image analysis path and record provider/model/degraded metadata. Files over 10MB or with an unlisted extension are rejected. With `ingest=true`, parsed chunks are joined into a managed knowledge document and enqueued through the Redis Streams ingestion pipeline; oversized bodies are truncated with an explicit marker. The Vue Knowledge Base calls this endpoint for non-text uploads and shows the parsed chunks as editable text before indexing.
+`POST /api/v1/files/parse` turns a single upload into typed, chunked text without touching a database. TXT and Markdown use paragraph-aware chunks; Excel and CSV become Markdown table chunks (60 rows per chunk); PDFs become per-page text plus extracted tables; PNG, JPEG, and WebP go through the Qwen-VL chat-image analysis path and record provider/model/degraded metadata. Files over 10MB or with an unlisted extension are rejected. With `ingest=true`, parsed chunks are joined into a managed knowledge document and enqueued through the Redis Streams ingestion pipeline; oversized bodies are truncated with an explicit marker. The Vue Knowledge Base calls this endpoint for non-text uploads and shows the parsed chunks as editable text before indexing. AI Assistant sends document attachments into the same parser through Multimodal Worker; the resulting chunks are shared with Campus or General Worker for grounded document analysis.
 
 ## Multi-agent orchestration and RAGAS-style evaluation
 

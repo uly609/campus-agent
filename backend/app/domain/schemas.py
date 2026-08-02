@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.domain.enums import Intent, MemoryType, PostCategory
 
@@ -159,12 +159,33 @@ class ToolResult(BaseModel):
     provenance: list[dict[str, Any]] = Field(default_factory=list)
 
 
+class ChatFileUpload(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    data_url: str = Field(min_length=10, max_length=14_100_000)
+
+    @model_validator(mode="after")
+    def validate_file(self) -> "ChatFileUpload":
+        suffix = self.name.lower().rsplit(".", 1)[-1] if "." in self.name else ""
+        if suffix not in {"xlsx", "csv", "pdf", "txt", "md", "markdown"}:
+            raise ValueError("chat file type is not supported")
+        if not self.data_url.startswith("data:") or ";base64," not in self.data_url[:160]:
+            raise ValueError("chat files must use base64 data URLs")
+        return self
+
+
 class ChatRequest(BaseModel):
     session_id: str = "demo-session"
     user_id: str = "demo-user"
     message: str = Field(min_length=1, max_length=2000)
     image_urls: list[str] = Field(default_factory=list, max_length=4)
+    files: list[ChatFileUpload] = Field(default_factory=list, max_length=4)
     is_agent: bool = False
+
+    @model_validator(mode="after")
+    def validate_total_file_size(self) -> "ChatRequest":
+        if sum(len(item.data_url) for item in self.files) > 28_000_000:
+            raise ValueError("chat files must be at most 20 MB in total")
+        return self
 
     @field_validator("image_urls")
     @classmethod

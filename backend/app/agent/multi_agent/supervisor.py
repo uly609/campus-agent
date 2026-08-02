@@ -34,6 +34,9 @@ class MultiAgentSupervisor:
         elif campus_query and len(selected) > 0 and re.search(r"查询|查找|核实|规定|政策|场地|天气|通知", query):
             selected.append("campus_worker")
 
+        if has_files and not ({"campus_worker", "draft_worker"} & set(selected)):
+            selected.append("general_worker")
+
         if not selected:
             selected.append("general_worker")
         unique = set(selected)

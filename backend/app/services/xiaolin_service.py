@@ -36,8 +36,14 @@ async def stream_xiaolin_events(request: ChatRequest) -> AsyncGenerator[dict[str
     message = request.message.strip()
     session_id = request.session_id
     image_analyses = [await analyze_chat_image(url) for url in request.image_urls]
+    uploaded_files = [item.model_dump() for item in request.files]
     model_message = message + (_image_context(image_analyses) if image_analyses else "")
-    stored_message = message + (f"\n[已附带 {len(image_analyses)} 张图片]" if image_analyses else "")
+    attachment_notes = []
+    if image_analyses:
+        attachment_notes.append(f"已附带 {len(image_analyses)} 张图片")
+    if uploaded_files:
+        attachment_notes.append("已附带文档：" + "、".join(item["name"] for item in uploaded_files))
+    stored_message = message + (f"\n[{'；'.join(attachment_notes)}]" if attachment_notes else "")
     user_message = await ChatHistoryManager.save_message(
         session_id=session_id,
         user_id=request.user_id,
@@ -64,6 +70,7 @@ async def stream_xiaolin_events(request: ChatRequest) -> AsyncGenerator[dict[str
                 session_id,
                 request.user_id,
                 max_turns=4,
+                files=uploaded_files,
                 chat_history=chat_history,
             )
             required_workers = list(state.get("required_workers", []))

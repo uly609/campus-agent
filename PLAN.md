@@ -589,3 +589,12 @@ make eval
 make e2e
 make smoke
 ```
+
+## M46 - Chat Document Intelligence
+
+- [x] Accept Excel, CSV, PDF, TXT, and Markdown attachments in the AI Assistant composer.
+- [x] Validate per-file and aggregate upload limits at both UI and API boundaries.
+- [x] Route chat documents through the Multi-Agent multimodal document parser.
+- [x] Share parsed table/page chunks with Campus and General workers.
+- [x] Treat attachment contents as untrusted data rather than executable instructions.
+- [x] Validate, deploy, and run a live Excel chat flow.
