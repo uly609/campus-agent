@@ -9,7 +9,9 @@ import {
   ChevronRight,
   CircleAlert,
   FileImage,
+  Flag,
   Gauge,
+  Heart,
   History,
   ImagePlus,
   LayoutList,
@@ -23,6 +25,7 @@ import {
   ServerCog,
   Search,
   Send,
+  ShieldCheck,
   Sparkles,
   Trash2,
   Upload,
@@ -32,6 +35,7 @@ import {
 
 const views = [
   { id: "feed", label: "帖子", icon: LayoutList },
+  { id: "governance", label: "社区治理", icon: ShieldCheck },
   { id: "chat", label: "AI 学问", icon: MessageSquareText },
   { id: "draft", label: "发帖助手", icon: Sparkles },
   { id: "campus", label: "校园技能", icon: CalendarDays },
@@ -58,10 +62,15 @@ const activeView = ref("feed");
 const busy = ref("");
 const notice = ref(null);
 const posts = ref([]);
+const feedMode = ref("latest");
 const postHasMore = ref(true);
 const selectedPost = ref(null);
 const postComments = ref([]);
 const commentInput = ref("");
+const reportReason = ref("spam");
+const reportDetail = ref("");
+const moderationReports = ref([]);
+const communityAudit = ref([]);
 const chatInput = ref("");
 const chatResult = ref(null);
 const chatMessages = ref([]);
@@ -150,6 +159,7 @@ function switchView(id) {
   if (id === "campus" && !campusCapabilities.value) loadCampusCapabilities();
   if (id === "knowledge") loadKnowledge();
   if (id === "platform") loadProviders();
+  if (id === "governance") loadGovernance();
 }
 
 async function loadCampusCapabilities() {
@@ -175,10 +185,63 @@ async function loadPosts(reset = true) {
   const offset = reset ? 0 : posts.value.length;
   const limit = 20;
   await run("posts", async () => {
-    const page = await api(`/api/v1/posts?offset=${offset}&limit=${limit}`);
+    const page = await api(`/api/v1/posts?offset=${offset}&limit=${limit}&mode=${feedMode.value}&user_id=demo-user`);
     posts.value = reset ? page : [...posts.value, ...page];
     postHasMore.value = page.length === limit;
   });
+}
+
+async function selectFeedMode(mode) {
+  feedMode.value = mode;
+  await loadPosts(true);
+}
+
+function replacePost(updated) {
+  const index = posts.value.findIndex((post) => post.post_id === updated.post_id);
+  if (index >= 0) posts.value[index] = updated;
+  if (selectedPost.value?.post_id === updated.post_id) selectedPost.value = updated;
+}
+
+async function toggleLike(post) {
+  await run(`like-${post.post_id}`, async () => {
+    const updated = await api(`/api/v1/posts/${encodeURIComponent(post.post_id)}/reactions`, {
+      method: "POST",
+      body: JSON.stringify({ user_id: "demo-user", liked: !post.viewer_liked }),
+    });
+    replacePost(updated);
+  });
+}
+
+async function submitReport() {
+  if (!selectedPost.value) return;
+  const postId = selectedPost.value.post_id;
+  await run(`report-${postId}`, async () => {
+    await api(`/api/v1/posts/${encodeURIComponent(postId)}/reports`, {
+      method: "POST",
+      body: JSON.stringify({ user_id: "demo-user", reason: reportReason.value, detail: reportDetail.value }),
+    });
+    reportDetail.value = "";
+  }, "举报已提交，等待社区管理员审核");
+}
+
+async function loadGovernance() {
+  await run("governance", async () => {
+    [moderationReports.value, communityAudit.value] = await Promise.all([
+      api("/api/v1/community/moderation/reports?status=pending_review"),
+      api("/api/v1/community/audit?limit=50"),
+    ]);
+  });
+}
+
+async function reviewReport(reportId, decision) {
+  await run(`review-${reportId}`, async () => {
+    await api(`/api/v1/community/moderation/reports/${encodeURIComponent(reportId)}/review`, {
+      method: "POST",
+      body: JSON.stringify({ decision, reviewer_alias: "社区管理员", note: "人工复核完成" }),
+    });
+    await loadGovernance();
+    await loadPosts(true);
+  }, decision === "hide" ? "帖子已隐藏并写入审计记录" : "举报已驳回并写入审计记录");
 }
 
 async function openPost(post) {
@@ -187,7 +250,7 @@ async function openPost(post) {
   commentInput.value = "";
   await run(`post-${post.post_id}`, async () => {
     const [detail, comments] = await Promise.all([
-      api(`/api/v1/posts/${encodeURIComponent(post.post_id)}`),
+      api(`/api/v1/posts/${encodeURIComponent(post.post_id)}?user_id=demo-user`),
       api(`/api/v1/posts/${encodeURIComponent(post.post_id)}/comments`),
     ]);
     selectedPost.value = detail;
@@ -961,6 +1024,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
       <section v-if="activeView === 'feed'" class="view feed-view">
         <div class="section-head"><div><h2>匿名校园动态</h2><p>最新发布的问答、活动与失物招领</p></div><button class="icon-button" title="刷新帖子" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
+        <div class="feed-modes" role="tablist" aria-label="帖子排序">
+          <button v-for="mode in [{ id: 'latest', label: '最新' }, { id: 'hot', label: '热门' }, { id: 'for_you', label: '为你推荐' }]" :key="mode.id" type="button" role="tab" :aria-selected="feedMode === mode.id" :class="{ active: feedMode === mode.id }" @click="selectFeedMode(mode.id)">{{ mode.label }}</button>
+        </div>
         <form class="feed-searchbar" role="search" @submit.prevent="runSearch">
           <Search :size="19" />
           <input v-model="searchInput" aria-label="搜索校园帖子" placeholder="搜索失物、活动、二手和校园问答" @input="handleSearchInput" />
@@ -981,7 +1047,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <div v-else-if="searchSubmitted" class="empty-state compact"><Search :size="25" /><h2>没有找到相关帖子</h2><p>换个关键词再试试</p></div>
         <template v-else>
         <div class="post-grid">
-          <button v-for="post in posts" :key="post.post_id" type="button" class="feed-post-card" @click="openPost(post)">
+          <article v-for="post in posts" :key="post.post_id" class="feed-post-card" tabindex="0" @click="openPost(post)" @keydown.enter="openPost(post)">
             <span class="post-avatar" aria-hidden="true">{{ post.author_alias?.includes('外部') ? '社' : '匿' }}</span>
             <span class="feed-post-content">
               <span class="post-byline">
@@ -995,14 +1061,39 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                   <span v-if="post.location">{{ post.location }}</span>
                   <span v-for="tag in post.tags?.slice(0, post.location ? 1 : 2)" :key="tag">#{{ tag }}</span>
                 </span>
-                <span class="comment-count"><MessageCircle :size="15" />评论 {{ post.comment_count || 0 }}<ChevronRight :size="15" /></span>
+                <span class="post-actions">
+                  <button type="button" :class="['post-action', { active: post.viewer_liked }]" :title="post.viewer_liked ? '取消点赞' : '点赞'" @click.stop="toggleLike(post)"><Heart :size="15" :fill="post.viewer_liked ? 'currentColor' : 'none'" />{{ post.like_count || 0 }}</button>
+                  <span class="comment-count"><MessageCircle :size="15" />{{ post.comment_count || 0 }}<ChevronRight :size="15" /></span>
+                </span>
+                <small v-if="feedMode !== 'latest'" class="ranking-reason">{{ post.ranking_reason }}</small>
               </span>
             </span>
-          </button>
+          </article>
         </div>
         <button v-if="postHasMore" type="button" class="load-more-posts" :disabled="busy === 'posts'" @click="loadPosts(false)"><LoaderCircle v-if="busy === 'posts'" class="spin" :size="17" /><ChevronRight v-else :size="17" />加载更多帖子</button>
         <div v-else-if="posts.length" class="feed-end">已经到底了</div>
         </template>
+      </section>
+
+      <section v-else-if="activeView === 'governance'" class="view governance-view">
+        <div class="section-head"><div><h2>社区治理</h2><p>模型只给风险建议，最终处置由管理员确认</p></div><button class="icon-button" title="刷新治理数据" :disabled="busy === 'governance'" @click="loadGovernance"><RefreshCw :class="{ spin: busy === 'governance' }" :size="19" /></button></div>
+        <div class="governance-grid">
+          <section class="governance-panel">
+            <header><strong>待人工审核</strong><span>{{ moderationReports.length }}</span></header>
+            <article v-for="report in moderationReports" :key="report.report_id" class="report-row">
+              <div class="report-meta"><strong>{{ report.reason }}</strong><span>风险 {{ Math.round(report.risk_score * 100) }}%</span><em>建议：{{ report.suggested_decision }}</em></div>
+              <p>{{ report.detail || '举报人未补充说明' }}</p>
+              <small>帖子 {{ report.post_id }} · {{ report.created_at.slice(0, 16).replace('T', ' ') }}</small>
+              <div class="review-actions"><button class="secondary" type="button" @click="reviewReport(report.report_id, 'keep')">保留</button><button class="primary" type="button" @click="reviewReport(report.report_id, 'hide')">隐藏</button></div>
+            </article>
+            <div v-if="!moderationReports.length" class="empty-state compact"><ShieldCheck :size="27" /><h2>暂无待审核举报</h2></div>
+          </section>
+          <section class="governance-panel">
+            <header><strong>审计记录</strong><span>{{ communityAudit.length }}</span></header>
+            <article v-for="event in communityAudit" :key="event.event_id" class="audit-row"><ShieldCheck :size="17" /><div><strong>{{ event.action === 'report_created' ? '创建举报' : '完成审核' }}</strong><p>{{ event.actor_alias }} · {{ event.post_id }}</p><small>{{ event.created_at.slice(0, 16).replace('T', ' ') }}</small></div></article>
+            <div v-if="!communityAudit.length" class="empty-state compact"><History :size="27" /><h2>暂无审计记录</h2></div>
+          </section>
+        </div>
       </section>
 
       <section v-else-if="activeView === 'chat'" class="view chat-view">
@@ -1225,6 +1316,15 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
           <div class="source-meta"><span>{{ selectedPost.author_alias }}</span><span v-if="selectedPost.location">{{ selectedPost.location }}</span><time>{{ selectedPost.created_at.slice(0, 10) }}</time></div>
           <p class="source-body">{{ selectedPost.body }}</p>
           <div v-if="selectedPost.tags?.length" class="source-tags"><span v-for="tag in selectedPost.tags" :key="tag">{{ tag }}</span></div>
+          <div class="post-detail-actions">
+            <button type="button" :class="['secondary', 'icon-text', { active: selectedPost.viewer_liked }]" @click="toggleLike(selectedPost)"><Heart :size="17" :fill="selectedPost.viewer_liked ? 'currentColor' : 'none'" />{{ selectedPost.viewer_liked ? '已点赞' : '点赞' }} {{ selectedPost.like_count || 0 }}</button>
+          </div>
+          <details class="report-form">
+            <summary><Flag :size="15" />举报这条帖子</summary>
+            <label><span>原因</span><select v-model="reportReason"><option value="spam">垃圾广告</option><option value="abuse">辱骂攻击</option><option value="fraud">疑似诈骗</option><option value="privacy">泄露隐私</option><option value="inaccurate">不实信息</option><option value="other">其他</option></select></label>
+            <label><span>补充说明</span><textarea v-model="reportDetail" maxlength="500" placeholder="说明具体问题，便于管理员复核"></textarea></label>
+            <button class="primary icon-text" type="button" :disabled="busy === `report-${selectedPost.post_id}`" @click="submitReport"><Flag :size="16" />提交审核</button>
+          </details>
           <section class="comment-section">
             <header><div><strong>评论</strong><span>{{ postComments.length }}</span></div></header>
             <div v-if="postComments.length" class="comment-list">

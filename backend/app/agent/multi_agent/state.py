@@ -21,6 +21,7 @@ class MultiAgentState(TypedDict, total=False):
 
 
 WORKER_NAMES = (
+    "community_worker",
     "retrieval_worker",
     "multimodal_worker",
     "draft_worker",

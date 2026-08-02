@@ -9,7 +9,17 @@ from typing import Any
 from app.core.config import get_settings
 from app.domain.enums import PostCategory
 from app.domain.platform_schemas import IngestionJob, KnowledgeDocument, StoredProviderProfile, UserSession
-from app.domain.schemas import MemoryRecord, Post, PostComment, PostCommentCreate, PostCreate
+from app.domain.schemas import (
+    CommunityAuditEvent,
+    MemoryRecord,
+    ModerationReviewCreate,
+    Post,
+    PostComment,
+    PostCommentCreate,
+    PostCreate,
+    PostReaction,
+    PostReport,
+)
 
 
 def now_iso() -> str:
@@ -22,6 +32,9 @@ class JsonRepository:
         self.base.mkdir(parents=True, exist_ok=True)
         self.posts_path = self.base / "runtime_posts.json"
         self.comments_path = self.base / "runtime_comments.json"
+        self.reactions_path = self.base / "runtime_post_reactions.json"
+        self.reports_path = self.base / "runtime_post_reports.json"
+        self.community_audit_path = self.base / "runtime_community_audit.json"
         self.docs_path = self.base / "runtime_docs.json"
         self.memories_path = self.base / "runtime_memories.json"
         self.traces_path = self.base / "runtime_traces.json"
@@ -83,6 +96,79 @@ class JsonRepository:
         rows.append(comment.model_dump(mode="json"))
         self._write_json(self.comments_path, rows[-5000:])
         return comment
+
+    def load_reactions(self) -> list[PostReaction]:
+        return [PostReaction.model_validate(row) for row in self._read_json(self.reactions_path, [])]
+
+    def set_post_like(self, post_id: str, user_id: str, liked: bool) -> PostReaction:
+        rows = [
+            reaction
+            for reaction in self.load_reactions()
+            if not (reaction.post_id == post_id and reaction.user_id == user_id)
+        ]
+        reaction = PostReaction(post_id=post_id, user_id=user_id, liked=liked, updated_at=now_iso())
+        rows.append(reaction)
+        self._write_json(self.reactions_path, [row.model_dump(mode="json") for row in rows[-10000:]])
+        return reaction
+
+    def count_likes(self, post_id: str) -> int:
+        return sum(row.post_id == post_id and row.liked for row in self.load_reactions())
+
+    def user_liked_post(self, post_id: str, user_id: str) -> bool:
+        return any(
+            row.post_id == post_id and row.user_id == user_id and row.liked
+            for row in self.load_reactions()
+        )
+
+    def load_reports(self, status: str | None = None) -> list[PostReport]:
+        reports = [PostReport.model_validate(row) for row in self._read_json(self.reports_path, [])]
+        return [report for report in reports if status is None or report.status == status]
+
+    def save_report(self, report: PostReport) -> PostReport:
+        rows = [row for row in self.load_reports() if row.report_id != report.report_id]
+        rows.insert(0, report)
+        self._write_json(self.reports_path, [row.model_dump(mode="json") for row in rows[:5000]])
+        return report
+
+    def count_reports(self, post_id: str) -> int:
+        return sum(report.post_id == post_id for report in self.load_reports())
+
+    def find_report(self, report_id: str) -> PostReport | None:
+        return next((report for report in self.load_reports() if report.report_id == report_id), None)
+
+    def resolve_report(self, report_id: str, payload: ModerationReviewCreate) -> PostReport | None:
+        report = self.find_report(report_id)
+        if report is None:
+            return None
+        resolved = report.model_copy(
+            update={
+                "status": "resolved",
+                "final_decision": payload.decision,
+                "reviewer_alias": payload.reviewer_alias,
+                "review_note": payload.note,
+                "resolved_at": now_iso(),
+            }
+        )
+        return self.save_report(resolved)
+
+    def hidden_post_ids(self) -> set[str]:
+        return {
+            report.post_id
+            for report in self.load_reports(status="resolved")
+            if report.final_decision == "hide"
+        }
+
+    def append_community_audit(self, event: CommunityAuditEvent) -> CommunityAuditEvent:
+        rows = self._read_json(self.community_audit_path, [])
+        rows.insert(0, event.model_dump(mode="json"))
+        self._write_json(self.community_audit_path, rows[:5000])
+        return event
+
+    def load_community_audit(self) -> list[CommunityAuditEvent]:
+        return [
+            CommunityAuditEvent.model_validate(row)
+            for row in self._read_json(self.community_audit_path, [])
+        ]
 
     def load_documents(self) -> list[dict[str, str]]:
         return self._read_json(self.docs_path, [])

@@ -55,6 +55,59 @@ class PostComment(PostCommentCreate):
     created_at: str
 
 
+class PostReactionCreate(BaseModel):
+    user_id: str = Field(default="demo-user", min_length=1, max_length=80)
+    liked: bool = True
+
+
+class PostReaction(PostReactionCreate):
+    post_id: str
+    updated_at: str
+
+
+class FeedPost(Post):
+    like_count: int = Field(default=0, ge=0)
+    report_count: int = Field(default=0, ge=0)
+    viewer_liked: bool = False
+    ranking_score: float = 0
+    ranking_reason: str = "按发布时间排序"
+
+
+class PostReportCreate(BaseModel):
+    user_id: str = Field(default="demo-user", min_length=1, max_length=80)
+    reason: Literal["spam", "abuse", "fraud", "privacy", "inaccurate", "other"]
+    detail: str = Field(default="", max_length=500)
+
+
+class PostReport(PostReportCreate):
+    report_id: str
+    post_id: str
+    risk_score: float = Field(ge=0, le=1)
+    suggested_decision: Literal["keep", "review", "hide"]
+    status: Literal["pending_review", "resolved"] = "pending_review"
+    final_decision: Literal["keep", "hide"] | None = None
+    reviewer_alias: str | None = None
+    review_note: str = ""
+    created_at: str
+    resolved_at: str | None = None
+
+
+class ModerationReviewCreate(BaseModel):
+    decision: Literal["keep", "hide"]
+    reviewer_alias: str = Field(default="社区管理员", min_length=1, max_length=80)
+    note: str = Field(default="", max_length=500)
+
+
+class CommunityAuditEvent(BaseModel):
+    event_id: str
+    action: Literal["report_created", "report_reviewed"]
+    actor_alias: str
+    post_id: str
+    report_id: str
+    detail: dict[str, Any] = Field(default_factory=dict)
+    created_at: str
+
+
 class Evidence(BaseModel):
     evidence_id: str
     source_id: str

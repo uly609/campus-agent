@@ -1,12 +1,22 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from app.domain.enums import PostCategory
-from app.domain.schemas import Post, PostComment, PostCommentCreate, PostCreate, SearchRequest
+from app.domain.schemas import (
+    FeedPost,
+    Post,
+    PostComment,
+    PostCommentCreate,
+    PostCreate,
+    PostReactionCreate,
+    PostReport,
+    PostReportCreate,
+    SearchRequest,
+)
 from app.memory.producer import publish_memory_event
 from app.multimodal.image_attributes import enhance_query_with_image, extract_image_attributes
 from app.retrieval.ingestion import build_corpus
@@ -18,10 +28,12 @@ from app.services.post_service import (
     get_draft,
     publish_confirmed_draft,
 )
+from app.services.community_service import CommunityService
 from app.services.repository import JsonRepository
 
 router = APIRouter(prefix="/api/v1")
 repo = JsonRepository()
+community = CommunityService(repo)
 
 
 class DraftRequest(BaseModel):
@@ -43,23 +55,41 @@ def create_post(payload: PostCreate) -> Post:
     return repo.create_post(payload)
 
 
-@router.get("/posts", response_model=list[Post])
+@router.get("/posts", response_model=list[FeedPost])
 def list_posts(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=50),
-) -> list[Post]:
-    return [
-        post.model_copy(update={"comment_count": repo.count_comments(post.post_id)})
-        for post in repo.load_posts()[offset : offset + limit]
-    ]
+    mode: Literal["latest", "hot", "for_you"] = "latest",
+    user_id: str = Query(default="demo-user", min_length=1, max_length=80),
+) -> list[FeedPost]:
+    return community.feed(user_id, mode)[offset : offset + limit]
 
 
-@router.get("/posts/{post_id}", response_model=Post)
-def get_post(post_id: str) -> Post:
-    post = repo.find_post(post_id)
+@router.get("/posts/{post_id}", response_model=FeedPost)
+def get_post(post_id: str, user_id: str = "demo-user") -> FeedPost:
+    post = community.get_post(post_id, user_id)
     if not post:
         raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
-    return post.model_copy(update={"comment_count": repo.count_comments(post_id)})
+    return post
+
+
+@router.post("/posts/{post_id}/reactions", response_model=FeedPost)
+def react_to_post(post_id: str, payload: PostReactionCreate) -> FeedPost:
+    if not repo.find_post(post_id):
+        raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
+    repo.set_post_like(post_id, payload.user_id, payload.liked)
+    post = community.get_post(post_id, payload.user_id)
+    if post is None:
+        raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
+    return post
+
+
+@router.post("/posts/{post_id}/reports", response_model=PostReport, status_code=201)
+def report_post(post_id: str, payload: PostReportCreate) -> PostReport:
+    post = repo.find_post(post_id)
+    if post is None:
+        raise HTTPException(status_code=404, detail={"code": "POST_NOT_FOUND"})
+    return community.create_report(post, payload)
 
 
 @router.get("/posts/{post_id}/comments", response_model=list[PostComment])

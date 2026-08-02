@@ -1,6 +1,6 @@
 # CampusFlow AI
 
-CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, human-in-the-loop post drafting, Redis Streams memory, evals, and observability.
+CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, explainable feed ranking, human-reviewed community moderation, Redis Streams memory, evals, and observability.
 
 The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines `rank-bm25`, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, RRF, and optional Bailian `qwen3-rerank` reranking.
 
@@ -78,6 +78,7 @@ make smoke
 8. Add or check a Chat, Embedding, or VLM route in Model Routing.
 9. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
 10. Open `POST /api/v1/files/parse` with a small Excel or PDF, then `POST /api/v1/agents/multi` with a campus question to see supervisor-worker orchestration.
+11. Like several posts, compare **最新 / 热门 / 为你推荐**, report a test post, then open **社区治理** to review it and inspect the audit trail.
 
 Long-term memory accepts explicit chat memories and eligible first-person facts or preferences from confirmed published posts. Generic post content is not memorized. Open **记忆** after publishing to consume the Redis Stream and inspect or delete the resulting record.
 
@@ -88,6 +89,11 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 - `POST /api/v1/posts/search`
 - `POST /api/v1/posts/draft`
 - `POST /api/v1/posts/draft/{draft_id}/feedback`
+- `POST /api/v1/posts/{post_id}/reactions`
+- `POST /api/v1/posts/{post_id}/reports`
+- `GET /api/v1/community/moderation/reports`
+- `POST /api/v1/community/moderation/reports/{report_id}/review`
+- `GET /api/v1/community/audit`
 - `GET /api/v1/memories`
 - `DELETE /api/v1/memories/{memory_id}`
 - `GET|POST /api/v1/knowledge/documents`
@@ -125,6 +131,12 @@ Corrective official-web search first uses configured official site indexes for p
 
 ## Multi-agent orchestration and RAGAS-style evaluation
 
-`POST /api/v1/agents/multi` runs a LangGraph supervisor-workers graph over five workers: retrieval, multimodal parsing, post drafting, evaluation, and general answering. The supervisor routes by Chinese intent, publishes plan messages to a shared message hub, and workers write artifacts to a shared blackboard; `GET /api/v1/agents/multi/spec` returns the graph contract. Prompt-injection flags stop orchestration, and bounded worker/turn limits prevent runaway loops.
+`POST /api/v1/agents/multi` runs a LangGraph supervisor-workers graph over six workers: community operations, retrieval, multimodal parsing, post drafting, evaluation, and general answering. The supervisor routes by Chinese intent, publishes plan messages to a shared message hub, and workers write artifacts to a shared blackboard; `GET /api/v1/agents/multi/spec` returns the graph contract. Prompt-injection flags stop orchestration, and bounded worker/turn limits prevent runaway loops.
 
 The offline eval report adds RAGAS-style `qa_faithfulness`, `qa_answer_relevancy`, `qa_context_precision`, and `qa_context_recall` using deterministic token-overlap approximations, documented as regression metrics rather than an LLM judge.
+
+## Community ranking and governance
+
+The post feed supports chronological, hot, and personalized modes. Hot ranking combines freshness, likes, comments, and report penalties; personalized ranking adds category and tag affinity learned only from the current user's explicit likes. Every non-chronological result carries a human-readable ranking reason.
+
+Reports receive deterministic risk scores and `keep`, `review`, or `hide` suggestions, but the model cannot remove content. A moderator must explicitly keep or hide a post, and both report creation and final review are persisted in the community audit log. This keeps AI assistance separate from the final governance decision.

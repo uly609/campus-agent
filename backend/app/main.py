@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.api import (
     campus_skills,
     chat,
+    community,
     evals,
     files,
     health,
@@ -71,6 +72,7 @@ app.include_router(health.router)
 app.include_router(campus_skills.router)
 app.include_router(chat.router)
 app.include_router(posts.router)
+app.include_router(community.router)
 app.include_router(ingest.router)
 app.include_router(memory.router)
 app.include_router(evals.router)

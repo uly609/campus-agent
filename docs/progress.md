@@ -402,3 +402,13 @@ External model credentials are optional for local demo and test runs. When absen
 - Added deterministic RAGAS-style offline metrics (faithfulness, answer relevancy, context precision, context recall) to the QA eval report, explicitly documented as token-overlap approximations rather than an LLM judge.
 - Knowledge Base uploads now accept Excel/CSV/PDF/images; non-text files are parsed and previewed as editable chunks before indexing.
 - Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 121 source files, all 133 unit/integration tests, 3 E2E flows, offline eval `eval-e19e742df4`, and smoke. All eight Compose services rebuilt and healthy; live checks returned a parsed Excel table, the multi-agent spec, and a cited multi-agent answer.
+
+## 2026-08-02 M44 Notes
+
+- Studied locally pinned revisions of OASIS, Buzz, LangChain's social-media-agent, and WeKnora for community interaction, moderation, HITL workflow, and Agent/RAG boundaries. CampusFlow implements its own scoped domain model instead of copying a general platform.
+- Added persistent, idempotent likes and three feed modes. Hot ranking combines freshness, likes, comments, and report penalties; personalized ranking adds explainable category/tag affinity from explicit user likes.
+- Added typed reports with deterministic risk scores and bounded suggestions. Reports never hide posts automatically: an administrator must choose keep or hide, and both actions are written to an append-only community audit log.
+- Added a sixth LangGraph worker for community recommendation and moderation summaries, with supervisor routing for trending, recommendation, report, and governance requests.
+- Added feed mode controls, direct like actions, report submission, and a community-governance workbench to the Vue UI.
+- Added service-level tests for ranking, preference, idempotency, moderation, and audit plus worker routing and an HTTP E2E governance flow.
+- Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 121 source files, 138 unit/integration tests, 3 E2E flows, offline eval `eval-0502053901`, and smoke. API/Web were rebuilt and deployed healthy; desktop and 390px browser QA found no horizontal overflow or console errors.

@@ -557,6 +557,16 @@ make smoke
 - [x] Accept Excel/CSV/PDF/images in the Vue Knowledge Base with parsed chunk previews.
 - [x] Cover parsing, orchestration, and metrics with unit tests and run the complete validation suite.
 
+## M44 - Community Agent Business Loop
+
+- [x] Add persistent, idempotent post likes and per-user engagement state.
+- [x] Add latest, hot, and explainable personalized feed ranking.
+- [x] Add typed post reports with deterministic risk scoring and bounded recommendations.
+- [x] Require human review before hiding reported posts and retain an append-only audit trail.
+- [x] Add a Community Worker to the LangGraph supervisor-workers graph.
+- [x] Add feed interactions and a community-governance workbench to the Vue application.
+- [x] Cover recommendation, reporting, review, audit, and worker routing with tests.
+
 Validation:
 
 ```bash

@@ -43,8 +43,17 @@ class MultiAgentGraph:
 
     async def finalize_node(self, state: MultiAgentState) -> MultiAgentState:
         if not state.get("final_answer"):
+            community = state.get("artifacts", {}).get("community_worker", {})
+            community_posts = community.get("posts", [])
+            if community_posts:
+                lines = [
+                    f"{index}. {item.get('title', '')}（{item.get('category', '')}，"
+                    f"{item.get('like_count', 0)} 赞 / {item.get('comment_count', 0)} 评论）"
+                    for index, item in enumerate(community_posts[:5], start=1)
+                ]
+                state["final_answer"] = "校园社区推荐：\n" + "\n".join(lines)
             general = state.get("artifacts", {}).get("general_worker", {})
-            answer = str(general.get("answer", "")).strip()
+            answer = str(state.get("final_answer", "") or general.get("answer", "")).strip()
             if not answer:
                 evidence = state.get("artifacts", {}).get("retrieval_worker", {}).get("evidence", [])
                 if evidence:

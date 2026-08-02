@@ -9,6 +9,7 @@ from app.llm.router import ProviderRouter
 from app.multimodal.document_parser import parse_document_file
 from app.retrieval.ingestion import build_corpus
 from app.retrieval.service import RetrievalService
+from app.services.community_service import CommunityService
 from app.services.repository import JsonRepository
 
 
@@ -17,6 +18,7 @@ class MultiAgentWorkers:
         self.repo = repo or JsonRepository()
         self.router = router or ProviderRouter()
         self._retrieval: RetrievalService | None = None
+        self.community = CommunityService(self.repo)
 
     @staticmethod
     def _append(
@@ -82,6 +84,35 @@ class MultiAgentWorkers:
                 {"kind": "retrieval", "evidence": [], "mode": "failed", "error": str(exc)[:200]},
                 status="failed",
             )
+        return state
+
+    async def community_worker(self, state: MultiAgentState) -> MultiAgentState:
+        user_id = str(state.get("user_id", "demo-user"))
+        feed = self.community.feed(user_id, "for_you")[:5]
+        pending = self.repo.load_reports(status="pending_review")
+        posts = [
+            {
+                "post_id": post.post_id,
+                "title": post.title,
+                "category": post.category.value,
+                "like_count": post.like_count,
+                "comment_count": post.comment_count,
+                "ranking_reason": post.ranking_reason,
+            }
+            for post in feed
+        ]
+        summary = f"社区 Worker 汇总了 {len(posts)} 条推荐帖子和 {len(pending)} 条待审核举报。"
+        self._append(
+            state,
+            "community_worker",
+            summary,
+            {
+                "kind": "community",
+                "posts": posts,
+                "pending_report_count": len(pending),
+                "mode": "personalized_feed_and_moderation",
+            },
+        )
         return state
 
     async def multimodal_worker(self, state: MultiAgentState) -> MultiAgentState:

@@ -47,6 +47,12 @@ async def test_supervisor_routes_eval_query_to_eval_worker() -> None:
 
 
 @pytest.mark.asyncio
+async def test_supervisor_routes_community_query_to_community_worker() -> None:
+    supervisor = MultiAgentSupervisor()
+    assert await supervisor.route(_state("校园里现在有什么热门帖子")) == "community_worker"
+
+
+@pytest.mark.asyncio
 async def test_multi_agent_respects_max_turns(monkeypatch: pytest.MonkeyPatch) -> None:
     graph = MultiAgentGraph()
 
@@ -54,7 +60,7 @@ async def test_multi_agent_respects_max_turns(monkeypatch: pytest.MonkeyPatch) -
         MultiAgentWorkers._append(state, _name, "noop", {"kind": "noop"})
         return state
 
-    for name in ("retrieval_worker", "multimodal_worker", "draft_worker", "eval_worker"):
+    for name in ("community_worker", "retrieval_worker", "multimodal_worker", "draft_worker", "eval_worker"):
         monkeypatch.setattr(graph.workers, name, lambda state, _name=name: noop(state, _name))
 
     state = await graph.run("你好", "s1", "u1", max_turns=2)

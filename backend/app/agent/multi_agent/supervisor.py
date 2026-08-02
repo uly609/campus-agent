@@ -13,11 +13,13 @@ class MultiAgentSupervisor:
     @staticmethod
     def _candidates(state: dict[str, Any]) -> list[str]:
         query = str(state.get("query", ""))
+        if re.search(r"热门|推荐|点赞|举报|审核|治理|社区动态|帖子趋势", query):
+            return ["community_worker", *[name for name in WORKER_NAMES if name != "community_worker"]]
         if re.search(r"图片|Excel|PDF|文件|上传|识别|拆分|扫描", query):
             return ["multimodal_worker", *[name for name in WORKER_NAMES if name != "multimodal_worker"]]
         if re.search(r"评测|评估|指标|RAGAS|测试报告", query):
             return ["eval_worker", *[name for name in WORKER_NAMES if name != "eval_worker"]]
-        if re.search(r"发帖|帖子|草稿|社区|发布", query):
+        if re.search(r"发帖|草稿|发布", query):
             return ["draft_worker", *[name for name in WORKER_NAMES if name != "draft_worker"]]
         if re.search(r"知识|课表|场地|图书馆|食堂|辅导员|校长|通知|搜索|找|服务|政策", query):
             return ["retrieval_worker", *[name for name in WORKER_NAMES if name != "retrieval_worker"]]

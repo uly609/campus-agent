@@ -18,3 +18,7 @@ infra/alertmanager/bin/
 .DS_Store
 evals/reports/eval-*.json
 evals/reports/eval-*.md
+.repo-source-cache/
+agent-candidate-pool.json
+agent-shortlist-preview.md
+repo-source-manifest.json

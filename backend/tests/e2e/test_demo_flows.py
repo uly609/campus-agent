@@ -50,6 +50,33 @@ def test_demo_flows_cover_chat_search_draft_memory_eval() -> None:
     assert comment.json()["body"] == "请问需要提前报名吗？"
     assert client.get(f"/api/v1/posts/{post_id}/comments").json()[0]["comment_id"] == comment.json()["comment_id"]
     assert client.get(f"/api/v1/posts/{post_id}").json()["comment_count"] == 1
+    liked = client.post(
+        f"/api/v1/posts/{post_id}/reactions",
+        json={"user_id": "e2e-community-user", "liked": True},
+    )
+    assert liked.status_code == 200
+    assert liked.json()["viewer_liked"] is True
+    assert liked.json()["like_count"] >= 1
+    report = client.post(
+        f"/api/v1/posts/{post_id}/reports",
+        json={
+            "user_id": "e2e-community-user",
+            "reason": "inaccurate",
+            "detail": "E2E 人工审核流程验证",
+        },
+    )
+    assert report.status_code == 201
+    report_id = report.json()["report_id"]
+    queue = client.get("/api/v1/community/moderation/reports?status=pending_review")
+    assert any(item["report_id"] == report_id for item in queue.json())
+    reviewed = client.post(
+        f"/api/v1/community/moderation/reports/{report_id}/review",
+        json={"decision": "keep", "reviewer_alias": "E2E 管理员", "note": "保留测试帖子"},
+    )
+    assert reviewed.status_code == 200
+    assert reviewed.json()["final_decision"] == "keep"
+    audit = client.get("/api/v1/community/audit?limit=100").json()
+    assert any(item["report_id"] == report_id and item["action"] == "report_reviewed" for item in audit)
     repeated = client.post(
         f"/api/v1/posts/draft/{draft_id}/feedback", json={"publish": True}
     )
