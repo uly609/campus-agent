@@ -139,4 +139,4 @@ The offline eval report adds RAGAS-style `qa_faithfulness`, `qa_answer_relevancy
 
 The post feed supports chronological, hot, and personalized modes. Hot ranking combines freshness, likes, comments, and report penalties; personalized ranking adds category and tag affinity learned only from the current user's explicit likes. Every non-chronological result carries a human-readable ranking reason.
 
-Reports receive deterministic risk scores and `keep`, `review`, or `hide` suggestions, but the model cannot remove content. A moderator must explicitly keep or hide a post, and both report creation and final review are persisted in the community audit log. This keeps AI assistance separate from the final governance decision.
+Reports receive deterministic risk scores and `keep`, `review`, or `hide` suggestions, but the automated scorer cannot remove content. A moderator must explicitly keep or hide a post, and both report creation and final review are persisted in the community audit log. This keeps automated assistance separate from the final governance decision.

@@ -1076,7 +1076,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       </section>
 
       <section v-else-if="activeView === 'governance'" class="view governance-view">
-        <div class="section-head"><div><h2>社区治理</h2><p>模型只给风险建议，最终处置由管理员确认</p></div><button class="icon-button" title="刷新治理数据" :disabled="busy === 'governance'" @click="loadGovernance"><RefreshCw :class="{ spin: busy === 'governance' }" :size="19" /></button></div>
+        <div class="section-head"><div><h2>社区治理</h2><p>系统只给风险建议，最终处置由管理员确认</p></div><button class="icon-button" title="刷新治理数据" :disabled="busy === 'governance'" @click="loadGovernance"><RefreshCw :class="{ spin: busy === 'governance' }" :size="19" /></button></div>
         <div class="governance-grid">
           <section class="governance-panel">
             <header><strong>待人工审核</strong><span>{{ moderationReports.length }}</span></header>
