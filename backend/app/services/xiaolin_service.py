@@ -4,9 +4,9 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
+from app.agent.multi_agent.graph import MultiAgentGraph
 from app.domain.schemas import ChatRequest
 from app.multimodal.image_attributes import analyze_chat_image
-from app.xiaolin_agent.LLMController import get_process_info
 from app.xiaolin_agent.ResponseGenerator import ResponseGenerator
 from app.xiaolin_agent.services.chat_history_manager import ChatHistoryManager
 
@@ -59,37 +59,81 @@ async def stream_xiaolin_events(request: ChatRequest) -> AsyncGenerator[dict[str
         if image_analyses:
             yield {"type": "data", "subtype": "image_analysis", "content": image_analyses}
         if request.is_agent:
-            async for event in get_process_info(model_message):
-                yield event
-                if event.get("type") == "step":
-                    process_steps.append(str(event.get("content", "")))
-                elif event.get("type") == "data":
-                    subtype = event.get("subtype")
-                    content = event.get("content")
-                    if subtype == "task_plan" and isinstance(content, list):
-                        task_plan = content
-                    elif subtype == "task_result" and isinstance(content, dict):
-                        task_results[int(content.get("task_id", 0))] = content.get("result")
-                    elif subtype == "tool_selections" and isinstance(content, dict):
-                        tool_selections = content
-
-            process_info = {
-                "user_input": model_message,
-                "steps": process_steps,
-                "task_planning": {"tasks": task_plan} if task_plan else {},
-                "tool_selection": {"tool_selections": tool_selections}
-                if tool_selections
-                else {},
-                "task_execution": task_results,
-            }
-            async for chunk in ResponseGenerator.create_streaming_response(
+            state = await MultiAgentGraph().run(
                 model_message,
-                process_info,
-                chat_history,
-            ):
-                if chunk:
-                    full_response += chunk
-                    yield {"content": chunk}
+                session_id,
+                request.user_id,
+                max_turns=4,
+                chat_history=chat_history,
+            )
+            required_workers = list(state.get("required_workers", []))
+            campus_artifact = state.get("artifacts", {}).get("campus_worker", {})
+            if required_workers == ["campus_worker"] and campus_artifact.get("events"):
+                for event in campus_artifact["events"]:
+                    yield event
+                process_info = dict(campus_artifact.get("process_info", {}))
+            else:
+                process_steps = [
+                    "Supervisor 分析任务复杂度...",
+                    f"调度 {len(required_workers)} 个必要 Agent...",
+                ]
+                for step in process_steps:
+                    yield {"type": "step", "content": step}
+                task_plan = [
+                    {
+                        "id": index,
+                        "task": _worker_task_label(worker),
+                        "input": model_message,
+                        "depends_on": [],
+                    }
+                    for index, worker in enumerate(required_workers, start=1)
+                ]
+                yield {"type": "data", "subtype": "task_plan", "content": task_plan}
+                tool_selections = {
+                    index: {
+                        "task_id": index,
+                        "tool": worker,
+                        "reason": "Supervisor 根据意图与任务依赖选择必要 Agent",
+                    }
+                    for index, worker in enumerate(required_workers, start=1)
+                }
+                yield {
+                    "type": "data",
+                    "subtype": "tool_selections",
+                    "content": tool_selections,
+                }
+                results_by_worker = {
+                    str(result.get("worker")): result for result in state.get("worker_results", [])
+                }
+                for index, worker in enumerate(required_workers, start=1):
+                    artifact = state.get("artifacts", {}).get(worker, {})
+                    worker_result = results_by_worker.get(worker, {})
+                    worker_status = str(worker_result.get("status", "completed"))
+                    result = {
+                        "status": "success" if worker_status == "completed" else "error",
+                        "api_result": artifact,
+                    }
+                    task_results[index] = result
+                    yield {
+                        "type": "data",
+                        "subtype": "task_result",
+                        "content": {"task_id": index, "result": result},
+                    }
+                process_info = {
+                    "user_input": model_message,
+                    "steps": process_steps,
+                    "task_planning": {"tasks": task_plan},
+                    "tool_selection": {"tool_selections": tool_selections},
+                    "task_execution": task_results,
+                    "multi_agent": {
+                        "complexity": state.get("complexity", "single"),
+                        "required_workers": required_workers,
+                        "task_completed": state.get("task_completed", False),
+                    },
+                }
+            full_response = str(state.get("final_answer", ""))
+            if full_response:
+                yield {"content": full_response}
         else:
             async for chunk in ResponseGenerator.create_simple_streaming_response(
                 model_message,
@@ -113,3 +157,15 @@ async def stream_xiaolin_events(request: ChatRequest) -> AsyncGenerator[dict[str
                     process_info=process_info,
                 )
         logger.info("小林聊天流结束: %s", session_id)
+
+
+def _worker_task_label(worker: str) -> str:
+    return {
+        "campus_worker": "查询并处理校园服务信息",
+        "community_worker": "分析校园社区内容与治理状态",
+        "retrieval_worker": "检索校园知识与社区资料",
+        "multimodal_worker": "解析图片、表格或文档附件",
+        "draft_worker": "生成校园社区帖子草稿",
+        "eval_worker": "读取并分析系统评测指标",
+        "general_worker": "回答通用问题",
+    }.get(worker, worker)

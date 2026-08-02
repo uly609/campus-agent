@@ -43,6 +43,11 @@ class MultiAgentGraph:
 
     async def finalize_node(self, state: MultiAgentState) -> MultiAgentState:
         if not state.get("final_answer"):
+            campus = state.get("artifacts", {}).get("campus_worker", {})
+            answer_parts: list[str] = []
+            campus_answer = str(campus.get("answer", "")).strip()
+            if campus_answer:
+                answer_parts.append(campus_answer)
             community = state.get("artifacts", {}).get("community_worker", {})
             community_posts = community.get("posts", [])
             if community_posts:
@@ -51,9 +56,22 @@ class MultiAgentGraph:
                     f"{item.get('like_count', 0)} 赞 / {item.get('comment_count', 0)} 评论）"
                     for index, item in enumerate(community_posts[:5], start=1)
                 ]
-                state["final_answer"] = "校园社区推荐：\n" + "\n".join(lines)
+                answer_parts.append("校园社区推荐：\n" + "\n".join(lines))
+            multimodal = state.get("artifacts", {}).get("multimodal_worker", {})
+            chunks = multimodal.get("chunks", [])
+            if chunks:
+                previews = [str(item.get("text", ""))[:240] for item in chunks[:3]]
+                answer_parts.append("附件解析结果：\n" + "\n".join(previews))
+            draft = state.get("artifacts", {}).get("draft_worker", {})
+            if draft.get("draft"):
+                answer_parts.append("帖子草稿：\n" + str(draft["draft"]))
+            evaluation = state.get("artifacts", {}).get("eval_worker", {})
+            if evaluation.get("summary"):
+                answer_parts.append(str(evaluation["summary"]))
             general = state.get("artifacts", {}).get("general_worker", {})
-            answer = str(state.get("final_answer", "") or general.get("answer", "")).strip()
+            if general.get("answer"):
+                answer_parts.append(str(general["answer"]))
+            answer = "\n\n".join(part for part in answer_parts if part).strip()
             if not answer:
                 evidence = state.get("artifacts", {}).get("retrieval_worker", {}).get("evidence", [])
                 if evidence:
@@ -85,6 +103,7 @@ class MultiAgentGraph:
         user_id: str,
         max_turns: int = 4,
         files: list[dict[str, str]] | None = None,
+        chat_history: list[dict[str, str]] | None = None,
     ) -> MultiAgentState:
         state: MultiAgentState = {
             "request_id": f"ma-{uuid.uuid4().hex[:12]}",
@@ -93,10 +112,14 @@ class MultiAgentGraph:
             "query": query,
             "max_turns": max_turns,
             "turn_count": 0,
+            "complexity": "single",
+            "required_workers": [],
+            "task_completed": False,
             "message_hub": [],
             "artifacts": {},
             "worker_results": [],
             "files": files or [],
+            "chat_history": chat_history or [],
             "final_answer": "",
             "guardrail_flags": [],
             "trace": [],
@@ -110,10 +133,11 @@ class MultiAgentGraph:
             "pattern": "supervisor_workers",
             "supervisor": "supervisor_node",
             "workers": list(WORKER_NAMES),
-            "shared_state": ["message_hub", "artifacts", "worker_results"],
+            "shared_state": ["required_workers", "message_hub", "artifacts", "worker_results"],
             "max_turns": 4,
-            "guardrails": ["prompt_injection", "worker_whitelist", "turn_limit"],
+            "guardrails": ["prompt_injection", "worker_whitelist", "required_worker_limit"],
             "communication": "message_hub publish + artifacts shared blackboard",
+            "termination": "all required workers completed or max_turns reached",
         }
 
 
@@ -123,5 +147,6 @@ async def run_multi_agent(
     user_id: str,
     max_turns: int = 4,
     files: list[dict[str, str]] | None = None,
+    chat_history: list[dict[str, str]] | None = None,
 ) -> MultiAgentState:
-    return await MultiAgentGraph().run(query, session_id, user_id, max_turns, files)
+    return await MultiAgentGraph().run(query, session_id, user_id, max_turns, files, chat_history)

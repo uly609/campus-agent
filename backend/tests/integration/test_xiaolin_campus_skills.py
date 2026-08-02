@@ -240,6 +240,33 @@ async def test_xiaolin_stream_emits_full_planner_tool_answer_flow(
 
 
 @pytest.mark.asyncio
+async def test_agent_greeting_uses_only_general_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setattr(ChatHistoryManager, "repo", JsonRepository(tmp_path))
+    events = [
+        event
+        async for event in stream_xiaolin_events(
+            ChatRequest(
+                session_id="unified-agent-greeting",
+                user_id="demo-user",
+                message="你好",
+                is_agent=True,
+            )
+        )
+    ]
+
+    plan = next(event["content"] for event in events if event.get("subtype") == "task_plan")
+    selections = next(
+        event["content"] for event in events if event.get("subtype") == "tool_selections"
+    )
+    assert len(plan) == 1
+    assert selections[1]["tool"] == "general_worker"
+    assert sum(event.get("subtype") == "task_result" for event in events) == 1
+
+
+@pytest.mark.asyncio
 async def test_xiaolin_normal_mode_uses_original_simple_stream(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,

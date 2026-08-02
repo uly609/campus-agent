@@ -567,6 +567,16 @@ make smoke
 - [x] Add feed interactions and a community-governance workbench to the Vue application.
 - [x] Cover recommendation, reporting, review, audit, and worker routing with tests.
 
+## M45 - Unified XiaoLin Multi-Agent Runtime
+
+- [x] Route the visible AI Assistant Agent mode through the LangGraph supervisor-workers graph.
+- [x] Preserve normal mode as a direct low-latency model path.
+- [x] Wrap XiaoLin's Planner, ToolSelector, TaskExecutor, and ResponseGenerator as `campus_worker`.
+- [x] Plan a bounded `required_workers` set once instead of cycling through all workers.
+- [x] Stop immediately when all required workers complete or the worker limit is reached.
+- [x] Preserve XiaoLin SSE process cards and chat history on the unified route.
+- [x] Expose complexity, selected workers, completion state, and termination rules through the API.
+
 Validation:
 
 ```bash

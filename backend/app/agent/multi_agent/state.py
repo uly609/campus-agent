@@ -10,10 +10,14 @@ class MultiAgentState(TypedDict, total=False):
     query: str
     max_turns: int
     turn_count: int
+    complexity: str
+    required_workers: list[str]
+    task_completed: bool
     message_hub: list[dict[str, Any]]
     artifacts: dict[str, Any]
     worker_results: list[dict[str, Any]]
     files: list[dict[str, str]]
+    chat_history: list[dict[str, str]]
     final_answer: str
     guardrail_flags: list[str]
     trace: list[dict[str, Any]]
@@ -21,6 +25,7 @@ class MultiAgentState(TypedDict, total=False):
 
 
 WORKER_NAMES = (
+    "campus_worker",
     "community_worker",
     "retrieval_worker",
     "multimodal_worker",

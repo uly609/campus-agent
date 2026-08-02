@@ -77,7 +77,7 @@ make smoke
 7. Add a TXT, Markdown, Excel, CSV, PDF, or image file in Knowledge Base; non-text files are parsed into editable chunks before indexing.
 8. Add or check a Chat, Embedding, or VLM route in Model Routing.
 9. Open `/metrics` or Grafana for request, LLM, tool, replan, cache, citation, and retrieval metrics.
-10. Open `POST /api/v1/files/parse` with a small Excel or PDF, then `POST /api/v1/agents/multi` with a campus question to see supervisor-worker orchestration.
+10. Enable **Agent** in AI Assistant: a greeting selects only General Worker, a campus fact selects XiaoLin Campus Worker, and a compound request selects only the required workers. `POST /api/v1/agents/multi` exposes the same graph for API inspection.
 11. Like several posts, compare **最新 / 热门 / 为你推荐**, report a test post, then open **社区治理** to review it and inspect the audit trail.
 
 Long-term memory accepts explicit chat memories and eligible first-person facts or preferences from confirmed published posts. Generic post content is not memorized. Open **记忆** after publishing to consume the Redis Stream and inspect or delete the resulting record.
@@ -131,7 +131,9 @@ Corrective official-web search first uses configured official site indexes for p
 
 ## Multi-agent orchestration and RAGAS-style evaluation
 
-`POST /api/v1/agents/multi` runs a LangGraph supervisor-workers graph over six workers: community operations, retrieval, multimodal parsing, post drafting, evaluation, and general answering. The supervisor routes by Chinese intent, publishes plan messages to a shared message hub, and workers write artifacts to a shared blackboard; `GET /api/v1/agents/multi/spec` returns the graph contract. Prompt-injection flags stop orchestration, and bounded worker/turn limits prevent runaway loops.
+AI Assistant Agent mode and `POST /api/v1/agents/multi` now share one LangGraph supervisor-workers graph. Seven registered workers cover XiaoLin campus operations, community operations, retrieval, multimodal parsing, post drafting, evaluation, and general answering. XiaoLin's original Planner, ToolSelector, TaskExecutor, and ResponseGenerator run inside `campus_worker`, preserving its campus tools and process details.
+
+The supervisor computes a bounded `required_workers` list once. A greeting runs only General Worker, a campus fact runs only Campus Worker, and a compound request can combine document, campus, community, drafting, or evaluation workers. Execution stops as soon as all selected workers complete; it no longer cycles through unrelated workers. `GET /api/v1/agents/multi/spec` exposes the shared state and termination contract, while prompt-injection flags and the worker limit remain hard stops.
 
 The offline eval report adds RAGAS-style `qa_faithfulness`, `qa_answer_relevancy`, `qa_context_precision`, and `qa_context_recall` using deterministic token-overlap approximations, documented as regression metrics rather than an LLM judge.
 

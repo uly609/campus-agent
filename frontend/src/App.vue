@@ -839,6 +839,13 @@ function toolLabel(value) {
     venue_coordination: "场地协调",
     campus_weather: "实时天气",
     student_profile: "学生画像",
+    campus_worker: "小林校园 Agent",
+    community_worker: "校园社区 Agent",
+    retrieval_worker: "知识检索 Agent",
+    multimodal_worker: "多模态解析 Agent",
+    draft_worker: "发帖创作 Agent",
+    eval_worker: "质量评测 Agent",
+    general_worker: "通用问答 Agent",
   })[value] || value;
 }
 

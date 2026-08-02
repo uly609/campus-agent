@@ -412,3 +412,13 @@ External model credentials are optional for local demo and test runs. When absen
 - Added feed mode controls, direct like actions, report submission, and a community-governance workbench to the Vue UI.
 - Added service-level tests for ranking, preference, idempotency, moderation, and audit plus worker routing and an HTTP E2E governance flow.
 - Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 121 source files, 138 unit/integration tests, 3 E2E flows, offline eval `eval-0502053901`, and smoke. API/Web were rebuilt and deployed healthy; desktop and 390px browser QA found no horizontal overflow or console errors.
+
+## 2026-08-02 M45 Notes
+
+- Removed the architectural split between the visible XiaoLin Agent and the standalone Multi-Agent API. AI Assistant normal mode remains direct, while Agent mode now enters the same LangGraph supervisor-workers graph exposed at `/api/v1/agents/multi`.
+- Wrapped XiaoLin's complete Planner, ToolSelector, TaskExecutor, and ResponseGenerator chain as `campus_worker`, retaining existing campus tools, SSE process detail, source labeling, and persisted history.
+- Replaced the former “run unexecuted workers until max turns” behavior with one bounded `required_workers` plan and an explicit `task_completed` termination condition.
+- Simple greetings select only General Worker; campus questions select only Campus Worker; compound document, campus, community, drafting, and evaluation requests select only the capabilities they need.
+- Extended the Multi-Agent response contract with complexity, required workers, and completion state so routing and cost behavior are externally verifiable.
+- Added facet-aware evidence extraction to Campus Worker. For example, an opening-hours question now requires a retrieved concrete time; otherwise the system refuses instead of allowing the model to invent a campus fact.
+- Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 123 source files, 142 unit/integration tests, 3 E2E flows, offline eval `eval-7b65e73bc9`, and smoke.

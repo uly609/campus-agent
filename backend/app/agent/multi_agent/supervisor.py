@@ -8,31 +8,58 @@ from app.security.prompt_injection import detect_prompt_injection
 
 
 class MultiAgentSupervisor:
-    """Deterministic supervisor that routes one new worker per turn."""
+    """Plan the minimum worker set once, then stop as soon as it is complete."""
 
     @staticmethod
-    def _candidates(state: dict[str, Any]) -> list[str]:
+    def required_workers(state: dict[str, Any]) -> list[str]:
         query = str(state.get("query", ""))
+        selected: list[str] = []
+        has_files = bool(state.get("files"))
+
+        if has_files or re.search(r"Excel|PDF|文件|表格|拆分|扫描件", query, re.IGNORECASE):
+            selected.append("multimodal_worker")
         if re.search(r"热门|推荐|点赞|举报|审核|治理|社区动态|帖子趋势", query):
-            return ["community_worker", *[name for name in WORKER_NAMES if name != "community_worker"]]
-        if re.search(r"图片|Excel|PDF|文件|上传|识别|拆分|扫描", query):
-            return ["multimodal_worker", *[name for name in WORKER_NAMES if name != "multimodal_worker"]]
+            selected.append("community_worker")
         if re.search(r"评测|评估|指标|RAGAS|测试报告", query):
-            return ["eval_worker", *[name for name in WORKER_NAMES if name != "eval_worker"]]
+            selected.append("eval_worker")
         if re.search(r"发帖|草稿|发布", query):
-            return ["draft_worker", *[name for name in WORKER_NAMES if name != "draft_worker"]]
-        if re.search(r"知识|课表|场地|图书馆|食堂|辅导员|校长|通知|搜索|找|服务|政策", query):
-            return ["retrieval_worker", *[name for name in WORKER_NAMES if name != "retrieval_worker"]]
-        return list(WORKER_NAMES)
+            selected.append("draft_worker")
+        campus_query = re.search(
+            r"浙江工商大学|浙商大|学校|校园|课表|课程|场地|图书馆|食堂|辅导员|"
+            r"校长|通知|教务|宿舍|校园卡|一卡通|奖学金|志愿|老师|教师|天气|下沙|教工路",
+            query,
+        )
+        if campus_query and not ({"community_worker", "draft_worker"} & set(selected)):
+            selected.append("campus_worker")
+        elif campus_query and len(selected) > 0 and re.search(r"查询|查找|核实|规定|政策|场地|天气|通知", query):
+            selected.append("campus_worker")
+
+        if not selected:
+            selected.append("general_worker")
+        unique = set(selected)
+        execution_order = (
+            "multimodal_worker",
+            "campus_worker",
+            "retrieval_worker",
+            "community_worker",
+            "draft_worker",
+            "eval_worker",
+            "general_worker",
+        )
+        return [worker for worker in execution_order if worker in unique]
 
     async def route(self, state: dict[str, Any]) -> str:
         if state.get("guardrail_flags") or state.get("final_answer"):
             return FINALIZE_NODE
         executed = {str(item.get("worker")) for item in state.get("worker_results", [])}
         max_turns = int(state.get("max_turns", 4))
-        if len(executed) >= max_turns or int(state.get("turn_count", 0)) > max_turns * 2:
+        required = list(state.get("required_workers", []))
+        if required and all(worker in executed for worker in required):
+            state["task_completed"] = True
             return FINALIZE_NODE
-        for candidate in self._candidates(state):
+        if len(executed) >= max_turns:
+            return FINALIZE_NODE
+        for candidate in required:
             if candidate not in executed:
                 return candidate
         return FINALIZE_NODE
@@ -52,12 +79,37 @@ class MultiAgentSupervisor:
                 }
             )
         else:
-            state["turn_count"] = int(state.get("turn_count", 0)) + 1
+            if not state.get("required_workers"):
+                required = self.required_workers(state)[: int(state.get("max_turns", 4))]
+                state["required_workers"] = required
+                state["complexity"] = "single" if len(required) == 1 else "multi"
+                state["message_hub"].append(
+                    {
+                        "agent": "supervisor",
+                        "role": "plan",
+                        "content": f"Selected workers: {', '.join(required)}.",
+                        "required_workers": required,
+                        "complexity": state["complexity"],
+                    }
+                )
+            executed = {str(item.get("worker")) for item in state.get("worker_results", [])}
+            required = list(state.get("required_workers", []))
+            if required and all(worker in executed for worker in required):
+                state["task_completed"] = True
+                state["message_hub"].append(
+                    {
+                        "agent": "supervisor",
+                        "role": "complete",
+                        "content": "All required workers completed; finalize now.",
+                    }
+                )
+                return state
             state["message_hub"].append(
                 {
                     "agent": "supervisor",
-                    "role": "plan",
-                    "content": f"Turn {state['turn_count']}: plan and dispatch next worker.",
+                    "role": "dispatch",
+                    "content": "Dispatch the next required worker.",
                 }
             )
+            state["turn_count"] = int(state.get("turn_count", 0)) + 1
         return state

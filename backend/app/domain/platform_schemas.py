@@ -76,6 +76,9 @@ class MultiAgentRequest(BaseModel):
 class MultiAgentResponse(BaseModel):
     request_id: str
     final_answer: str
+    complexity: Literal["single", "multi"]
+    required_workers: list[str]
+    task_completed: bool
     worker_results: list[dict[str, object]]
     message_hub: list[dict[str, object]]
     turn_count: int

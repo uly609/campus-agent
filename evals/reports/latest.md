@@ -1,4 +1,4 @@
-# Eval Report eval-0502053901
+# Eval Report eval-7c3192eb3a
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -20,25 +20,25 @@
 | retrieval_hit_at_8 | 0.7222 |
 | retrieval_hard_negative_rate_at_5 | 0.2778 |
 | qa_answer_fact_recall | 0.7143 |
-| qa_context_relevance | 0.2250 |
+| qa_context_relevance | 0.2309 |
 | qa_citation_precision | 0.5000 |
 | qa_citation_faithfulness | 1.0000 |
 | qa_faithfulness | 1.0000 |
-| qa_answer_relevancy | 0.5073 |
-| qa_context_precision | 0.5500 |
-| qa_context_recall | 0.6000 |
+| qa_answer_relevancy | 0.4651 |
+| qa_context_precision | 0.5667 |
+| qa_context_recall | 0.7000 |
 | qa_forbidden_content_rate | 0.0000 |
 | refusal_precision | 1.0000 |
 | refusal_recall | 1.0000 |
 | refusal_f1 | 1.0000 |
-| replan_precision | 0.6000 |
+| replan_precision | 0.5000 |
 | replan_recall | 1.0000 |
-| replan_f1 | 0.7500 |
+| replan_f1 | 0.6667 |
 | tool_success_rate | 1.0000 |
-| corrective_rag_success_rate | 1.0000 |
+| corrective_rag_success_rate | 0.8333 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 181.5100 |
-| p95_latency_ms | 20352.5599 |
+| p50_latency_ms | 138.1422 |
+| p95_latency_ms | 17423.9973 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases

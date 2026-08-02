@@ -20,6 +20,9 @@ async def run_multi_agent_api(request: MultiAgentRequest) -> MultiAgentResponse:
     return MultiAgentResponse(
         request_id=str(state.get("request_id", "")),
         final_answer=str(state.get("final_answer", "")),
+        complexity="multi" if state.get("complexity") == "multi" else "single",
+        required_workers=list(state.get("required_workers", [])),
+        task_completed=bool(state.get("task_completed", False)),
         worker_results=list(state.get("worker_results", [])),
         message_hub=list(state.get("message_hub", [])),
         turn_count=int(state.get("turn_count", 0)),
