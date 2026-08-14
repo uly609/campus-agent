@@ -10,7 +10,7 @@ from app.agent.grounded_llm import synthesize_with_provider
 from app.agent.planner import PlanValidator, StructuredPlanner
 from app.agent.policies import judge_relevance, synthesize_grounded_answer
 from app.agent.state import AgentState, REQUIRED_NODES, SIX_STAGES
-from app.agent.tools.campus_tools import build_registry
+from app.agent.tools.knowledge_tools import build_registry
 from app.domain.enums import Intent
 from app.domain.schemas import Citation, Evidence, MemoryRecord
 from app.memory.producer import publish_memory_event
@@ -33,7 +33,7 @@ GraphRoute = Literal[
 ]
 
 
-class CampusFlowGraph:
+class AtlasHubGraph:
     def __init__(self, repo: JsonRepository | None = None) -> None:
         self.repo = repo or JsonRepository()
         self.provider_router = ProviderRouter()
@@ -346,7 +346,7 @@ class CampusFlowGraph:
         query = await self._rewrite_query(state["resolved_query"])
         if state["replan_count"] == 1:
             state["plan"] = [
-                {"tool": "search_campus_docs", "args": {"query": query}},
+                {"tool": "search_knowledge_base", "args": {"query": query}},
                 {"tool": "search_posts", "args": {"query": query}},
             ]
             state["trace"].append(
@@ -355,7 +355,7 @@ class CampusFlowGraph:
         else:
             state["plan"] = [
                 {"tool": "search_official_web", "args": {"query": query}},
-                {"tool": "search_campus_docs", "args": {"query": query}},
+                {"tool": "search_knowledge_base", "args": {"query": query}},
             ]
             state["trace"].append(
                 {"event": "corrective_rag", "action": "official_web_fallback", "query": query}
@@ -363,16 +363,16 @@ class CampusFlowGraph:
 
     async def _rewrite_query(self, query: str) -> str:
         if "fake_chat_provider" in self.provider_router.degraded_modes:
-            return f"{query} 校园 官方 说明"
+            return f"{query} 企业 官方 说明"
         try:
             result = await self.provider_router.chat(
-                "Rewrite this campus query for retrieval. Return only the rewritten query: " + query
+                "Rewrite this enterprise knowledge query for retrieval. Return only the rewritten query: " + query
             )
             if isinstance(result.content, str) and not result.degraded and result.content.strip():
                 return result.content.strip()[:300]
         except (ProviderRecoverableError, ValueError, TypeError):
-            return f"{query} 校园 官方 说明"
-        return f"{query} 校园 官方 说明"
+            return f"{query} 企业 官方 说明"
+        return f"{query} 企业 官方 说明"
 
     async def grounded_synthesis_node(self, state: AgentState) -> None:
         if "input_prompt_injection" in state.get("guardrail_flags", []):
@@ -380,7 +380,7 @@ class CampusFlowGraph:
             state["citations"] = []
             return
         if state.get("intent") == Intent.GREETING.value:
-            result = await self.provider_router.chat("寒暄：以“浙小商助手”的身份介绍自己是浙江工商大学校园 Agent，并简要说明任务规划、校园查询、帖子检索和发帖辅助能力。")
+            result = await self.provider_router.chat("寒暄：以 AtlasHub AI 企业知识社区 Agent 的身份介绍自己，并简要说明知识库检索、社区治理、内容创作和多模态分析能力。")
             state["final_answer"] = str(result.content)
             state["citations"] = []
             if result.degraded and "fake_chat_provider" not in state["degraded_mode"]:
@@ -486,8 +486,8 @@ class CampusFlowGraph:
         )
 
 
-def build_graph() -> CampusFlowGraph:
-    return CampusFlowGraph()
+def build_graph() -> AtlasHubGraph:
+    return AtlasHubGraph()
 
 
 async def run_agent(

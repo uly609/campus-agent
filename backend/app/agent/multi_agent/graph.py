@@ -43,11 +43,11 @@ class MultiAgentGraph:
 
     async def finalize_node(self, state: MultiAgentState) -> MultiAgentState:
         if not state.get("final_answer"):
-            campus = state.get("artifacts", {}).get("campus_worker", {})
+            knowledge = state.get("artifacts", {}).get("knowledge_worker", {})
             answer_parts: list[str] = []
-            campus_answer = str(campus.get("answer", "")).strip()
-            if campus_answer:
-                answer_parts.append(campus_answer)
+            knowledge_answer = str(knowledge.get("answer", "")).strip()
+            if knowledge_answer:
+                answer_parts.append(knowledge_answer)
             community = state.get("artifacts", {}).get("community_worker", {})
             community_posts = community.get("posts", [])
             if community_posts:
@@ -56,7 +56,7 @@ class MultiAgentGraph:
                     f"{item.get('like_count', 0)} 赞 / {item.get('comment_count', 0)} 评论）"
                     for index, item in enumerate(community_posts[:5], start=1)
                 ]
-                answer_parts.append("校园社区推荐：\n" + "\n".join(lines))
+                answer_parts.append("知识社区推荐：\n" + "\n".join(lines))
             multimodal = state.get("artifacts", {}).get("multimodal_worker", {})
             chunks = multimodal.get("chunks", [])
             if chunks:
@@ -80,10 +80,10 @@ class MultiAgentGraph:
                         f"（来源：{item.get('source_id', '')}）"
                         for index, item in enumerate(evidence[:3], start=1)
                     ]
-                    answer = "根据校园知识检索结果：\n" + "\n".join(lines)
+                    answer = "根据企业知识社区检索结果：\n" + "\n".join(lines)
                 else:
                     answer = (
-                        "多 Agent 协作已完成。该问题需要更具体的校园数据或附件，"
+                        "多 Agent 协作已完成。该问题需要更具体的企业资料或附件，"
                         "请提供文件或改用 Agent 查询。"
                     )
             state["final_answer"] = answer

@@ -9,7 +9,7 @@ import pytest
 from app.agent.multi_agent.graph import MultiAgentGraph
 from app.agent.multi_agent.state import MultiAgentState, WORKER_NAMES
 from app.agent.multi_agent.supervisor import MultiAgentSupervisor
-from app.agent.multi_agent.workers import MultiAgentWorkers, _evidence_for_query
+from app.agent.multi_agent.workers import MultiAgentWorkers
 from app.services.repository import JsonRepository
 
 
@@ -42,10 +42,10 @@ async def _route(query: str, **overrides) -> tuple[str, MultiAgentState]:
 
 
 @pytest.mark.asyncio
-async def test_supervisor_routes_campus_query_to_campus_worker() -> None:
-    route, state = await _route("图书馆几点关门")
-    assert route == "campus_worker"
-    assert state["required_workers"] == ["campus_worker"]
+async def test_supervisor_routes_knowledge_query_to_knowledge_worker() -> None:
+    route, state = await _route("企业知识库里的发布流程是什么")
+    assert route == "retrieval_worker"
+    assert state["required_workers"] == ["retrieval_worker", "knowledge_worker"]
 
 
 @pytest.mark.asyncio
@@ -55,7 +55,7 @@ async def test_supervisor_routes_file_query_to_multimodal() -> None:
         files=[{"name": "课表.xlsx", "data_url": "data:application/octet-stream;base64,AA=="}],
     )
     assert route == "multimodal_worker"
-    assert state["required_workers"] == ["multimodal_worker", "campus_worker"]
+    assert state["required_workers"] == ["multimodal_worker", "general_worker"]
 
 
 @pytest.mark.asyncio
@@ -85,15 +85,11 @@ async def test_supervisor_routes_community_query_to_community_worker() -> None:
 @pytest.mark.asyncio
 async def test_supervisor_selects_only_required_workers_for_composite_task() -> None:
     _, state = await _route(
-        "解析这份Excel，查询校园场地和天气，再生成活动帖子草稿",
+        "解析这份Excel，查询知识库里的活动流程，再生成社区内容草稿",
         files=[{"name": "名单.xlsx", "data_url": "data:application/octet-stream;base64,AA=="}],
     )
     assert state["complexity"] == "multi"
-    assert state["required_workers"] == [
-        "multimodal_worker",
-        "campus_worker",
-        "draft_worker",
-    ]
+    assert state["required_workers"] == ["multimodal_worker", "retrieval_worker", "draft_worker"]
 
 
 @pytest.mark.asyncio
@@ -129,7 +125,7 @@ async def test_draft_worker_consumes_shared_artifacts(tmp_path) -> None:
         "根据名单生成活动帖子",
         artifacts={
             "multimodal_worker": {"chunks": [{"text": "报名人数：200"}]},
-            "campus_worker": {"answer": "可用场地：报告厅"},
+            "knowledge_worker": {"answer": "可用场地：报告厅"},
         },
     )
 
@@ -167,27 +163,6 @@ async def test_general_worker_answers_from_parsed_document_artifacts(tmp_path) -
     assert state["artifacts"]["general_worker"]["answer"] == "名单共有 200 人。"
 
 
-def test_campus_time_query_rejects_evidence_without_concrete_time() -> None:
-    process_info = {
-        "task_execution": {
-            1: {
-                "status": "success",
-                "api_result": [
-                    {
-                        "source_id": "library-overview",
-                        "source_type": "official",
-                        "title": "图书馆介绍",
-                        "body": "开放安排请以图书馆最新通知为准。",
-                        "official": "true",
-                    }
-                ],
-            }
-        }
-    }
-
-    assert _evidence_for_query("图书馆几点关门？", process_info) == []
-
-
 @pytest.mark.asyncio
 async def test_prompt_injection_stops_orchestration() -> None:
     graph = MultiAgentGraph()
@@ -219,7 +194,7 @@ async def test_multimodal_worker_parses_uploaded_excel(monkeypatch: pytest.Monke
         MultiAgentWorkers._append(state, _name, "noop", {"kind": "noop"})
         return state
 
-    for name in ("campus_worker", "retrieval_worker", "draft_worker", "eval_worker", "general_worker"):
+    for name in ("knowledge_worker", "retrieval_worker", "draft_worker", "eval_worker", "general_worker"):
         monkeypatch.setattr(graph.workers, name, lambda state, _name=name: noop(state, _name))
 
     state = await graph.run(

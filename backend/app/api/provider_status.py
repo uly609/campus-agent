@@ -5,7 +5,8 @@ from typing import Any
 from fastapi import APIRouter
 
 from app.core.config import get_settings
-from app.xiaolin_agent.services.llm_service import MAIN_AGENT_MODEL, TOOL_LIBRARY_MODEL
+MAIN_AGENT_MODEL = "qwen-plus"
+TOOL_LIBRARY_MODEL = "qwen-turbo"
 
 router = APIRouter(prefix="/api")
 

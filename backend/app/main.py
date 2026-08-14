@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import (
-    campus_skills,
+    knowledge_capabilities,
     chat,
     community,
     evals,
@@ -21,7 +21,7 @@ from app.api import (
     profile,
     search,
     sessions,
-    xiaolin_demo,
+    provider_status,
 )
 from app.core.logging import configure_logging
 from app.observability.metrics import REQUEST_LATENCY, REQUESTS, metrics_response
@@ -70,7 +70,7 @@ async def metrics_middleware(request: Request, call_next):
 
 
 app.include_router(health.router)
-app.include_router(campus_skills.router)
+app.include_router(knowledge_capabilities.router)
 app.include_router(chat.router)
 app.include_router(posts.router)
 app.include_router(community.router)
@@ -81,7 +81,7 @@ app.include_router(search.router)
 app.include_router(providers.router)
 app.include_router(profile.router)
 app.include_router(sessions.router)
-app.include_router(xiaolin_demo.router)
+app.include_router(provider_status.router)
 app.include_router(files.router)
 app.include_router(multi_agent.router)
 

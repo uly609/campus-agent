@@ -1,21 +1,13 @@
 from __future__ import annotations
 
 ALLOWED_TOOLS = {
-    "search_campus_docs",
+    "search_knowledge_base",
     "search_official_web",
-    "query_course_schedule",
-    "query_campus_notices",
-    "query_campus_venues",
-    "query_campus_weather",
-    "get_student_profile",
-    "create_venue_reservation_draft",
     "search_posts",
     "get_post_detail",
     "search_lost_and_found",
-    "get_campus_events",
-    "get_campus_service_info",
+    "get_knowledge_service_info",
     "analyze_post_image",
-    "verify_demo_student_card",
     "create_post_draft",
     "load_user_memories",
     "save_memory_feedback",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from app.agent.tools.campus_tools import CampusTools
+from app.agent.tools.knowledge_tools import KnowledgeCommunityTools
 from app.domain.schemas import Evidence
 from app.retrieval.official_web import OfficialWebSearch
 
@@ -15,7 +15,7 @@ async def test_official_web_returns_explicit_degraded_result_without_credentials
     search.api_key = ""
     search.bailian_api_key = ""
     search.allowed_domains = ()
-    tools = CampusTools()
+    tools = KnowledgeCommunityTools()
     tools._official_web = search
 
     result = await tools.search_official_web({"query": "最新校历"})
@@ -113,11 +113,11 @@ async def test_campus_docs_falls_back_to_official_web_when_local_rag_misses() ->
         async def search(self, query):
             return [official]
 
-    tools = CampusTools()
+    tools = KnowledgeCommunityTools()
     tools._retrieval = FakeRetrieval()  # type: ignore[assignment]
     tools._official_web = FakeOfficialWeb()  # type: ignore[assignment]
 
-    result = await tools.search_campus_docs({"query": "浙江工商大学现任校长信息"})
+    result = await tools.search_knowledge_base({"query": "企业现任负责人信息"})
 
     assert result.success is True
     assert result.provenance[0]["kind"] == "official_web_fallback"

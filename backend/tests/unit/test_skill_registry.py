@@ -7,18 +7,12 @@ def test_default_skills_expose_only_registered_planner_tools() -> None:
     registry = default_skill_registry()
     names = {skill.name for skill in registry.skills}
     assert names == {
-        "campus_knowledge",
+        "enterprise_knowledge",
         "community_search",
         "post_creation",
         "memory_management",
         "evaluation",
-        "course_schedule",
-        "campus_notice",
-        "venue_coordination",
-        "campus_weather",
-        "student_profile",
     }
     assert "search_official_web" in registry.tool_names
-    assert "query_course_schedule" in registry.tool_names
-    assert "query_campus_venues" in registry.tool_names
+    assert "search_knowledge_base" in registry.tool_names
     assert all(skill.description and skill.tools for skill in registry.skills)

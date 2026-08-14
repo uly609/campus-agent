@@ -30,17 +30,14 @@ class MultiAgentSupervisor:
             selected.append("retrieval_worker")
         if re.search(r"发帖|草稿|发布", query):
             selected.append("draft_worker")
-        campus_query = re.search(
-            r"浙江工商大学|浙商大|学校|校园|课表|课程|场地|图书馆|食堂|辅导员|"
-            r"校长|通知|教务|宿舍|校园卡|一卡通|奖学金|志愿|老师|教师|天气|下沙|教工路",
+        knowledge_query = re.search(
+            r"知识库|制度|流程|政策|规范|产品|接口|合同|协议|FAQ|案例|经验|检索|查找|核实",
             query,
         )
-        if campus_query and not ({"community_worker", "draft_worker"} & set(selected)):
-            selected.append("campus_worker")
-        elif campus_query and len(selected) > 0 and re.search(r"查询|查找|核实|规定|政策|场地|天气|通知", query):
-            selected.append("campus_worker")
+        if knowledge_query and not ({"community_worker", "draft_worker"} & set(selected)):
+            selected.append("knowledge_worker")
 
-        if has_files and not ({"campus_worker", "draft_worker"} & set(selected)):
+        if has_files and not ({"knowledge_worker", "draft_worker"} & set(selected)):
             selected.append("general_worker")
 
         if not selected:
@@ -48,8 +45,8 @@ class MultiAgentSupervisor:
         unique = set(selected)
         execution_order = (
             "multimodal_worker",
-            "campus_worker",
             "retrieval_worker",
+            "knowledge_worker",
             "community_worker",
             "draft_worker",
             "eval_worker",

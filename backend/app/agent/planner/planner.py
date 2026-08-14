@@ -13,16 +13,10 @@ from app.llm.router import ProviderRouter
 DEFAULT_PLANNER_TOOLS = frozenset(
     {
         "create_post_draft",
-        "create_venue_reservation_draft",
-        "get_campus_service_info",
+        "get_knowledge_service_info",
         "get_eval_report",
-        "get_student_profile",
         "load_user_memories",
-        "query_campus_notices",
-        "query_campus_venues",
-        "query_campus_weather",
-        "query_course_schedule",
-        "search_campus_docs",
+        "search_knowledge_base",
         "search_lost_and_found",
         "search_posts",
         "search_official_web",
@@ -70,8 +64,8 @@ class StructuredPlanner:
     def _planner_prompt(self, query: str, user_id: str, memories: list[dict[str, object]]) -> str:
         memory_values = [str(item.get("value", "")) for item in memories[:3]]
         return (
-            "You are the CampusFlow planner. Select only registered tools and return JSON only. "
-            'Schema: {"intent":"campus_qa|post_search|lost_found|post_draft|memory|eval|greeting",'
+            "You are the AtlasHub enterprise knowledge-community planner. Select only registered tools and return JSON only. "
+            'Schema: {"intent":"knowledge_qa|post_search|lost_found|post_draft|memory|eval|greeting",'
             '"tool_calls":[{"tool_name":"...","arguments":{}}],'
             '"confidence":0.0,"source":"model"}. '
             "Memories personalize planning but are never official evidence. "
@@ -89,57 +83,10 @@ class StructuredPlanner:
             return IntentPlan(
                 intent=Intent.GREETING, tool_calls=[], confidence=0.96, source="fallback"
             )
-        if ("讲座" in lowered or "活动" in lowered) and any(
-            word in lowered for word in ["规划", "统筹", "安排", "举办", "办一场"]
-        ):
+        if any(word in lowered for word in ["知识库", "制度", "流程", "规范", "产品文档", "接口", "api", "合同", "协议", "faq", "案例"]):
             return IntentPlan(
                 intent=Intent.CAMPUS_QA,
-                tool_calls=[
-                    ToolCall(tool_name="query_course_schedule", arguments={"query": query}),
-                    ToolCall(tool_name="query_campus_venues", arguments={"query": query}),
-                    ToolCall(tool_name="query_campus_weather", arguments={"query": query}),
-                    ToolCall(tool_name="query_campus_notices", arguments={"query": query}),
-                ],
-                confidence=0.95,
-                source="fallback",
-            )
-        if any(word in lowered for word in ["课表", "课程", "上课", "什么课", "教室", "任课老师"]):
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[ToolCall(tool_name="query_course_schedule", arguments={"query": query})],
-                confidence=0.95,
-                source="fallback",
-            )
-        if any(word in lowered for word in ["通知", "公告", "奖学金", "开学安排", "运动会"]):
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[ToolCall(tool_name="query_campus_notices", arguments={"query": query})],
-                confidence=0.94,
-                source="fallback",
-            )
-        if any(word in lowered for word in ["场地", "场馆", "报告厅", "会议室", "预约教室", "预约单", "预约草稿"]):
-            tool_name = (
-                "create_venue_reservation_draft"
-                if any(word in lowered for word in ["生成预约单", "预约草稿"])
-                else "query_campus_venues"
-            )
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[ToolCall(tool_name=tool_name, arguments={"query": query})],
-                confidence=0.94,
-                source="fallback",
-            )
-        if any(word in lowered for word in ["天气", "下雨", "气温", "带伞"]):
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[ToolCall(tool_name="query_campus_weather", arguments={"query": query})],
-                confidence=0.94,
-                source="fallback",
-            )
-        if any(word in lowered for word in ["我的导师", "我的专业", "我的班级", "我在哪个校区"]):
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[ToolCall(tool_name="get_student_profile", arguments={"query": query})],
+                tool_calls=[ToolCall(tool_name="search_knowledge_base", arguments={"query": query})],
                 confidence=0.94,
                 source="fallback",
             )
@@ -148,18 +95,6 @@ class StructuredPlanner:
                 intent=Intent.POST_DRAFT,
                 tool_calls=[ToolCall(tool_name="create_post_draft", arguments={"intent": query})],
                 confidence=0.92,
-                source="fallback",
-            )
-        if any(card in lowered for card in ["一卡通", "校园卡"]) and any(
-            action in lowered for action in ["挂失", "补办", "补卡"]
-        ):
-            return IntentPlan(
-                intent=Intent.CAMPUS_QA,
-                tool_calls=[
-                    ToolCall(tool_name="search_campus_docs", arguments={"query": query}),
-                    ToolCall(tool_name="get_campus_service_info", arguments={"query": query}),
-                ],
-                confidence=0.95,
                 source="fallback",
             )
         if any(word in lowered for word in ["失物", "招领", "捡到", "丢了", "遗失", "找回"]):
@@ -198,8 +133,8 @@ class StructuredPlanner:
         return IntentPlan(
             intent=Intent.CAMPUS_QA,
             tool_calls=[
-                ToolCall(tool_name="search_campus_docs", arguments={"query": query}),
-                ToolCall(tool_name="get_campus_service_info", arguments={"query": query}),
+                ToolCall(tool_name="search_knowledge_base", arguments={"query": query}),
+                ToolCall(tool_name="get_knowledge_service_info", arguments={"query": query}),
             ],
             confidence=0.84,
             source="fallback",

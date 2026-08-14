@@ -10,7 +10,7 @@ from app.domain.platform_schemas import UserSession
 from app.domain.schemas import ChatRequest
 from app.services.chat_service import handle_chat
 from app.services.repository import JsonRepository, now_iso
-from app.services.xiaolin_service import stream_xiaolin_events
+from app.services.agent_chat_service import stream_agent_events
 
 router = APIRouter(prefix="/api/v1")
 repo = JsonRepository()
@@ -50,7 +50,7 @@ async def chat(request: ChatRequest):
 
 
 @router.post("/chat/", response_model=None)
-def xiaolin_chat(request: ChatRequest) -> StreamingResponse:
+def agent_chat(request: ChatRequest) -> StreamingResponse:
     return chat_stream(request)
 
 
@@ -58,7 +58,7 @@ def xiaolin_chat(request: ChatRequest) -> StreamingResponse:
 def chat_stream(request: ChatRequest) -> StreamingResponse:
     async def event_stream():
         try:
-            async for event in stream_xiaolin_events(request):
+            async for event in stream_agent_events(request):
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
         except Exception as exc:
             error = {"type": "error", "content": str(exc)}
