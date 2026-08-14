@@ -47,9 +47,9 @@ def delete_session(session_id: str, user_id: str = "demo-user") -> dict[str, obj
 
 @router.get("/{session_id}/messages")
 def list_session_messages(session_id: str) -> list[dict[str, object]]:
-    return repo.load_xiaolin_messages(session_id)
+    return repo.load_chat_messages(session_id)
 
 
 @router.get("/{session_id}/process-info")
 def list_session_process(session_id: str) -> list[dict[str, object]]:
-    return repo.load_xiaolin_process(session_id)
+    return repo.load_chat_process(session_id)
