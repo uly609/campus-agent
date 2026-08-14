@@ -431,3 +431,32 @@ External model credentials are optional for local demo and test runs. When absen
 - Generic document questions now run Multimodal Worker followed by General Worker, while campus-specific document questions reuse Campus Worker. Both downstream workers consume the shared parsed artifacts instead of raw binary data.
 - A live AI Assistant SSE request parsed a generated `课程统计.xlsx`, exposed the table chunk in the process trace, selected only Multimodal and General workers, and returned an answer constrained to the workbook's two course rows.
 - Final validation passed with Ruff, frontend lint/typecheck/build/tests, Mypy across 123 source files, 146 unit/integration tests, 3 E2E flows, offline eval `eval-9a854452cb`, and smoke. API and Web were rebuilt and deployed healthy.
+
+## 2026-08-12 Interview Knowledge Base Notes
+
+- Added `docs/interview/` as a project-specific interview knowledge base covering the current CampusFlow architecture, RAG/Agent deep dives, backend scenarios, failure verification, project scripts, source boundaries, and a study roadmap.
+- Cross-checked the answers against the current Agent, retrieval, memory, multimodal, multi-agent, evaluation, community, and MCP modules. The code evidence index records the relevant modules and the claims that must not be overstated.
+- Recorded the source boundary honestly: the local Markdown and XiaoLin source are available for direct analysis; 25 PPTX files have extractable text; PDF scan/image pages, XMind, and 70 videos still need dedicated visual review or transcription; the currently signed-in Yuque account only exposes the default knowledge base welcome document.
+- Added an explicit distinction between current implementation, degraded adapter, reference design, and unverified extension so interview answers do not turn LangMem, ReAct, full OCR, true parallel Multi-Agent, complete RAGAS LLM judging, or Redis Consumer Groups into fabricated claims.
+- Added a per-source-family guide and a second-level CampusFlow grilling set covering source-to-project mapping, local-first official search, evidence facets, memory reliability, Multi-Agent boundaries, file parsing limits, and evaluation claims.
+- Generated `docs/interview/source-file-manifest.md`, listing all 1,959 files under `/Users/ntroi/学习资料` with an explicit processing state instead of silently treating every attachment as read.
+- Verified the seven DOCX files separately: six are readable supplemental/duplicate sources and one `.~` temporary lock file is excluded as structurally incomplete; the manifest generator now records that distinction.
+- Extracted the readable JavaGuide DOCX structure: it covers interview preparation, resume/project expression, Java basics, collections, concurrency, JVM, databases, Redis, frameworks, distributed systems, high concurrency, system design, interview retrospectives, self-tests, and growth guidance. These topics are mapped to the existing answer sets rather than duplicated.
+- Parsed the three duplicate XMind copies directly from `content.xml`: 552 nodes, 499 unique titles. Added a guide mapping Java/Web/backend/frontend/JVM/concurrency/distributed/database topics to CampusFlow, enterprise procurement, and coupon projects; embedded XMind images remain marked for visual review.
+- Added a video topic index for 60 Java interview videos and 10 12306 business videos. It deliberately records filename-level topics only because no local subtitle/transcription tool is available.
+- Added a final current-claim audit so resume/interview wording distinguishes verified implementation, degraded behavior, and reference-only extensions.
+- Extended the source manifest with a first-heading index for all 462 Markdown files, making each text source directly searchable instead of only listing its path.
+- Added keyword-based topic labels to the 462-entry Markdown index for RAG/Agent, Redis/cache, MQ/consistency, MySQL/database, Java/concurrency/JVM, microservices, algorithms, project/interview, and business-system navigation. These labels are navigation aids, not proof that the current project uses every referenced technology.
+- Added overlapping topic coverage counts to the manifest so gaps can be seen at a glance: Java/concurrency/JVM, project/interview expression, business systems, RAG/Agent, microservices, database/cache, MQ/consistency, and algorithms are all separately visible.
+- Verified the interview README links all 18 listed guide documents with no broken links; the claim audit contains 21 explicit current/limited/not-implemented boundaries.
+- Extended the manifest with filename-level topic navigation for all PDF, PPTX, DOCX, XMind, and video files; their individual processing states remain authoritative and are not upgraded by the inferred labels.
+- Added `local-yuque-mirror-index.md`: 178 local Markdown files retain 337 Yuque URL associations. The index explicitly excludes the ZSXQ export and keeps online Yuque access as a separate unresolved source boundary.
+
+## 2026-08-14 AtlasHub Migration Notes
+
+- Added `AtlasHub AI` as the enterprise knowledge-community product profile and exposed it through `GET /api/v1/profile`.
+- Updated the Vue product surface from campus labels to knowledge community, content governance, enterprise knowledge base, Agent skills, and content assistant labels.
+- Kept legacy campus adapters available for migration fixtures and regression coverage; they are no longer the product-facing positioning.
+- Added enterprise knowledge intent routing so policy, product documentation, version, ticket, workflow, and knowledge-base questions can enter the retrieval worker.
+- Pulled `skygazer42/MimirQ` into the local reference cache and verified its document governance, ingestion, ACL, evaluation, and Dify integration structure. No MimirQ source was copied into AtlasHub.
+- Frontend lint, typecheck, production build, and tests passed. Docker `ruff`, `mypy`, backend unit/integration tests, offline eval, E2E, smoke, and Compose API/Web health checks passed after rebuilding the images. Live checks confirmed the AtlasHub profile, enterprise-only feed, document chunk preview, and Multi-Agent spec.

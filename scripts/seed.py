@@ -136,6 +136,29 @@ DEMO_POSTS = [
 ]
 
 
+ENTERPRISE_DOCS = [
+    ("atlas-expense-policy", "差旅与费用报销制度", "员工差旅申请、费用标准、票据要求和审批节点统一在费用平台提交。超过标准的支出需要补充业务负责人和财务负责人的审批意见。"),
+    ("atlas-open-api-auth", "开放平台 API 鉴权规范", "开放平台 API 使用 OAuth2 Client Credentials 获取访问令牌。调用方必须按应用分配 scope，服务端校验 token、租户和接口权限，禁止把密钥写入前端或日志。"),
+    ("atlas-incident-runbook", "订单服务故障排查手册", "发现错误率、延迟或消息堆积异常时，先确认告警时间窗和影响范围，再检查网关、订单服务、数据库连接池和消息消费组。涉及数据修复必须创建工单并经人工确认。"),
+    ("atlas-support-sla", "客户支持 SLA", "P1 级故障需要 15 分钟内响应并持续更新进度，P2 级问题 2 小时内响应，普通咨询在一个工作日内回复。每次升级必须关联客户、服务和事件编号。"),
+    ("atlas-data-access", "企业知识库权限与数据分级", "公开资料、部门资料、客户资料和敏感资料按四级管理。检索结果继承文档 ACL，敏感内容默认脱敏；导出和跨部门共享需要审批并记录审计事件。"),
+    ("atlas-release-policy", "产品版本发布规范", "版本发布需要完成变更说明、回滚方案、灰度范围和责任人确认。发布后观察核心指标，出现回归时按回滚条件恢复上一稳定版本，并在复盘中补充知识库条目。"),
+    ("atlas-contract-review", "合同审批流程", "合同先由业务负责人提交，再经过法务、财务和授权负责人审核。模板外条款必须标明风险点和替代方案，审批完成前不得对外承诺或执行交付。"),
+    ("atlas-onboarding", "新员工入职手册", "新员工入职后完成账号申请、权限最小化配置、信息安全培训和团队知识库导览。业务系统权限按岗位申请，离职或转岗时由负责人发起回收。"),
+    ("atlas-kb-governance", "知识库入库与审核规范", "文档入库必须记录来源、版本、责任部门和复核时间。解析后先预览切块，再执行索引；失效文档进入 STALE 状态，不能作为高置信度答案的唯一依据。"),
+]
+
+
+ENTERPRISE_POSTS = [
+    ("经验分享", "如何定位线上消息积压？", "先确认消费组延迟和积压时间窗，再查看生产速率、消费异常和下游依赖。涉及重放或补偿时必须保留工单号并人工确认。", "SRE", ["消息队列", "故障排查", "经验"]),
+    ("知识问答", "开放平台接口应该如何申请权限？", "请先确认应用所属租户和业务场景，再按最小权限申请 scope。生产密钥不能提交到代码仓库，也不能在工单中明文传播。", "开发者平台", ["API", "权限", "安全"]),
+    ("经验分享", "一次发布回滚复盘记录", "这次问题来自配置变更没有进入灰度观察。后续发布会把回滚阈值、观察指标和负责人写进发布单，并同步到知识库。", "发布管理", ["发布", "回滚", "复盘"]),
+    ("知识问答", "客户投诉升级时需要记录哪些信息？", "至少记录客户、服务、事件编号、影响范围、首次响应时间和当前负责人。信息不完整时先补齐事实，不要直接推断责任。", "客户支持", ["SLA", "工单", "客户支持"]),
+    ("资源共享", "整理了一份数据库慢查询排查清单", "包含执行计划、索引命中、锁等待、连接池和最近发布变更几个检查项，欢迎补充真实案例。", "工程效率", ["MySQL", "排障", "清单"]),
+    ("业务协作", "本周知识库治理共审了 18 篇文档", "已完成来源、责任人和复核时间补充，其中 3 篇旧版本标记为 STALE，后续会由业务负责人确认是否替换。", "知识治理", ["知识库", "审核", "版本"]),
+]
+
+
 def build_documents() -> list[dict[str, str]]:
     docs = []
     topics = DOC_TOPICS + RETRIEVAL_SUPPORT_TOPICS
@@ -154,6 +177,28 @@ def build_documents() -> list[dict[str, str]]:
             }
         )
     return docs + VERIFIED_OFFICIAL_DOCS
+
+
+def build_enterprise_documents() -> list[dict[str, str]]:
+    docs: list[dict[str, str]] = []
+    for source_id, title, body in ENTERPRISE_DOCS:
+        docs.append(
+            {
+                "source_id": source_id,
+                "source_type": "official",
+                "title": title,
+                "body": body,
+                "official": "true",
+                "path": f"demo://enterprise_docs/{source_id}.md",
+                "url": "",
+                "data_mode": "enterprise_demo",
+                "domain": "enterprise",
+                "version": "v1.0",
+                "department": "平台运营中心",
+                "verified_at": "2026-08-14",
+            }
+        )
+    return docs
 
 
 def build_posts() -> list[Post]:
@@ -177,6 +222,7 @@ def build_posts() -> list[Post]:
             else [],
             author_alias=f"校园同学{index + 1:02d}",
             created_at=f"2026-07-{24 - index:02d}T09:00:00+00:00",
+            domain="legacy_campus",
         )
         for index, (category, title, body, location, tags) in enumerate(DEMO_POSTS)
     ]
@@ -214,18 +260,36 @@ def build_posts() -> list[Post]:
                 images=images,
                 author_alias=f"匿名同学{index % 40:02d}",
                 created_at=now_iso(),
+                domain="legacy_campus",
             )
         )
     return posts
 
 
+def build_enterprise_posts() -> list[Post]:
+    return [
+        Post(
+            post_id=f"atlas-post-{index:02d}",
+            title=title,
+            body=body,
+            category=PostCategory(category),
+            tags=tags,
+            location=location,
+            author_alias=f"社区成员{index + 1:02d}",
+            created_at=now_iso(),
+            domain="enterprise",
+        )
+        for index, (category, title, body, location, tags) in enumerate(ENTERPRISE_POSTS)
+    ]
+
+
 def main() -> None:
     repo = JsonRepository()
-    documents = build_documents()
-    posts = build_posts()
+    documents = build_documents() + build_enterprise_documents()
+    posts = build_posts() + build_enterprise_posts()
     repo.save_documents(documents)
     repo.save_posts(posts)
-    print(f"seeded {len(posts)} demo posts and {len(documents)} campus documents")
+    print(f"seeded {len(posts)} demo posts and {len(documents)} knowledge documents")
 
 
 if __name__ == "__main__":

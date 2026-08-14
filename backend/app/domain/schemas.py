@@ -27,6 +27,7 @@ class PostCreate(BaseModel):
     tags: list[str] = Field(default_factory=list, max_length=8)
     location: Optional[str] = Field(default=None, max_length=80)
     images: list[PostImage] = Field(default_factory=list, max_length=4)
+    domain: str = Field(default="enterprise", min_length=2, max_length=40)
 
 
 class Post(PostCreate):

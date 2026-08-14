@@ -1,4 +1,4 @@
-# Eval Report eval-9a854452cb
+# Eval Report eval-057c41f6dd
 
 - Profile: `offline_deterministic_regression`
 - Dataset: `campusflow-hard-v2`
@@ -19,14 +19,14 @@
 | retrieval_ndcg_at_8 | 0.6402 |
 | retrieval_hit_at_8 | 0.7222 |
 | retrieval_hard_negative_rate_at_5 | 0.2778 |
-| qa_answer_fact_recall | 0.7143 |
-| qa_context_relevance | 0.2250 |
-| qa_citation_precision | 0.5000 |
+| qa_answer_fact_recall | 0.7857 |
+| qa_context_relevance | 0.2333 |
+| qa_citation_precision | 0.6000 |
 | qa_citation_faithfulness | 1.0000 |
 | qa_faithfulness | 1.0000 |
-| qa_answer_relevancy | 0.5128 |
-| qa_context_precision | 0.5500 |
-| qa_context_recall | 0.6000 |
+| qa_answer_relevancy | 0.4928 |
+| qa_context_precision | 0.6500 |
+| qa_context_recall | 0.7000 |
 | qa_forbidden_content_rate | 0.0000 |
 | refusal_precision | 1.0000 |
 | refusal_recall | 1.0000 |
@@ -35,10 +35,10 @@
 | replan_recall | 1.0000 |
 | replan_f1 | 0.6667 |
 | tool_success_rate | 1.0000 |
-| corrective_rag_success_rate | 0.8333 |
+| corrective_rag_success_rate | 1.0000 |
 | memory_recall_non_empty_rate | 0.0000 |
-| p50_latency_ms | 322.9635 |
-| p95_latency_ms | 19691.0718 |
+| p50_latency_ms | 4577.8659 |
+| p95_latency_ms | 24470.2519 |
 | cache_repeat_hit_rate | 1.0000 |
 
 ## Failed Cases
@@ -75,7 +75,6 @@
 - QA `qa-03`: fact=1.000, citation=0.000 - 奖学金申请要哪些条件，材料交给谁？
 - QA `qa-06`: fact=0.000, citation=0.000 - 补退选什么时候截止，课程容量听群里的还是系统里的？
 - QA `qa-08`: fact=0.000, citation=0.000 - 怎么查个人课表，临时换教室以哪里为准？
-- QA `qa-09`: fact=0.000, citation=0.000 - 图书馆门口发现的蓝色校园卡被送到哪里了？
 
 ## Limitations
 

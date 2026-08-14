@@ -12,6 +12,10 @@ class PostCategory(StrEnum):
     RANT = "吐槽"
     STUDY = "学习"
     LIFE = "生活"
+    KNOWLEDGE_QA = "知识问答"
+    RESOURCE = "资源共享"
+    COLLABORATION = "业务协作"
+    EXPERIENCE = "经验分享"
 
 
 class MemoryType(StrEnum):
@@ -28,4 +32,3 @@ class Intent(StrEnum):
     POST_DRAFT = "post_draft"
     MEMORY = "memory"
     EVAL = "eval"
-

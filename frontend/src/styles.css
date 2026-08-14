@@ -131,7 +131,8 @@ main { min-width: 0; padding: 0 34px 42px; }
 .xiaolin-chat-card { height: 100%; min-height: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #dfe3e1; border-radius: 8px; background: #fff; box-shadow: 0 3px 14px rgba(24, 33, 30, .08); }
 .xiaolin-chat-header { min-height: 86px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #eef0ef; }
 .xiaolin-identity { min-width: 0; display: flex; align-items: center; gap: 14px; }
-.xiaolin-identity img { width: 54px; height: 54px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; object-position: 48% 32%; }
+.chat-avatar { width: 54px; height: 54px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 14px; background: #28765d; color: #fff; }
+.chat-avatar.large { width: 70px; height: 70px; border-radius: 18px; }
 .xiaolin-identity h1 { margin: 0; font-size: 24px; line-height: 1.2; letter-spacing: 0; }
 .xiaolin-identity small { margin-top: 5px; display: block; color: #858b88; font-size: 11px; }
 .xiaolin-header-actions { display: flex; align-items: center; gap: 10px; }
@@ -140,7 +141,6 @@ main { min-width: 0; padding: 0 34px 42px; }
 .xiaolin-chat-card > .xiaolin-config-warning { margin: 10px 20px 0; }
 .xiaolin-chat-card > .chat-surface { height: auto; min-height: 0; flex: 1; padding: 30px 32px; overflow-y: auto; border: 0; border-radius: 0; background: #fff; scroll-behavior: smooth; }
 .xiaolin-empty-state { min-height: 100%; }
-.xiaolin-empty-state img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; object-position: 48% 32%; }
 .xiaolin-empty-state h2 { margin-top: 18px; font-size: 22px; }
 .xiaolin-empty-state p { margin-top: 5px; }
 .xiaolin-chat-card .chat-thread { width: min(1120px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
@@ -289,10 +289,10 @@ main { min-width: 0; padding: 0 34px 42px; }
   .chat-main { height: 100vh; padding: 8px 8px 76px; overflow: hidden; }
   .chat-view { height: calc(100vh - 84px); margin: 0; }
   .xiaolin-chat-header { min-height: 66px; padding: 9px 11px; gap: 10px; }
-  .xiaolin-identity { gap: 9px; }.xiaolin-identity img { width: 44px; height: 44px; }.xiaolin-identity h1 { font-size: 19px; }.xiaolin-identity small { display: none; }
+  .xiaolin-identity { gap: 9px; }.chat-avatar { width: 44px; height: 44px; border-radius: 11px; }.chat-avatar.large { width: 58px; height: 58px; border-radius: 14px; }.xiaolin-identity h1 { font-size: 19px; }.xiaolin-identity small { display: none; }
   .xiaolin-header-actions { gap: 5px; }.xiaolin-header-actions button { width: 39px; height: 39px; }
   .xiaolin-chat-card > .chat-surface { height: auto; min-height: 0; padding: 16px 13px; }
-  .xiaolin-empty-state img { width: 58px; height: 58px; }.xiaolin-empty-state h2 { font-size: 18px; }.xiaolin-empty-state p { font-size: 12px; }
+  .xiaolin-empty-state h2 { font-size: 18px; }.xiaolin-empty-state p { font-size: 12px; }
   .xiaolin-chat-card .chat-thread { gap: 22px; }
   .xiaolin-chat-card .chat-message.user { max-width: 92%; padding: 13px 15px; font-size: 14px; }
   .xiaolin-chat-card .chat-message.assistant { font-size: 14px; }

@@ -1,6 +1,6 @@
-# CampusFlow AI - Complete Project Specification
+# AtlasHub AI - Complete Project Specification
 
-CampusFlow AI is an AI-driven campus anonymous community, campus knowledge QA, intelligent post retrieval, and AI-assisted post drafting platform.
+AtlasHub AI is an AI-driven enterprise knowledge community and governance platform. It combines governed document RAG, community content, chat-first Agent workflows, multimodal ingestion, human review, memory, evaluation, and observability. Legacy campus adapters remain available as migration fixtures while the business domain is being replaced.
 
 The implementation focus is a Python-first multi-stage agent with Hybrid RAG, GraphRAG, multimodal understanding, long-term memory, provider fallback, evaluation, and observability. FastAPI exposes the runtime API and Vue 3 provides the demo UI.
 

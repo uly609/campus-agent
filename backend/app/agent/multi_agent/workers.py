@@ -145,7 +145,7 @@ class MultiAgentWorkers:
             self._append(
                 state,
                 "retrieval_worker",
-                f"检索到 {len(payload)} 条校园知识结果。",
+                f"检索到 {len(payload)} 条企业知识或社区结果。",
                 {"kind": "retrieval", "evidence": payload, "mode": "hybrid_rag"},
             )
         except (OSError, RuntimeError, ValueError, KeyError) as exc:
@@ -190,7 +190,7 @@ class MultiAgentWorkers:
             self._append(
                 state,
                 "campus_worker",
-                "小林校园 Agent 已完成规划、工具选择和任务执行。",
+                "业务 Agent 已完成规划、工具选择和任务执行。",
                 {
                     "kind": "campus_agent",
                     "answer": grounded.answer,
@@ -211,7 +211,7 @@ class MultiAgentWorkers:
                 "小林校园 Agent 执行失败。",
                 {
                     "kind": "campus_agent",
-                    "answer": "我这边暂时无法完成校园工具查询，请稍后再试。",
+                    "answer": "我这边暂时无法完成业务工具查询，请稍后再试。",
                     "events": events,
                     "process_info": process_info,
                     "mode": "failed",

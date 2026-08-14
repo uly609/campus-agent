@@ -1,6 +1,6 @@
-# CampusFlow AI
+# AtlasHub AI
 
-CampusFlow AI is a Python-first campus community agent platform with FastAPI, a Vue 3 + Vite UI, Hybrid RAG, GraphRAG, managed knowledge ingestion, multimodal search, explainable feed ranking, human-reviewed community moderation, Redis Streams memory, evals, and observability.
+AtlasHub AI is a Python-first enterprise knowledge community and governance Agent. It combines a chat-first Agent, managed knowledge ingestion, Hybrid RAG, GraphRAG, multimodal community content, explainable feed ranking, human-reviewed moderation, Redis Streams memory, evals, and observability. The current repository keeps the former campus adapters as migration-compatible fixtures while the product surface is being moved to the enterprise knowledge domain.
 
 The runtime uses a compiled LangGraph `StateGraph`. Hybrid retrieval combines `rank-bm25`, routed embeddings, Neo4j Vector Index queries, Neo4j GraphRAG expansion, RRF, and optional Bailian `qwen3-rerank` reranking.
 
@@ -113,9 +113,9 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 `make seed` creates 300 Chinese demo campus posts, 40 explicitly labeled demo documents, and 3 manually verified Zhejiang Gongshang University public sources under `data/generated`. Verified records retain their official URLs and verification dates; demo records never use fake official URLs. The first screen deliberately includes a varied campus-week demo feed: dining, dorm repair, course selection, sports, campus-card loss, second-hand exchange, ride sharing, study groups, clubs, and health services. Eval datasets are generated as human-readable JSONL files under `evals/datasets` if missing, then reports are written to `evals/reports`.
 
 
-## ZJSU XiaoLin chat workbench: 浙小商助手
+## AtlasHub chat workbench
 
-The **AI 学问** page is the primary XiaoLin-style Agent surface; the separate reference application is not required. Each Agent response shows its task plan, selected tools, execution results, and source mode. Verified official, live external, demo, and model-generated results are visibly distinguished. Normal mode performs no campus retrieval and is instructed to refuse school-specific factual claims that would require current sources. The profile and campus fixtures are localized to Zhejiang Gongshang University. Only user-provided profile facts are used; unknown advisor, dormitory, contact, and student-id fields remain explicitly unconfigured.
+The **AI 助手** page is the primary AtlasHub Agent surface. Each Agent response shows its task plan, selected tools, execution results, and source mode. Knowledge documents and community content remain separate evidence classes, and human review is required before community content becomes a governed knowledge candidate. The former campus adapters remain available only for migration fixtures and regression coverage.
 
 ## Dynamic Skills and official web fallback
 

@@ -3,10 +3,10 @@ import fs from "node:fs";
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const app = fs.readFileSync(new URL("../src/App.vue", import.meta.url), "utf8");
 if (!html.includes('id="app"')) throw new Error("missing Vue mount point");
-for (const text of ["AI 学问", "发帖助手", "校园技能", "记忆", "评测", "轨迹"]) {
+for (const text of ["AI 助手", "内容助手", "Agent 技能", "记忆", "评测", "轨迹"]) {
   if (!app.includes(text)) throw new Error(`missing demo surface ${text}`);
 }
-if (!app.includes("搜索校园帖子") || !app.includes("加载更多帖子")) {
+if (!app.includes("搜索知识社区内容") || !app.includes("加载更多帖子")) {
   throw new Error("post feed must include search and pagination");
 }
 if (!app.includes('type="file"') || !app.includes("resizeImage")) throw new Error("missing real image upload flow");
@@ -20,7 +20,7 @@ if (!app.includes("publishDraft") || !app.includes("发布帖子")) {
 if (!app.includes("chatMessages") || !app.includes("新对话")) {
   throw new Error("chat must preserve and present a continuous conversation");
 }
-for (const text of ["浙小商助手", "浙江工商大学校园 AI 助手", "Agent 执行过程", "任务计划", "处理步骤"]) {
+for (const text of ["AtlasHub", "企业知识社区与智能治理 Agent", "Agent 执行过程", "任务计划", "处理步骤"]) {
   if (!app.includes(text)) throw new Error(`missing xiaolin workbench ${text}`);
 }
 if (!app.includes("agentProcess") || !app.includes("toolLabel")) {
@@ -41,17 +41,17 @@ if (!app.includes("files.map(({ name, dataUrl })") || !app.includes("chatFiles.v
 if (!app.includes("xiaolin-agent-toggle") || !app.includes('@keydown="handleChatKeydown"')) {
   throw new Error("xiaolin composer must expose mode switching and upstream keyboard behavior");
 }
-if (!app.includes("xiaolin-avatar.png") || !app.includes("xiaolin-header-actions") || !app.includes("xiaolin-history-panel")) {
-  throw new Error("xiaolin chat must preserve the upstream avatar, header actions, and history drawer");
+if (!app.includes("chat-avatar") || !app.includes("xiaolin-header-actions") || !app.includes("xiaolin-history-panel")) {
+  throw new Error("chat must expose the branded avatar, header actions, and history drawer");
 }
 if (!app.includes("normalizeXiaolinTaskResult") || !app.includes('{ status: "success", api_result: result }')) {
   throw new Error("successful XiaoLin task events must not be displayed as failures");
 }
 if (!app.includes("uniqueCitations")) throw new Error("chat citations must be de-duplicated for display");
-if (!app.includes("xiaolinTaskDataMode") || !app.includes("回答使用演示数据") || !app.includes("模型直接回答 · 未检索校园资料")) {
+if (!app.includes("xiaolinTaskDataMode") || !app.includes("回答使用演示数据") || !app.includes("模型直接回答 · 未检索企业资料")) {
   throw new Error("chat answers must disclose verified, demo, live, and ungrounded data modes");
 }
-if (!app.includes("runCampusPrompt") || !app.includes("活动统筹") || !app.includes("200人的讲座场地")) {
-  throw new Error("campus skills need executable demo actions");
+if (!app.includes("runCampusPrompt") || !app.includes("发布统筹") || !app.includes("订单服务消息积压")) {
+  throw new Error("enterprise skills need executable demo actions");
 }
 console.log("frontend tests passed");

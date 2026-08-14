@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable
 
 
 @dataclass(frozen=True)
@@ -75,7 +75,7 @@ def chunk_text(
     return chunks
 
 
-def chunks_from_documents(documents: Iterable[dict[str, str]]) -> list[Chunk]:
+def chunks_from_documents(documents: Iterable[dict[str, Any]]) -> list[Chunk]:
     chunks: list[Chunk] = []
     for doc in documents:
         chunks.extend(
@@ -90,6 +90,9 @@ def chunks_from_documents(documents: Iterable[dict[str, str]]) -> list[Chunk]:
                     "url": doc.get("url", ""),
                     "data_mode": doc.get("data_mode", "unverified"),
                     "verified_at": doc.get("verified_at", ""),
+                    "domain": str(doc.get("domain", "enterprise")),
+                    "version": str(doc.get("version", "v1")),
+                    "department": str(doc.get("department", "")),
                 },
             )
         )

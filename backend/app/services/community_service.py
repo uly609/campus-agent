@@ -75,7 +75,7 @@ class CommunityService:
         elif mode == "for_you" and affinity_score:
             reason = "与你点赞过的分类或标签相关"
         elif mode == "for_you":
-            reason = "暂无偏好数据，先按校园热度推荐"
+            reason = "暂无偏好数据，先按社区热度推荐"
         else:
             reason = "综合新鲜度、点赞和评论热度"
         return FeedPost(
@@ -88,10 +88,19 @@ class CommunityService:
             ranking_reason=reason,
         )
 
-    def feed(self, user_id: str, mode: FeedMode = "latest") -> list[FeedPost]:
+    def feed(
+        self,
+        user_id: str,
+        mode: FeedMode = "latest",
+        domain: str | None = "enterprise",
+    ) -> list[FeedPost]:
         hidden = self.repo.hidden_post_ids()
         affinity = self._affinity(user_id)
-        posts = [post for post in self.repo.load_posts() if post.post_id not in hidden]
+        posts = [
+            post
+            for post in self.repo.load_posts()
+            if post.post_id not in hidden and (domain is None or post.domain == domain)
+        ]
         rows = [self._feed_post(post, user_id, mode, affinity) for post in posts]
         if mode != "latest":
             rows.sort(key=lambda row: (row.ranking_score, row.created_at), reverse=True)

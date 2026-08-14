@@ -35,12 +35,12 @@ import {
 } from "lucide-vue-next";
 
 const views = [
-  { id: "feed", label: "帖子", icon: LayoutList },
-  { id: "governance", label: "社区治理", icon: ShieldCheck },
-  { id: "chat", label: "AI 学问", icon: MessageSquareText },
-  { id: "draft", label: "发帖助手", icon: Sparkles },
-  { id: "campus", label: "校园技能", icon: CalendarDays },
-  { id: "knowledge", label: "知识库", icon: BookOpen },
+  { id: "feed", label: "知识社区", icon: LayoutList },
+  { id: "governance", label: "内容治理", icon: ShieldCheck },
+  { id: "chat", label: "AI 助手", icon: MessageSquareText },
+  { id: "draft", label: "内容助手", icon: Sparkles },
+  { id: "campus", label: "Agent 技能", icon: CalendarDays },
+  { id: "knowledge", label: "企业知识库", icon: BookOpen },
   { id: "memory", label: "记忆", icon: MemoryStick },
   { id: "eval", label: "评测", icon: Gauge },
   { id: "trace", label: "轨迹", icon: Activity },
@@ -54,12 +54,17 @@ const draftCategories = [
   { value: "活动", label: "活动" },
   { value: "拼车", label: "拼车" },
   { value: "学习", label: "学习" },
-  { value: "校园问答", label: "求助" },
+    { value: "校园问答", label: "知识问答" },
   { value: "吐槽", label: "建议" },
   { value: "生活", label: "生活" },
 ];
 
 const activeView = ref("feed");
+const productProfile = ref({
+  brand: "AtlasHub AI",
+  short_name: "AtlasHub",
+  subtitle: "企业知识社区与智能治理 Agent",
+});
 const busy = ref("");
 const notice = ref(null);
 const posts = ref([]);
@@ -113,12 +118,20 @@ const providerForm = ref({
   enabled: true,
 });
 
-const pageTitle = computed(() => views.find((item) => item.id === activeView.value)?.label || "CampusFlow AI");
+const pageTitle = computed(() => views.find((item) => item.id === activeView.value)?.label || productProfile.value.brand);
 const draftProgress = computed(() => draft.value ? `${draft.value.edit_round} / ${draft.value.max_edit_rounds}` : "0 / 5");
 const sourcePublicUrl = computed(() => {
   const url = String(sourceDetail.value?.url || "");
   return /^https?:\/\//.test(url) && !url.includes("campus.example.edu") ? url : "";
 });
+
+async function loadProductProfile() {
+  try {
+    productProfile.value = await api("/api/v1/profile");
+  } catch {
+    // Keep the enterprise profile usable when the API is running in degraded mode.
+  }
+}
 
 async function api(path, options = {}) {
   const isForm = options.body instanceof FormData;
@@ -187,7 +200,7 @@ async function loadPosts(reset = true) {
   const offset = reset ? 0 : posts.value.length;
   const limit = 20;
   await run("posts", async () => {
-    const page = await api(`/api/v1/posts?offset=${offset}&limit=${limit}&mode=${feedMode.value}&user_id=demo-user`);
+  const page = await api(`/api/v1/posts?offset=${offset}&limit=${limit}&mode=${feedMode.value}&user_id=demo-user&domain=enterprise`);
     posts.value = reset ? page : [...posts.value, ...page];
     postHasMore.value = page.length === limit;
   });
@@ -333,7 +346,7 @@ async function streamXiaolinChat(message, imageUrls, files, messageIndex, isAgen
       is_agent: isAgent,
     }),
   });
-  if (!response.ok || !response.body) throw new Error("浙小商助手 Agent 流式连接失败");
+  if (!response.ok || !response.body) throw new Error("AtlasHub Agent 流式连接失败");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -811,7 +824,7 @@ function metricValue(key, value) {
 }
 
 function categoryLabel(value) {
-  return ({ lost_found: "失物招领", question: "校园问答", event: "校园活动", experience: "经验分享" })[value] || value;
+  return ({ lost_found: "问题线索", question: "知识问答", event: "业务活动", experience: "经验分享" })[value] || value;
 }
 
 function retrievalLabel(item) {
@@ -823,7 +836,7 @@ function retrievalLabel(item) {
 
 function intentLabel(value) {
   return ({
-    campus_qa: "校园问答",
+    campus_qa: "知识问答",
     post_search: "帖子搜索",
     post_draft: "发帖草稿",
     memory_manage: "记忆管理",
@@ -851,28 +864,28 @@ async function openCitation(citation) {
 
 function toolLabel(value) {
   return ({
-    search_campus_docs: "校园知识检索",
-    search_posts: "社区帖子检索",
-    search_lost_and_found: "多模态失物检索",
-    get_campus_service_info: "校园服务查询",
-    create_post_draft: "发帖草稿生成",
+    search_campus_docs: "企业知识检索",
+    search_posts: "社区内容检索",
+    search_lost_and_found: "多模态内容检索",
+    get_campus_service_info: "业务服务查询",
+    create_post_draft: "社区内容草稿",
     load_user_memories: "长期记忆召回",
-    search_official_web: "学校官网检索",
+    search_official_web: "外部权威来源检索",
     query_course_schedule: "个人课表",
-    query_campus_notices: "校园通知",
+    query_campus_notices: "业务通知",
     query_campus_venues: "场地协调",
     query_campus_weather: "实时天气",
     get_student_profile: "学生画像",
     create_venue_reservation_draft: "场地预约草稿",
-    campus_knowledge: "校园知识检索",
+    campus_knowledge: "企业知识检索",
     community_search: "社区帖子检索",
     course_schedule: "个人课表",
-    campus_notice: "校园通知",
+    campus_notice: "业务通知",
     venue_coordination: "场地协调",
     campus_weather: "实时天气",
     student_profile: "学生画像",
-    campus_worker: "小林校园 Agent",
-    community_worker: "校园社区 Agent",
+    campus_worker: "业务服务 Agent",
+    community_worker: "知识社区 Agent",
     retrieval_worker: "知识检索 Agent",
     multimodal_worker: "多模态解析 Agent",
     draft_worker: "发帖创作 Agent",
@@ -918,7 +931,7 @@ function xiaolinMcpLabel(message, taskId) {
     return `MCP：${row.mcp_server} · ${row.mcp_transport}`;
   }
   const metadata = row?.metadata || {};
-  if (metadata.mcp_degraded) return `MCP 降级：${metadata.mcp_server || "campusflow-weather"}`;
+  if (metadata.mcp_degraded) return `MCP 降级：${metadata.mcp_server || "业务服务"}`;
   return "";
 }
 
@@ -954,7 +967,7 @@ function xiaolinMessageDataMode(message) {
     .map((task) => xiaolinTaskDataMode(message, task.id))
     .filter(Boolean);
   if (modes.some((item) => item.tone === "demo")) return { label: "回答使用演示数据，不代表你的真实校务信息", tone: "demo" };
-  if (modes.some((item) => item.tone === "verified")) return { label: "回答包含已核验的学校官方来源", tone: "verified" };
+  if (modes.some((item) => item.tone === "verified")) return { label: "回答包含已核验的企业来源", tone: "verified" };
   if (modes.some((item) => item.tone === "live")) return { label: "回答包含实时外部数据", tone: "live" };
   if (modes.length) return { label: "回答来源尚未核验", tone: "unknown" };
   return null;
@@ -1027,7 +1040,7 @@ function modelVersionLabel(value) {
 
 onMounted(async () => {
   window.addEventListener("keydown", handleGlobalKeydown);
-  await Promise.all([loadPosts(), loadSessions(), loadXiaolinConfigStatus()]);
+  await Promise.all([loadPosts(), loadSessions(), loadXiaolinConfigStatus(), loadProductProfile()]);
 });
 onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown));
 </script>
@@ -1035,9 +1048,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 <template>
   <div class="shell">
     <aside class="sidebar">
-      <button class="brand" type="button" aria-label="CampusFlow AI" @click="switchView('feed')">
+      <button class="brand" type="button" aria-label="AtlasHub AI" @click="switchView('feed')">
         <span class="brand-mark"><Bot :size="22" /></span>
-        <span><strong>CampusFlow</strong><small>校园智能体</small></span>
+        <span><strong>{{ productProfile.short_name }}</strong><small>{{ productProfile.subtitle }}</small></span>
       </button>
       <nav aria-label="主导航">
         <button v-for="item in views" :key="item.id" :class="{ active: activeView === item.id }" type="button" @click="switchView(item.id)">
@@ -1045,13 +1058,13 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
           <span>{{ item.label }}</span>
         </button>
       </nav>
-      <div class="service-status"><span></span><div><strong>服务在线</strong><small>CampusFlow Runtime</small></div></div>
+      <div class="service-status"><span></span><div><strong>服务在线</strong><small>{{ productProfile.brand }} Runtime</small></div></div>
     </aside>
 
     <main :class="{ 'chat-main': activeView === 'chat' }">
       <header v-if="activeView !== 'chat'" class="topbar">
-        <div><span class="eyebrow">CAMPUSFLOW</span><h1>{{ pageTitle }}</h1></div>
-        <div class="avatar" title="演示用户">CF</div>
+        <div><span class="eyebrow">ATLAS HUB</span><h1>{{ pageTitle }}</h1></div>
+        <div class="avatar" title="演示用户">AH</div>
       </header>
 
       <div v-if="notice" :class="['notice', notice.type]" role="status">
@@ -1062,17 +1075,17 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       </div>
 
       <section v-if="activeView === 'feed'" class="view feed-view">
-        <div class="section-head"><div><h2>匿名校园动态</h2><p>最新发布的问答、活动与失物招领</p></div><button class="icon-button" title="刷新帖子" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
+        <div class="section-head"><div><h2>知识社区动态</h2><p>最新发布的问题、经验与业务案例</p></div><button class="icon-button" title="刷新内容" :disabled="busy === 'posts'" @click="loadPosts"><RefreshCw :class="{ spin: busy === 'posts' }" :size="19" /></button></div>
         <div class="feed-modes" role="tablist" aria-label="帖子排序">
           <button v-for="mode in [{ id: 'latest', label: '最新' }, { id: 'hot', label: '热门' }, { id: 'for_you', label: '为你推荐' }]" :key="mode.id" type="button" role="tab" :aria-selected="feedMode === mode.id" :class="{ active: feedMode === mode.id }" @click="selectFeedMode(mode.id)">{{ mode.label }}</button>
         </div>
         <form class="feed-searchbar" role="search" @submit.prevent="runSearch">
           <Search :size="19" />
-          <input v-model="searchInput" aria-label="搜索校园帖子" placeholder="搜索失物、活动、二手和校园问答" @input="handleSearchInput" />
+          <input v-model="searchInput" aria-label="搜索知识社区内容" placeholder="搜索制度、产品文档、案例和经验" @input="handleSearchInput" />
           <button v-if="searchInput" type="button" class="feed-search-clear" title="清空搜索" aria-label="清空搜索" @click="clearSearch"><X :size="17" /></button>
           <button type="submit" class="feed-search-submit" title="搜索帖子" aria-label="搜索帖子" :disabled="busy === 'search' || !searchInput.trim()"><Search :size="18" /></button>
         </form>
-        <div v-if="busy === 'search'" class="feed-search-state"><LoaderCircle class="spin" :size="20" /><span>正在搜索校园帖子…</span></div>
+        <div v-if="busy === 'search'" class="feed-search-state"><LoaderCircle class="spin" :size="20" /><span>正在搜索知识社区…</span></div>
         <div v-else-if="searchSubmitted && searchResults.length" class="feed-search-results">
           <header><strong>搜索结果</strong><span>{{ searchResults.length }} 条相关帖子</span></header>
           <div class="result-list">
@@ -1115,7 +1128,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       </section>
 
       <section v-else-if="activeView === 'governance'" class="view governance-view">
-        <div class="section-head"><div><h2>社区治理</h2><p>系统只给风险建议，最终处置由管理员确认</p></div><button class="icon-button" title="刷新治理数据" :disabled="busy === 'governance'" @click="loadGovernance"><RefreshCw :class="{ spin: busy === 'governance' }" :size="19" /></button></div>
+        <div class="section-head"><div><h2>内容治理</h2><p>系统只给风险建议，最终处置由管理员确认</p></div><button class="icon-button" title="刷新治理数据" :disabled="busy === 'governance'" @click="loadGovernance"><RefreshCw :class="{ spin: busy === 'governance' }" :size="19" /></button></div>
         <div class="governance-grid">
           <section class="governance-panel">
             <header><strong>待人工审核</strong><span>{{ moderationReports.length }}</span></header>
@@ -1139,8 +1152,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
         <div class="xiaolin-chat-card">
           <header class="xiaolin-chat-header">
             <div class="xiaolin-identity">
-              <img src="/xiaolin-avatar.png" alt="浙小商助手头像" />
-              <div><h1>浙小商助手</h1><small>浙江工商大学校园 AI 助手</small></div>
+              <span class="chat-avatar" aria-hidden="true"><Bot :size="22" /></span>
+              <div><h1>{{ productProfile.short_name }}</h1><small>{{ productProfile.subtitle }}</small></div>
             </div>
             <div class="xiaolin-header-actions">
               <button type="button" title="查看 Tool 与 Skill" aria-label="查看 Tool 与 Skill" @click="switchView('campus')"><Wrench :size="21" /></button>
@@ -1156,9 +1169,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
           <div ref="chatSurface" class="chat-surface">
             <div v-if="!chatMessages.length && busy !== 'chat'" class="empty-state xiaolin-empty-state">
-              <img src="/xiaolin-avatar.png" alt="" />
-              <h2>有什么校园问题，尽管问我</h2>
-              <p>开启 Agent 后，我会规划任务并调用校园工具。</p>
+              <span class="chat-avatar large" aria-hidden="true"><Bot :size="28" /></span>
+              <h2>有什么业务问题，尽管问我</h2>
+              <p>开启 Agent 后，我会规划任务、检索知识并调用受控业务工具。</p>
             </div>
             <div v-if="chatMessages.length" class="chat-thread">
               <article v-for="(message, index) in chatMessages" :key="`${index}-${message.role}`" :class="['chat-message', message.role]">
@@ -1190,7 +1203,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
                     </div>
                   </template>
                 </div>
-                <div v-if="message.role === 'assistant' && !message.processInfo" class="answer-origin model">模型直接回答 · 未检索校园资料</div>
+                <div v-if="message.role === 'assistant' && !message.processInfo" class="answer-origin model">模型直接回答 · 未检索企业资料</div>
                 <div v-if="message.role === 'assistant' && message.processInfo && xiaolinMessageDataMode(message)" :class="['answer-origin', xiaolinMessageDataMode(message).tone]">{{ xiaolinMessageDataMode(message).label }}</div>
                 <div v-if="message.role === 'assistant' && message.imageAnalyses?.length" :class="['answer-origin', message.imageAnalyses.some((item) => item._analysis?.degraded) ? 'demo' : 'live']">{{ message.imageAnalyses.some((item) => item._analysis?.degraded) ? '演示识图' : `百炼识图 ${message.imageAnalyses[0]._analysis.model}` }}</div>
                 <div class="message-content">
@@ -1210,7 +1223,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
           <form :class="['composer', 'xiaolin-composer', { 'has-attachments': chatImages.length || chatFiles.length }]" @submit.prevent="sendChat">
             <div v-if="chatImages.length" class="chat-attachment-strip"><div v-for="(image, imageIndex) in chatImages" :key="image.name + imageIndex"><img :src="image.url" :alt="image.name" /><button type="button" title="移除图片" aria-label="移除图片" @click="removeChatImage(imageIndex)"><X :size="14" /></button></div></div>
             <div v-if="chatFiles.length" class="chat-file-strip"><div v-for="(file, fileIndex) in chatFiles" :key="file.name + fileIndex"><FileText :size="18" /><span>{{ file.name }}</span><button type="button" title="移除文档" aria-label="移除文档" @click="removeChatFile(fileIndex)"><X :size="14" /></button></div></div>
-            <textarea v-model="chatInput" aria-label="校园问题" maxlength="2000" rows="2" placeholder="输入消息…" @input="resizeChatInput" @keydown="handleChatKeydown"></textarea>
+            <textarea v-model="chatInput" aria-label="知识问题" maxlength="2000" rows="2" placeholder="输入消息…" @input="resizeChatInput" @keydown="handleChatKeydown"></textarea>
             <div class="xiaolin-composer-actions">
               <label class="xiaolin-upload-button" title="添加图片或文档" aria-label="添加图片或文档"><Upload :size="20" /><input type="file" accept="image/jpeg,image/png,image/webp,.xlsx,.csv,.pdf,.txt,.md,.markdown,text/plain,text/markdown" @change="selectChatFile" /></label>
               <button type="button" :class="['xiaolin-agent-toggle', { active: xiaolinAgentEnabled }]" :aria-pressed="xiaolinAgentEnabled" title="切换 Agent 模式" @click="xiaolinAgentEnabled = !xiaolinAgentEnabled"><Bot :size="17" />Agent</button>
@@ -1234,7 +1247,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
 
       <section v-else-if="activeView === 'draft'" class="view draft-layout">
         <div class="draft-workspace">
-          <div class="section-head"><div><h2>校园发帖</h2><p>可用文字直接生成，图片用于补充视觉信息</p></div><span class="round-count">修改 {{ draftProgress }}</span></div>
+          <div class="section-head"><div><h2>内容助手</h2><p>生成社区问题、知识摘要和业务案例，支持图片补充信息</p></div><span class="round-count">修改 {{ draftProgress }}</span></div>
           <div class="draft-categories" aria-label="发帖场景">
             <button v-for="item in draftCategories" :key="item.value" type="button" :class="{ active: draftCategory === item.value }" @click="draftCategory = item.value">{{ item.label }}</button>
           </div>
@@ -1258,26 +1271,26 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
       </section>
 
       <section v-else-if="activeView === 'campus'" class="view">
-        <div class="section-head"><div><h2>校园 Agent 技能</h2><p>Planner 会按问题动态选择工具，也能一次组合多项能力</p></div><button class="secondary icon-text" :disabled="busy === 'campus'" @click="loadCampusCapabilities"><RefreshCw :class="{ spin: busy === 'campus' }" :size="18" />刷新</button></div>
+        <div class="section-head"><div><h2>Agent 技能</h2><p>Planner 会按问题动态选择知识、治理和业务工具</p></div><button class="secondary icon-text" :disabled="busy === 'campus'" @click="loadCampusCapabilities"><RefreshCw :class="{ spin: busy === 'campus' }" :size="18" />刷新</button></div>
         <div class="post-grid campus-skill-grid">
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('查一下我周二的课表')"><span class="result-icon"><CalendarDays :size="20" /></span><h3>个人课表</h3><p>按日期、课程、教师或校区查询演示课表。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('查最新奖学金通知')"><span class="result-icon"><BookOpen :size="20" /></span><h3>校园通知</h3><p>检索结构化公告、发布部门与时间。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('找下沙校区能坐200人的讲座场地，要投影')"><span class="result-icon"><Search :size="20" /></span><h3>场地协调</h3><p>筛选容量、设备和时段冲突。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('下沙校区未来3天天气怎么样')"><span class="result-icon"><Activity :size="20" /></span><h3>实时天气</h3><p>通过 Open-Meteo 适配器获取外部实时信息。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('我的导师是谁')"><span class="result-icon"><Bot :size="20" /></span><h3>学生画像</h3><p>只读取演示画像的非敏感字段。</p></button>
-          <button class="post-card skill-action" type="button" @click="runCampusPrompt('帮我规划一场下沙校区200人讲座')"><span class="result-icon"><Sparkles :size="20" /></span><h3>活动统筹</h3><p>一次规划课表、场地、天气与通知多个工具。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('开放平台 API 鉴权应该怎么申请')"><span class="result-icon"><KeyRound :size="20" /></span><h3>接口与权限</h3><p>检索 API 文档、scope 和权限申请规则。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('订单服务消息积压怎么排查')"><span class="result-icon"><Activity :size="20" /></span><h3>故障排查</h3><p>结合运行手册、指标和工单上下文定位问题。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('产品版本发布前需要检查什么')"><span class="result-icon"><BookOpen :size="20" /></span><h3>发布规范</h3><p>检索变更说明、灰度、回滚和观察指标。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('客户投诉升级需要记录哪些信息')"><span class="result-icon"><MessageCircle :size="20" /></span><h3>客户支持</h3><p>根据 SLA 和工单规范整理处理要点。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('知识库文档怎么入库和审核')"><span class="result-icon"><Wrench :size="20" /></span><h3>知识治理</h3><p>查看来源、版本、切块预览和复核状态。</p></button>
+          <button class="post-card skill-action" type="button" @click="runCampusPrompt('帮我规划一次版本发布和回滚演练')"><span class="result-icon"><Sparkles :size="20" /></span><h3>发布统筹</h3><p>多个 Agent 协作生成检查清单和待确认动作。</p></button>
         </div>
         <div v-if="campusCapabilities" class="run-meta"><span>{{ campusCapabilities.skills.length }} 项可用技能</span><small>业务数据为合成演示；天气为外部实时数据；预约必须人工确认</small></div>
       </section>
 
       <section v-else-if="activeView === 'knowledge'" class="view platform-layout">
         <div class="admin-panel">
-          <div class="section-head"><div><h2>添加知识</h2><p>TXT 与 Markdown 将异步切分并写入混合检索</p></div></div>
+          <div class="section-head"><div><h2>添加知识</h2><p>文本、Excel、PDF 和图片会先解析预览，再异步切分并写入混合检索</p></div></div>
           <label class="upload-document"><input type="file" accept=".txt,.md,.markdown,text/plain,text/markdown,.xlsx,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*" @change="selectKnowledgeFile" /><Upload :size="20" /><span>选择文档</span></label>
           <label class="field"><span>文档标题</span><input v-model="knowledgeForm.title" maxlength="160" placeholder="例如：图书馆开放时间" /></label>
           <label class="field"><span>来源编号</span><input v-model="knowledgeForm.source_id" maxlength="120" placeholder="留空自动生成" /></label>
-          <label class="field"><span>正文内容</span><textarea v-model="knowledgeForm.body" maxlength="200000" placeholder="粘贴学校官方通知或知识内容"></textarea></label>
-          <label class="check-field"><input v-model="knowledgeForm.official" type="checkbox" /><span>标记为官方可信来源</span></label>
+          <label class="field"><span>正文内容</span><textarea v-model="knowledgeForm.body" maxlength="200000" placeholder="粘贴制度、产品文档、流程或社区知识"></textarea></label>
+          <label class="check-field"><input v-model="knowledgeForm.official" type="checkbox" /><span>标记为企业可信来源</span></label>
           <button class="primary wide icon-text" :disabled="busy === 'knowledge-create' || !knowledgeForm.title.trim() || !knowledgeForm.body.trim()" @click="createKnowledge"><BookOpen :size="18" />提交索引</button>
         </div>
         <div class="admin-content">
@@ -1387,7 +1400,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", handleGlobalKeydown)
     <div v-if="selectedResult" class="modal-backdrop" @click.self="closeSourceDetail">
       <section class="source-modal" role="dialog" aria-modal="true" aria-labelledby="source-detail-title">
         <header>
-          <div><span>{{ selectedResult.official ? '官方知识' : '校园帖子' }}</span><h2 id="source-detail-title">{{ selectedResult.title }}</h2></div>
+          <div><span>{{ selectedResult.official ? '企业知识' : '社区内容' }}</span><h2 id="source-detail-title">{{ selectedResult.title }}</h2></div>
           <button type="button" class="icon-button" title="关闭详情" aria-label="关闭详情" @click="closeSourceDetail"><X :size="19" /></button>
         </header>
         <div v-if="busy === `source-${selectedResult.source_id}`" class="source-loading"><LoaderCircle class="spin" :size="24" /><span>正在读取完整内容…</span></div>

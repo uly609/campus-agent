@@ -18,6 +18,7 @@ from app.api import (
     multi_agent,
     posts,
     providers,
+    profile,
     search,
     sessions,
     xiaolin_demo,
@@ -28,7 +29,7 @@ from app.security.rate_limit import RateLimiter
 
 configure_logging()
 
-app = FastAPI(title="CampusFlow AI", version="0.1.0")
+app = FastAPI(title="AtlasHub AI", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -78,6 +79,7 @@ app.include_router(memory.router)
 app.include_router(evals.router)
 app.include_router(search.router)
 app.include_router(providers.router)
+app.include_router(profile.router)
 app.include_router(sessions.router)
 app.include_router(xiaolin_demo.router)
 app.include_router(files.router)

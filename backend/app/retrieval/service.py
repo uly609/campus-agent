@@ -15,7 +15,20 @@ from app.retrieval.rrf import reciprocal_rank_fusion
 class RetrievalService:
     @staticmethod
     def _route_source(query: str) -> str:
-        official_keywords = ("通知", "政策", "规定", "办事", "申请", "时间")
+        official_keywords = (
+            "通知",
+            "政策",
+            "规定",
+            "制度",
+            "规范",
+            "流程",
+            "申请",
+            "权限",
+            "版本",
+            "SLA",
+            "合同",
+            "时间",
+        )
         if any(keyword in query for keyword in official_keywords):
             return "official_first"
         return "hybrid"

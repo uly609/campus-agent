@@ -61,8 +61,9 @@ def list_posts(
     limit: int = Query(default=20, ge=1, le=50),
     mode: Literal["latest", "hot", "for_you"] = "latest",
     user_id: str = Query(default="demo-user", min_length=1, max_length=80),
+    domain: str | None = Query(default=None, min_length=2, max_length=40),
 ) -> list[FeedPost]:
-    return community.feed(user_id, mode)[offset : offset + limit]
+    return community.feed(user_id, mode, domain=domain)[offset : offset + limit]
 
 
 @router.get("/posts/{post_id}", response_model=FeedPost)

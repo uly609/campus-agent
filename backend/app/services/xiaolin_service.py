@@ -168,11 +168,11 @@ async def stream_xiaolin_events(request: ChatRequest) -> AsyncGenerator[dict[str
 
 def _worker_task_label(worker: str) -> str:
     return {
-        "campus_worker": "查询并处理校园服务信息",
-        "community_worker": "分析校园社区内容与治理状态",
-        "retrieval_worker": "检索校园知识与社区资料",
+        "campus_worker": "查询并处理业务服务信息",
+        "community_worker": "分析知识社区内容与治理状态",
+        "retrieval_worker": "检索企业知识与社区资料",
         "multimodal_worker": "解析图片、表格或文档附件",
-        "draft_worker": "生成校园社区帖子草稿",
+        "draft_worker": "生成知识社区内容草稿",
         "eval_worker": "读取并分析系统评测指标",
         "general_worker": "回答通用问题",
     }.get(worker, worker)

@@ -170,10 +170,10 @@ class JsonRepository:
             for row in self._read_json(self.community_audit_path, [])
         ]
 
-    def load_documents(self) -> list[dict[str, str]]:
+    def load_documents(self) -> list[dict[str, Any]]:
         return self._read_json(self.docs_path, [])
 
-    def save_documents(self, docs: list[dict[str, str]]) -> None:
+    def save_documents(self, docs: list[dict[str, Any]]) -> None:
         self._write_json(self.docs_path, docs)
 
     def load_knowledge(self) -> list[KnowledgeDocument]:

@@ -22,6 +22,12 @@ class MultiAgentSupervisor:
             selected.append("community_worker")
         if re.search(r"评测|评估|指标|RAGAS|测试报告", query):
             selected.append("eval_worker")
+        if re.search(
+            r"知识库|知识|制度|流程|政策|规范|产品文档|接口文档|API|版本|合同|协议|企业|工单|FAQ|手册|案例|经验",
+            query,
+            re.IGNORECASE,
+        ):
+            selected.append("retrieval_worker")
         if re.search(r"发帖|草稿|发布", query):
             selected.append("draft_worker")
         campus_query = re.search(
@@ -72,7 +78,7 @@ class MultiAgentSupervisor:
         flags = detect_prompt_injection(query)
         if flags:
             state["guardrail_flags"] = flags
-            state["final_answer"] = "检测到可疑指令注入，已停止多 Agent 协作。请用正常校园问题重试。"
+            state["final_answer"] = "检测到可疑指令注入，已停止多 Agent 协作。请用正常业务问题重试。"
             state["message_hub"].append(
                 {
                     "agent": "supervisor",

@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     chat_rate_limit_per_minute: int = Field(default=20, alias="CAMPUSFLOW_CHAT_RATE_LIMIT")
     memory_enabled: bool = True
     data_dir: str = "data/generated"
-    prompt_version: str = "campusflow-agent-v1"
+    prompt_version: str = "atlashub-agent-v1"
 
     @property
     def bailian_api_key(self) -> str | None:

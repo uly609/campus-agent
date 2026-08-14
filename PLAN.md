@@ -598,3 +598,36 @@ make smoke
 - [x] Share parsed table/page chunks with Campus and General workers.
 - [x] Treat attachment contents as untrusted data rather than executable instructions.
 - [x] Validate, deploy, and run a live Excel chat flow.
+
+## M47 - Interview Knowledge Base And Evidence Audit
+
+- [x] Inventory local source families and distinguish local Yuque mirrors from ZSXQ exports.
+- [x] Record the currently visible online Yuque scope without claiming access to an unshown knowledge base.
+- [x] Write the CampusFlow project master pitch, detailed Q&A, backend scenarios, failure questions, and structured answer templates.
+- [x] Add a priority study roadmap separating current implementation, degraded behavior, reference design, and unverified extensions.
+- [x] Add a code evidence index mapping interview claims to current modules, tests, and configuration.
+- [x] Add per-source-family guides and a second-level CampusFlow grilling set.
+- [x] Generate a transparent per-file source manifest with read/visual-review/transcription states.
+- [x] Separately verify DOCX supplements and exclude the temporary lock file from source claims.
+- [x] Extract the readable DOCX topic structure and map it to existing project and scenario answers.
+- [x] Extract XMind node text and deduplicate the three identical copies before mapping topics.
+- [x] Build a filename-level index for all 70 videos and map their topics to the three projects.
+- [x] Audit current interview claims against code evidence and explicitly mark unsupported extensions.
+- [x] Add first-heading search entries for all indexed Markdown sources.
+- [x] Add transparent topic labels to the Markdown source index for project/interview navigation.
+- [x] Index all local Markdown files that retain Yuque source URLs and separate them from the ZSXQ export.
+- [ ] Transcribe or visually review the remaining video, scan-only PDF, XMind, and image materials before claiming complete source coverage.
+
+## M48 - AtlasHub Enterprise Knowledge Community Migration
+
+- [x] Add an explicit enterprise knowledge-community product profile without deleting legacy campus adapters.
+- [x] Rename the user-facing brand and primary navigation to AtlasHub AI.
+- [x] Route enterprise knowledge, policy, product-document, version, ticket, and workflow queries to the retrieval worker.
+- [x] Update multi-agent and community labels to describe enterprise knowledge and governance responsibilities.
+- [x] Add enterprise documents, cases, FAQs, and community examples while retaining legacy fixtures for regression tests.
+- [x] Add document domain, version, department, visibility, and ingestion metadata modeled after the MimirQ reference.
+- [x] Add chunk preview and retrieval diagnostics APIs; keep ACL filtering and evidence audit as the next persistence milestone.
+- [x] Add enterprise routing examples to the existing offline Golden/evaluation pipeline without inventing production metrics.
+- [x] Remove campus-only labels from the primary UI and prompts; retain campus adapters only as compatibility fixtures.
+
+Reference implementation: the locally cached `skygazer42/MimirQ` repository is used for RAG governance patterns only; its code is not copied into the application.

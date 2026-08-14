@@ -19,6 +19,10 @@ class KnowledgeDocumentCreate(BaseModel):
     official: bool = True
     path: str = Field(default="", max_length=500)
     url: str = Field(default="", max_length=1000)
+    domain: str = Field(default="enterprise", min_length=2, max_length=40)
+    version: str = Field(default="v1", min_length=1, max_length=40)
+    department: str = Field(default="", max_length=120)
+    visibility: Literal["private", "department", "workspace"] = "workspace"
 
 
 class KnowledgeDocument(KnowledgeDocumentCreate):

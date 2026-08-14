@@ -19,6 +19,7 @@ def chunks_from_posts(posts: list[Post]) -> list[Chunk]:
                     "category": post.category.value,
                     "location": post.location or "",
                     "created_at": post.created_at,
+                    "domain": post.domain,
                 },
                 target_tokens=180,
                 overlap=20,
@@ -27,6 +28,5 @@ def chunks_from_posts(posts: list[Post]) -> list[Chunk]:
     return chunks
 
 
-def build_corpus(posts: list[Post], docs: list[dict[str, str]]) -> list[Chunk]:
+def build_corpus(posts: list[Post], docs: list[dict[str, object]]) -> list[Chunk]:
     return chunks_from_documents(docs) + chunks_from_posts(posts)
-

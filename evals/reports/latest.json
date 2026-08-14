@@ -1,6 +1,6 @@
 {
-  "run_id": "eval-9a854452cb",
-  "created_at": "2026-08-02T12:55:27.596903+00:00",
+  "run_id": "eval-057c41f6dd",
+  "created_at": "2026-08-13T23:19:48.865008+00:00",
   "dataset_version": "campusflow-hard-v2",
   "evaluation_profile": "offline_deterministic_regression",
   "prompt_version": "campusflow-agent-v1",
@@ -33,14 +33,14 @@
     "retrieval_ndcg_at_8": 0.6402066119047684,
     "retrieval_hit_at_8": 0.7222222222222222,
     "retrieval_hard_negative_rate_at_5": 0.2777777777777778,
-    "qa_answer_fact_recall": 0.7142857142857143,
-    "qa_context_relevance": 0.225,
-    "qa_citation_precision": 0.5,
+    "qa_answer_fact_recall": 0.7857142857142857,
+    "qa_context_relevance": 0.23333333333333334,
+    "qa_citation_precision": 0.6,
     "qa_citation_faithfulness": 1.0,
     "qa_faithfulness": 1.0,
-    "qa_answer_relevancy": 0.5128381615804216,
-    "qa_context_precision": 0.55,
-    "qa_context_recall": 0.6,
+    "qa_answer_relevancy": 0.49283816158042165,
+    "qa_context_precision": 0.65,
+    "qa_context_recall": 0.7,
     "qa_forbidden_content_rate": 0.0,
     "refusal_precision": 1.0,
     "refusal_recall": 1.0,
@@ -49,10 +49,10 @@
     "replan_recall": 1.0,
     "replan_f1": 0.6666666666666666,
     "tool_success_rate": 1.0,
-    "corrective_rag_success_rate": 0.8333333333333334,
+    "corrective_rag_success_rate": 1.0,
     "memory_recall_non_empty_rate": 0.0,
-    "p50_latency_ms": 322.9635000025155,
-    "p95_latency_ms": 19691.071759007173,
+    "p50_latency_ms": 4577.865919000004,
+    "p95_latency_ms": 24470.251886000027,
     "cache_repeat_hit_rate": 1.0
   },
   "details": {
@@ -820,9 +820,9 @@
           "doc-dorm-repair-25",
           "doc-dorm-repair-26",
           "doc-counseling-31",
+          "doc-delivery-30",
           "doc-counseling-10",
-          "doc-delivery-09",
-          "doc-delivery-30"
+          "doc-delivery-09"
         ],
         "qrels": {
           "doc-dorm-repair-01": 3
@@ -911,11 +911,11 @@
           "post-demo-01",
           "doc-canteen-05",
           "doc-canteen-37",
-          "post-seed-025",
           "post-seed-089",
-          "post-seed-153",
+          "post-seed-025",
           "post-seed-281",
-          "post-seed-217"
+          "post-seed-217",
+          "post-seed-153"
         ],
         "qrels": {
           "doc-canteen-05": 3
@@ -1002,12 +1002,12 @@
         "returned_source_ids": [
           "doc-delivery-09",
           "doc-delivery-30",
-          "post-seed-037",
           "post-seed-101",
-          "post-seed-165",
+          "post-seed-037",
           "post-seed-229",
-          "post-seed-001",
-          "post-seed-257"
+          "post-seed-165",
+          "post-seed-065",
+          "post-seed-001"
         ],
         "qrels": {
           "doc-delivery-09": 3
@@ -1029,6 +1029,7 @@
           "post-demo-02",
           "doc-delivery-09",
           "doc-delivery-30",
+          "post-c872307297",
           "post-demo-00"
         ],
         "qrels": {
@@ -1202,7 +1203,7 @@
           "doc-library-hours-23",
           "doc-library-hours-24",
           "post-seed-143",
-          "post-seed-107"
+          "post-seed-057"
         ],
         "qrels": {
           "post-demo-09": 3
@@ -1246,7 +1247,7 @@
         "id": "qa-01",
         "difficulty": "multi_fact",
         "question": "宿舍突然漏水，应该在哪里报修，紧急电话是多少？",
-        "answer": "官方信息：根据目前提供的知识库内容，未包含浙江工商大学关于宿舍报修渠道或紧急维修电话的官方说明。所给资料涉及校园生活区（行云苑、流水苑、清风苑）、食堂信息、出国（境）交流团组通知、自考学位论文上传通知等，但**未提及宿舍报修流程、后勤维修部门联系方式 [1]",
+        "answer": "官方信息：根据目前提供的知识库内容，未包含浙江工商大学官网关于宿舍报修流程或紧急报修电话的官方信息。所给资料涉及校园生活区（行云苑、流水苑、清风苑）、食堂信息、自考学位论文提交通知及研究生复试要求等，但**未提及宿舍报修渠道、后勤维修平台、物业管理联 [1]",
         "answer_fact_recall": 0.0,
         "context_relevance": 0.0,
         "citation_precision": 0.0,
@@ -1259,12 +1260,12 @@
         "expected_refusal": false,
         "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": true,
-        "replan_count": 1,
+        "predicted_replan": false,
+        "replan_count": 0,
         "citation_source_ids": [
           "https://iee.zjgsu.edu.cn/?news/4578.html"
         ],
-        "corrective_rag_triggered": true,
+        "corrective_rag_triggered": false,
         "memory_recall_count": 0
       },
       {
@@ -1446,25 +1447,25 @@
         "id": "qa-09",
         "difficulty": "post_fact",
         "question": "图书馆门口发现的蓝色校园卡被送到哪里了？",
-        "answer": "官方信息：根据提供的知识库内容，没有直接提及“图书馆门口发现的蓝色校园卡被送到哪里了”的具体信息。\n\n不过，关于校园卡（包括遗失或需办理相关业务）的处理，资料中提到了以下相关服务点：\n\n- **下沙校区**：师生之家1号窗口（教学区学生活动中心一楼） [1]",
-        "answer_fact_recall": 0.0,
-        "context_relevance": 0.0,
-        "citation_precision": 0.0,
+        "answer": "社区信息，可能过时：图书馆门口发现蓝色校园卡\n在图书馆门口长椅发现一张蓝色校园卡，已交到一楼服务台。失主请携带有效证件前往领取。\n标签:失物招领,校园卡,蓝色 地点:图书馆 [1]",
+        "answer_fact_recall": 1.0,
+        "context_relevance": 0.08333333333333333,
+        "citation_precision": 1.0,
         "citation_faithfulness": 1.0,
         "qa_faithfulness": 1.0,
-        "qa_answer_relevancy": 1.0,
-        "qa_context_precision": 0.0,
-        "qa_context_recall": 0.0,
+        "qa_answer_relevancy": 0.8,
+        "qa_context_precision": 1.0,
+        "qa_context_recall": 1.0,
         "forbidden_term_rate": 0.0,
         "expected_refusal": false,
         "predicted_refusal": false,
         "expected_replan": false,
-        "predicted_replan": false,
-        "replan_count": 0,
+        "predicted_replan": true,
+        "replan_count": 1,
         "citation_source_ids": [
-          "https://lib.zjgsu.edu.cn/2019/0625/c1071a38459/page.htm"
+          "post-demo-09"
         ],
-        "corrective_rag_triggered": false,
+        "corrective_rag_triggered": true,
         "memory_recall_count": 0
       },
       {
@@ -1522,7 +1523,7 @@
         "context_relevance": 0.0,
         "citation_precision": 0.0,
         "citation_faithfulness": 0.0,
-        "qa_faithfulness": 0.5,
+        "qa_faithfulness": 0.0,
         "qa_answer_relevancy": 0.1111111111111111,
         "qa_context_precision": 0.0,
         "qa_context_recall": 0.0,
@@ -1545,7 +1546,7 @@
         "context_relevance": 0.0,
         "citation_precision": 0.0,
         "citation_faithfulness": 0.0,
-        "qa_faithfulness": 1.0,
+        "qa_faithfulness": 0.0,
         "qa_answer_relevancy": 0.15384615384615385,
         "qa_context_precision": 0.0,
         "qa_context_recall": 0.0,
