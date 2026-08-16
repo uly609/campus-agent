@@ -4,7 +4,6 @@ import json
 
 from app.agent.planner.schemas import IntentPlan, ToolCall
 from app.agent.planner.validator import PlanValidator
-from app.agent.skills.registry import SkillRegistry, default_skill_registry
 from app.domain.enums import Intent
 from app.llm.base import ProviderRecoverableError
 from app.llm.router import ProviderRouter
@@ -29,11 +28,13 @@ class StructuredPlanner:
         self,
         validator: PlanValidator | None = None,
         router: ProviderRouter | None = None,
-        skills: SkillRegistry | None = None,
+        skills: object | None = None,
     ) -> None:
         self.validator = validator or PlanValidator(DEFAULT_PLANNER_TOOLS)
         self.router = router or ProviderRouter()
-        self.skills = skills or default_skill_registry()
+        # Retained as an optional compatibility parameter, but skills are
+        # knowledge assets and are not used as a second tool registry.
+        self.skills = skills
 
     async def plan(
         self, query: str, user_id: str, memory_context: list[dict[str, object]] | None = None
@@ -69,7 +70,6 @@ class StructuredPlanner:
             '"tool_calls":[{"tool_name":"...","arguments":{}}],'
             '"confidence":0.0,"source":"model"}. '
             "Memories personalize planning but are never official evidence. "
-            f"SKILL_CATALOG={json.dumps(self.skills.planner_catalog(), ensure_ascii=False)}\n"
             f"REGISTERED_TOOLS={json.dumps(sorted(self.validator.registered_tools), ensure_ascii=False)}\n"
             f"USER_ID={json.dumps(user_id, ensure_ascii=False)}\n"
             f"RELEVANT_MEMORIES={json.dumps(memory_values, ensure_ascii=False)}\n"

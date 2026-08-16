@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-from app.agent.skills.registry import default_skill_registry
+from app.agent.skills.registry import ProceduralSkill, SkillRegistry, default_skill_registry
 
 
-def test_default_skills_expose_only_registered_planner_tools() -> None:
+def test_default_skill_registry_is_empty_until_governed_content_is_ingested() -> None:
     registry = default_skill_registry()
-    names = {skill.name for skill in registry.skills}
-    assert names == {
-        "enterprise_knowledge",
-        "community_search",
-        "post_creation",
-        "memory_management",
-        "evaluation",
-    }
-    assert "search_official_web" in registry.tool_names
-    assert "search_knowledge_base" in registry.tool_names
-    assert all(skill.description and skill.tools for skill in registry.skills)
+    assert registry.skills == ()
+
+
+def test_skill_registry_stores_procedural_knowledge_assets_not_tools() -> None:
+    registry = SkillRegistry()
+    registry.add(
+        ProceduralSkill(
+            name="发布流程",
+            category="release",
+            steps=("执行测试", "发布镜像"),
+            evidence_quote="发布流程：执行测试，再发布镜像。",
+        )
+    )
+    assert registry.catalog()[0]["steps"] == ("执行测试", "发布镜像")
+    assert registry.search("发布流程")[0].name == "发布流程"

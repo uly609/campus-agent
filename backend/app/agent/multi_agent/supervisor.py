@@ -28,7 +28,7 @@ class MultiAgentSupervisor:
             re.IGNORECASE,
         ):
             selected.append("retrieval_worker")
-        if re.search(r"发帖|草稿|发布", query):
+        if re.search(r"发帖|草稿|发布帖子|发布到社区|生成社区内容", query):
             selected.append("draft_worker")
         knowledge_query = re.search(
             r"知识库|制度|流程|政策|规范|产品|接口|合同|协议|FAQ|案例|经验|检索|查找|核实",

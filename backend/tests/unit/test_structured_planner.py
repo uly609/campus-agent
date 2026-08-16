@@ -68,7 +68,8 @@ class ModelPlannerRouter:
     async def chat(self, prompt: str):
         from app.llm.base import ProviderResult
 
-        assert "SKILL_CATALOG" in prompt
+        assert "SKILL_CATALOG" not in prompt
+        assert "REGISTERED_TOOLS" in prompt
         assert "住在西区" in prompt
         return ProviderResult(
             role="chat",
@@ -85,7 +86,7 @@ class ModelPlannerRouter:
 
 
 @pytest.mark.asyncio
-async def test_model_planner_selects_registered_tool_from_skill_catalog() -> None:
+async def test_model_planner_selects_registered_tool_from_tool_allowlist() -> None:
     planner = StructuredPlanner(router=ModelPlannerRouter())
     plan = await planner.plan("找篮球搭子", "u1", [{"value": "我住在西区", "memory_type": "fact"}])
 

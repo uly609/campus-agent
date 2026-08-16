@@ -117,13 +117,11 @@ Long-term memory accepts explicit chat memories and eligible first-person facts 
 
 The **AI 助手** page is the primary AtlasHub Agent surface. Each Agent response shows its task plan, selected tools, execution results, and source mode. Knowledge documents and community content remain separate evidence classes, and human review is required before community content becomes a governed knowledge candidate. The former campus adapters remain available only for migration fixtures and regression coverage.
 
-## Dynamic Skills and official web fallback
+## Tool routing and procedural Skills
 
-The Agent exposes ten typed Skills backed by allowlisted tools: campus knowledge, community search, post creation, memory management, evaluation, course schedule, campus notices, venue coordination, campus weather, and a privacy-safe synthetic student profile. A complex campus activity request can fan out to schedule, venue, weather, and notice tools in one validated plan. With a real Chat provider, the Planner returns validated JSON; degraded mode uses an explicit deterministic planner.
+The Planner uses one typed allowlist of executable Tools. Tools are atomic actions such as knowledge retrieval, community search, official-source lookup, attachment analysis, draft generation, memory access, and evaluation-report lookup. They are validated before execution and return structured results with provenance.
 
-The XiaoLin Agent discovers and calls `campus_weather` through the `campusflow-weather` FastMCP stdio server. Run it independently with `python -m scripts.weather_mcp_server`. Results record the MCP server and transport; the internal `query_campus_weather` adapter is retained only as an explicit degraded fallback. Course, notice, venue, and profile fixtures are synthetic demonstration data; weather uses Open-Meteo and reports failure instead of fabricating live data.
-
-Corrective official-web search first uses configured official site indexes for precise organizational facts, then uses the unified Bailian credential with `OFFICIAL_WEB_ALLOWED_DOMAINS`, or a dedicated provider configured by `OFFICIAL_WEB_SEARCH_URL` and `OFFICIAL_WEB_SEARCH_API_KEY`. The computer-college adapter uses the college's Drupal site search for grade-advisor queries and preserves direct official excerpts instead of model summaries. When all external search paths are unavailable, CampusFlow reports the tool as unavailable and continues with local Hybrid RAG; it never reports fake external results. See `THIRD_PARTY_NOTICES.md` for reference-project attribution and reuse boundaries.
+Skills are not a second tool-routing layer. During governed document ingestion, `ProceduralSkillExtractor` turns evidence-backed SOP sections into reusable procedural knowledge assets containing a name, steps, inputs, outputs, evidence quote, tags, and confidence. A future LLM extractor can replace the deterministic fallback without changing this asset contract. This follows the separation used by MimirQ: Agent orchestration, executable tools, and reusable procedural knowledge are separate concerns.
 
 ## Document parsing and managed knowledge ingestion
 
@@ -131,9 +129,9 @@ Corrective official-web search first uses configured official site indexes for p
 
 ## Multi-agent orchestration and RAGAS-style evaluation
 
-AI Assistant Agent mode and `POST /api/v1/agents/multi` now share one LangGraph supervisor-workers graph. Seven registered workers cover XiaoLin campus operations, community operations, retrieval, multimodal parsing, post drafting, evaluation, and general answering. XiaoLin's original Planner, ToolSelector, TaskExecutor, and ResponseGenerator run inside `campus_worker`, preserving its campus tools and process details.
+AI Assistant Agent mode and `POST /api/v1/agents/multi` share a LangGraph supervisor-workers graph. The retrieval worker follows a bounded Plan-Worker pattern: it decomposes a compound request into at most four sub-queries, runs Hybrid RAG retrieval for those sub-queries, deduplicates evidence, and shares citations and extracted procedural skills through the state blackboard. Other workers handle community operations, multimodal parsing, drafting, evaluation, or general answering.
 
-The supervisor computes a bounded `required_workers` list once. A greeting runs only General Worker, a campus fact runs only Campus Worker, and a compound request can combine document, campus, community, drafting, or evaluation workers. Execution stops as soon as all selected workers complete; it no longer cycles through unrelated workers. `GET /api/v1/agents/multi/spec` exposes the shared state and termination contract, while prompt-injection flags and the worker limit remain hard stops.
+The supervisor computes a bounded worker set once and terminates when the selected workers finish or the turn limit is reached. The Tool Registry remains the only executable allowlist; workers produce task artifacts and do not create a parallel business-tool registry. `GET /api/v1/agents/multi/spec` exposes the shared state and termination contract, while prompt-injection flags and worker limits remain hard stops.
 
 The offline eval report adds RAGAS-style `qa_faithfulness`, `qa_answer_relevancy`, `qa_context_precision`, and `qa_context_recall` using deterministic token-overlap approximations, documented as regression metrics rather than an LLM judge.
 

@@ -1,59 +1,61 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 
 
 @dataclass(frozen=True)
-class AgentSkill:
+class ProceduralSkill:
+    """A reusable SOP extracted from governed enterprise content.
+
+    Skills are knowledge assets, not another tool-routing layer. A skill records
+    the procedure, its evidence, and the inputs/outputs needed to reuse it.
+    """
+
     name: str
-    description: str
-    tools: tuple[str, ...]
+    category: str = ""
+    summary: str = ""
+    evidence_quote: str = ""
+    steps: tuple[str, ...] = field(default_factory=tuple)
+    inputs: tuple[str, ...] = field(default_factory=tuple)
+    outputs: tuple[str, ...] = field(default_factory=tuple)
+    tools: tuple[str, ...] = field(default_factory=tuple)
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    confidence: float = 0.0
+
+
+# Compatibility alias for callers that imported the old name. The object now
+# represents a procedural knowledge asset rather than a business tool bundle.
+AgentSkill = ProceduralSkill
 
 
 class SkillRegistry:
-    def __init__(self, skills: tuple[AgentSkill, ...] = ()) -> None:
+    def __init__(self, skills: tuple[ProceduralSkill, ...] = ()) -> None:
         self._skills = {skill.name: skill for skill in skills}
 
     @property
     def skills(self) -> tuple[AgentSkill, ...]:
         return tuple(self._skills.values())
 
-    @property
-    def tool_names(self) -> frozenset[str]:
-        return frozenset(tool for skill in self.skills for tool in skill.tools)
+    def add(self, skill: ProceduralSkill) -> None:
+        self._skills[skill.name] = skill
 
-    def planner_catalog(self) -> list[dict[str, object]]:
+    def search(self, query: str, limit: int = 5) -> tuple[ProceduralSkill, ...]:
+        terms = {part.casefold() for part in query.split() if part.strip()}
+        ranked = sorted(
+            self.skills,
+            key=lambda skill: sum(
+                term in f"{skill.name} {skill.summary} {' '.join(skill.tags)}".casefold()
+                for term in terms
+            ),
+            reverse=True,
+        )
+        return tuple(ranked[: max(0, limit)])
+
+    def catalog(self) -> list[dict[str, object]]:
         return [asdict(skill) for skill in self.skills]
 
 
-DEFAULT_SKILLS = (
-    AgentSkill(
-        name="enterprise_knowledge",
-        description="Answer enterprise policies, product documentation, workflows and FAQs with managed evidence.",
-        tools=("search_knowledge_base", "get_knowledge_service_info", "search_official_web"),
-    ),
-    AgentSkill(
-        name="community_search",
-        description="Search community posts, operational cases and knowledge-sharing records.",
-        tools=("search_posts", "search_lost_and_found"),
-    ),
-    AgentSkill(
-        name="post_creation",
-        description="Create a community content draft that must pass human review before publishing.",
-        tools=("create_post_draft",),
-    ),
-    AgentSkill(
-        name="memory_management",
-        description="Load user-controlled memories to personalize planning without replacing official evidence.",
-        tools=("load_user_memories",),
-    ),
-    AgentSkill(
-        name="evaluation",
-        description="Read the latest offline intent, retrieval and grounded-QA evaluation report.",
-        tools=("get_eval_report",),
-    ),
-)
-
-
 def default_skill_registry() -> SkillRegistry:
-    return SkillRegistry(DEFAULT_SKILLS)
+    # Skills are populated from approved documents during ingestion. Keeping
+    # this empty prevents the planner from confusing SOP assets with tools.
+    return SkillRegistry()

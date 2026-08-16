@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
+import re
+from dataclasses import asdict
 from typing import Any
 
 from app.agent.multi_agent.state import MultiAgentState
+from app.agent.skills.extractor import ProceduralSkillExtractor
+from app.agent.tools.knowledge_tools import KnowledgeCommunityTools, build_registry
+from app.agent.tools.registry import ToolRegistry
 from app.llm.router import ProviderRouter
 from app.multimodal.document_parser import parse_document_file
-from app.retrieval.ingestion import build_corpus
-from app.retrieval.service import RetrievalService
 from app.services.community_service import CommunityService
 from app.services.repository import JsonRepository
 
@@ -17,8 +21,9 @@ class MultiAgentWorkers:
     def __init__(self, repo: JsonRepository | None = None, router: ProviderRouter | None = None) -> None:
         self.repo = repo or JsonRepository()
         self.router = router or ProviderRouter()
-        self._retrieval: RetrievalService | None = None
         self.community = CommunityService(self.repo)
+        self.skill_extractor = ProceduralSkillExtractor()
+        self.tools: ToolRegistry = build_registry(KnowledgeCommunityTools(self.repo))
 
     @staticmethod
     def _append(
@@ -57,24 +62,50 @@ class MultiAgentWorkers:
             )
             return state
         try:
-            if self._retrieval is None:
-                self._retrieval = RetrievalService(build_corpus(posts, documents))
-            evidence = await self._retrieval.search(query, top_k=5)
-            payload = [
-                {
-                    "source_id": item.source_id,
-                    "title": item.title,
-                    "excerpt": item.excerpt,
-                    "score": item.score,
-                    "official": item.official,
-                }
-                for item in evidence
-            ]
+            sub_queries = [part.strip() for part in re.split(r"(?:并且|同时|以及|和|、)", query) if part.strip()]
+            if not sub_queries:
+                sub_queries = [query]
+            sub_queries = list(dict.fromkeys(sub_queries))[:4]
+            tool_calls = [
+                self.tools.call("search_knowledge_base", {"query": item})
+                for item in sub_queries
+            ] + [self.tools.call("search_posts", {"query": item}) for item in sub_queries]
+            tool_results = await asyncio.gather(*tool_calls)
+            unique: dict[str, dict[str, Any]] = {}
+            for result in tool_results:
+                if not result.success or not isinstance(result.data, list):
+                    continue
+                for item in result.data:
+                    if not isinstance(item, dict):
+                        continue
+                    key = str(item.get("source_id") or item.get("evidence_id") or item.get("title") or "")
+                    if not key:
+                        continue
+                    previous = unique.get(key)
+                    if previous is None or float(item.get("score", 0.0)) > float(previous.get("score", 0.0)):
+                        unique[key] = item
+            payload = sorted(unique.values(), key=lambda item: float(item.get("score", 0.0)), reverse=True)[:8]
+            procedural_skills = []
+            for document in documents:
+                procedural_skills.extend(
+                    self.skill_extractor.extract(
+                        str(document.get("body", "")),
+                        title=str(document.get("title", "")),
+                        max_skills=2,
+                    )
+                )
+            skill_payload = [asdict(skill) for skill in procedural_skills[:8]]
             self._append(
                 state,
                 "retrieval_worker",
-                f"检索到 {len(payload)} 条企业知识或社区结果。",
-                {"kind": "retrieval", "evidence": payload, "mode": "hybrid_rag"},
+                f"Plan-Worker 通过 {len(tool_results)} 次 Tool 调用检索到 {len(payload)} 条结果。",
+                {
+                    "kind": "retrieval",
+                    "evidence": payload,
+                    "sub_queries": sub_queries,
+                    "procedural_skills": skill_payload,
+                    "mode": "plan_worker_hybrid_rag",
+                },
             )
         except (OSError, RuntimeError, ValueError, KeyError) as exc:
             self._append(
@@ -99,9 +130,14 @@ class MultiAgentWorkers:
             )
         evidence = state.get("artifacts", {}).get("retrieval_worker", {}).get("evidence", [])
         context = "\n".join(str(item.get("excerpt", ""))[:700] for item in evidence[:5])
+        procedural_skills = state.get("artifacts", {}).get("retrieval_worker", {}).get("procedural_skills", [])
+        skill_context = "\n".join(
+            f"流程知识：{item.get('name', '')}；步骤：{'；'.join(item.get('steps', []))}"
+            for item in procedural_skills[:4]
+        )
         result = await self.router.chat(
             "请基于企业知识社区检索结果回答问题。证据不足时明确说明，不要编造。\n"
-            f"问题：{query}\n证据：{context}"
+            f"问题：{query}\n证据：{context}\n可复用流程知识（仅作参考）：{skill_context}"
         )
         self._append(
             state,

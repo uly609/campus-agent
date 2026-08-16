@@ -18,8 +18,8 @@ Replan triggers on empty evidence, tool errors, or low coverage. The counter is 
 When a real chat provider is configured, grounded synthesis requires structured claims bound to supplied evidence ids. Unknown ids, unsupported claims, malformed JSON, provider failure, or fake fallback cause deterministic grounded synthesis or an evidence-insufficient refusal.
 
 
-## Dynamic planning and Skills
+## Dynamic planning, Tools, and procedural Skills
 
-The planner receives a typed Skill catalog and a separate allowlist of executable tools. A real Chat provider may select a valid tool plan; Pydantic validation rejects malformed output, unknown tools, missing arguments, and wrong argument types before execution. Fake-provider and provider-failure paths use a deterministic planner so tests and degraded demos remain reproducible.
+The planner receives one typed allowlist of executable tools. A real Chat provider may select a valid tool plan; Pydantic validation rejects malformed output, unknown tools, missing arguments, and wrong argument types before execution. Fake-provider and provider-failure paths use a deterministic planner so tests and degraded demos remain reproducible.
 
-The registered Skills cover campus knowledge, community search, post creation, memory management, evaluation, course schedules, campus notices, venue coordination, live campus-area weather, and a privacy-safe synthetic profile. They are capability descriptions over the allowlisted ToolRegistry, not unrestricted prompt plugins. Complex activity requests may fan out to schedule, venue, weather, and notice tools, while the existing relevance gate and two-replan cap remain unchanged. On the second and final corrective-RAG attempt, the graph may use `search_official_web`; it only accepts configured allowlisted school domains.
+Procedural Skills are governed knowledge assets extracted from document sections, not aliases for tools. Each asset records executable steps, inputs, outputs, evidence quote, tags, and confidence. The retrieval Plan-Worker can return these assets alongside evidence so a later workflow can recommend or execute a documented procedure without treating document text as an instruction.
