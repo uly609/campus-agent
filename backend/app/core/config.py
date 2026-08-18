@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     api_rate_limit_per_minute: int = Field(default=120, alias="CAMPUSFLOW_API_RATE_LIMIT")
     chat_rate_limit_per_minute: int = Field(default=20, alias="CAMPUSFLOW_CHAT_RATE_LIMIT")
     memory_enabled: bool = True
+    context_compression_enabled: bool = True
+    context_max_tokens: int = 4000
+    context_trigger_ratio: float = 0.75
+    context_recent_messages: int = 6
     data_dir: str = "data/generated"
     prompt_version: str = "atlashub-agent-v1"
 

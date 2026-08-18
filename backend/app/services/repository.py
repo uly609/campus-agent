@@ -45,6 +45,7 @@ class JsonRepository:
         self.sessions_path = self.base / "runtime_sessions.json"
         self.chat_messages_path = self.base / "runtime_chat_messages.json"
         self.chat_process_path = self.base / "runtime_chat_process.json"
+        self.context_snapshots_path = self.base / "runtime_context_snapshots.json"
 
     def load_posts(self) -> list[Post]:
         rows = self._read_json(self.posts_path, [])
@@ -268,6 +269,22 @@ class JsonRepository:
             self.chat_process_path,
             [row for row in process_rows if row.get("session_id") != session_id],
         )
+        snapshots = self._read_json(self.context_snapshots_path, [])
+        self._write_json(
+            self.context_snapshots_path,
+            [row for row in snapshots if row.get("session_id") != session_id],
+        )
+
+    def load_context_snapshot(self, session_id: str) -> dict[str, Any] | None:
+        rows = self._read_json(self.context_snapshots_path, [])
+        return next((row for row in rows if row.get("session_id") == session_id), None)
+
+    def save_context_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
+        rows = self._read_json(self.context_snapshots_path, [])
+        rows = [row for row in rows if row.get("session_id") != snapshot.get("session_id")]
+        rows.insert(0, snapshot)
+        self._write_json(self.context_snapshots_path, rows[:500])
+        return snapshot
 
     def append_trace(self, trace: dict[str, Any]) -> None:
         traces = self._read_json(self.traces_path, [])
