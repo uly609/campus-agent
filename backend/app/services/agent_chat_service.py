@@ -30,7 +30,11 @@ async def stream_agent_events(request: ChatRequest) -> AsyncGenerator[dict[str, 
     """Stream the AtlasHub chat lifecycle for normal and Agent modes."""
     analyses = [await analyze_chat_image(url) for url in request.image_urls]
     uploaded_files = [item.model_dump() for item in request.files]
-    context_window = context_compression.load_window(request.session_id, request.user_id)
+    context_window = context_compression.load_window(
+        request.session_id,
+        request.user_id,
+        request.message,
+    )
     query = request.message.strip() + (_image_context(analyses) if analyses else "")
     if analyses:
         yield {"type": "data", "subtype": "image_analysis", "content": analyses}
@@ -67,6 +71,11 @@ async def stream_agent_events(request: ChatRequest) -> AsyncGenerator[dict[str, 
                 "content": {"task_id": index, "result": {"status": result.get("status", "completed"), "api_result": artifact}},
             }
         yield {"content": str(state.get("final_answer", ""))}
+        if context_window.checkpoint_id:
+            context_compression.formalize_checkpoint(
+                request.session_id,
+                context_window.checkpoint_id,
+            )
         _save_stream_messages(request, str(state.get("final_answer", "")))
         context_compression.schedule_precompression(request.session_id, request.user_id)
         return
@@ -77,6 +86,11 @@ async def stream_agent_events(request: ChatRequest) -> AsyncGenerator[dict[str, 
         + request.message
     )
     yield {"content": str(result.content)}
+    if context_window.checkpoint_id:
+        context_compression.formalize_checkpoint(
+            request.session_id,
+            context_window.checkpoint_id,
+        )
     _save_stream_messages(request, str(result.content))
     context_compression.schedule_precompression(request.session_id, request.user_id)
 

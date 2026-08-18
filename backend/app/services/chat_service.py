@@ -14,7 +14,11 @@ context_compression = ContextCompressionService(repo=repo)
 
 
 async def handle_chat(request: ChatRequest) -> ChatResponse:
-    context_window = context_compression.load_window(request.session_id, request.user_id)
+    context_window = context_compression.load_window(
+        request.session_id,
+        request.user_id,
+        request.message,
+    )
     previous_query = context_window.virtual_context or load_last_query(request.user_id, request.session_id)
     state = await run_agent(
         request.message,
@@ -42,6 +46,11 @@ async def handle_chat(request: ChatRequest) -> ChatResponse:
         }
     )
     save_last_query(request.user_id, request.session_id, saved_user_message["content"])
+    if context_window.checkpoint_id:
+        context_compression.formalize_checkpoint(
+            request.session_id,
+            context_window.checkpoint_id,
+        )
     scheduled = context_compression.schedule_precompression(request.session_id, request.user_id)
     state.setdefault("trace", []).append(
         {

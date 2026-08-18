@@ -32,18 +32,20 @@ class ContextWindow:
     summary: str
     summary_version: int
     compressed_through: int
+    context_messages: list[dict[str, Any]]
     recent_messages: list[dict[str, Any]]
     estimated_tokens: int
     should_precompress: bool
+    checkpoint_id: str = ""
 
     @property
     def virtual_context(self) -> str:
         parts: list[str] = []
         if self.summary:
             parts.append("[历史摘要]\n" + self.summary)
-        if self.recent_messages:
+        if self.context_messages:
             recent = "\n".join(
-                row for row in (_message_text(item) for item in self.recent_messages) if row
+                row for row in (_message_text(item) for item in self.context_messages) if row
             )
             parts.append("[最近对话]\n" + recent)
         return "\n\n".join(parts)
@@ -67,12 +69,23 @@ class ContextCompressionService:
         self.trigger_ratio = settings.context_trigger_ratio
         self.recent_limit = max(2, settings.context_recent_messages)
 
-    def load_window(self, session_id: str, user_id: str) -> ContextWindow:
+    def load_window(
+        self,
+        session_id: str,
+        user_id: str,
+        extra_text: str = "",
+    ) -> ContextWindow:
         messages = self.repo.load_chat_messages(session_id)
         snapshot = self.repo.load_context_snapshot(session_id) or {}
+        if snapshot.get("user_id") not in (None, user_id):
+            snapshot = {}
         compressed_through = min(int(snapshot.get("compressed_through", 0)), len(messages))
-        recent_messages = messages[compressed_through:][-self.recent_limit :]
-        text = "\n".join(_message_text(item) for item in messages)
+        context_messages = messages[compressed_through:]
+        recent_messages = context_messages[-self.recent_limit :]
+        text = "\n".join(
+            item for item in [str(snapshot.get("summary", "")), *(_message_text(row) for row in context_messages), extra_text]
+            if item
+        )
         estimated_tokens = _estimate_tokens(text)
         threshold = int(self.max_tokens * self.trigger_ratio)
         should_precompress = (
@@ -84,9 +97,11 @@ class ContextCompressionService:
             summary=str(snapshot.get("summary", "")),
             summary_version=int(snapshot.get("version", 0)),
             compressed_through=compressed_through,
+            context_messages=context_messages,
             recent_messages=recent_messages,
             estimated_tokens=estimated_tokens,
             should_precompress=should_precompress,
+            checkpoint_id=str(snapshot.get("checkpoint_id", "")),
         )
 
     def schedule_precompression(self, session_id: str, user_id: str) -> bool:
@@ -119,14 +134,30 @@ class ContextCompressionService:
             return old or None
         snapshot = {
             "snapshot_id": str(old.get("snapshot_id") or f"ctx-{uuid.uuid4().hex[:12]}"),
+            "checkpoint_id": f"checkpoint-{uuid.uuid4().hex[:12]}",
             "session_id": session_id,
             "user_id": user_id,
             "version": int(old.get("version", 0)) + 1,
+            "algorithm_version": 1,
+            "summary_format_version": 1,
             "summary": summary,
             "compressed_through": cutoff,
             "source_message_ids": [str(row.get("message_id", "")) for row in source_messages],
+            "source_leaf_id": str(messages[cutoff - 1].get("message_id", "")),
             "created_at": _now_iso(),
-            "status": "committed",
+            "status": "ready",
+        }
+        return self.repo.save_context_snapshot(snapshot)
+
+    def formalize_checkpoint(self, session_id: str, checkpoint_id: str) -> dict[str, Any] | None:
+        """Mark a ready virtual checkpoint as used by a settled Agent run."""
+        snapshot = self.repo.load_context_snapshot(session_id)
+        if not snapshot or snapshot.get("checkpoint_id") != checkpoint_id:
+            return snapshot
+        snapshot = {
+            **snapshot,
+            "status": "formalized",
+            "formalized_at": _now_iso(),
         }
         return self.repo.save_context_snapshot(snapshot)
 

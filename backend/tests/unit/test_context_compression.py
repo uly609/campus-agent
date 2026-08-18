@@ -42,12 +42,18 @@ async def test_progressive_context_compression_keeps_summary_and_recent_window(t
 
     assert snapshot is not None
     assert snapshot["version"] == 1
+    assert snapshot["status"] == "ready"
+    assert snapshot["checkpoint_id"].startswith("checkpoint-")
     assert snapshot["compressed_through"] == 6
     after = service.load_window("s1", "u1")
     assert after.summary_version == 1
     assert "completed_tasks" in after.summary
+    assert [item["message_id"] for item in after.context_messages] == ["m-6", "m-7"]
     assert [item["message_id"] for item in after.recent_messages] == ["m-6", "m-7"]
     assert len(repo.load_chat_messages("s1")) == 8
+    formalized = service.formalize_checkpoint("s1", snapshot["checkpoint_id"])
+    assert formalized is not None
+    assert formalized["status"] == "formalized"
 
 
 @pytest.mark.asyncio
